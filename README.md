@@ -1,31 +1,34 @@
-# Necromancer: Rise of the Fallen — Android 0.2
+# Necromancer: Rise of the Fallen — Android 0.3
 
-Jogo nativo para **Android**, em Java com renderização 2D via Canvas. Sem WebView ou navegador.
+RPG de ação e necromancia **nativo para Android** (Java e Canvas 2D), com controle por toque, combate em tempo real e servos autônomos. Não usa WebView, navegador ou recursos de outros jogos.
 
-## Instalação
+## Instalar
 
-Baixe o artefato `necromancer-android-v0.2` na execução mais recente em [GitHub Actions](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/android.yml). Extraia `app-debug.apk` e instale no Android 8.0+.
+Acesse as [compilações no GitHub](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/android.yml), escolha a execução mais recente e baixe o artefato `necromancer-android-v0.3`. Extraia `app-debug.apk` e instale no Android 8.0+.
 
-## Jogabilidade
+## Controles e novidades
 
-- **Joystick esquerdo:** movimentação livre em oito direções.
-- **GOLPE/MAGIA à direita:** ataque manual. O primeiro monstro derrota com os punhos; essa vitória desbloqueia a magia de projétil (9 de ânima).
-- **REVIVER:** toque quando próximo a um cadáver destacado. Corpos comuns duram 32 segundos e o da sentinela dura 90 segundos. O destaque mostra o custo de ânima.
-- **Segurar REVIVER por 0,65 s:** dispensar o servo mais próximo, liberando capacidade de comando sem devolver ânima.
-- **DEFESA / CAÇA:** alterna a IA do exército entre proteger o personagem e perseguir monstros nas proximidades. Servos retornam à formação após a luta.
-- **4 pontos de comando:** rato e morcego custam 1, limo custa 2 e sentinela custa 3. As invocações permanecem até morrer ou serem dispensadas. Morcegos atacam de longe e não atravessam rochas com seus ataques.
-- **Objetivo final do prólogo:** derrotar e **ressuscitar** a sentinela; gerencie sua capacidade para conseguir vinculá-la.
+- **Joystick:** movimento livre. **GOLPE/MAGIA:** ataque ativo; a magia é liberada depois da primeira criatura derrotada.
+- **REVIVER:** toque perto de um cadáver para recrutar o monstro, pagando ânima e respeitando o limite de comando 4. Segure REVIVER para dispensar um servo.
+- **DEFESA/CAÇA:** alterna o comportamento automático dos servos.
+- **EVOLUIR (novo):** abre um painel e pausa o combate. Gaste fragmentos de alma, recebidos ao derrotar inimigos, para evoluir **ratos, limos e morcegos**. Cada espécie tem até **3 graus**. Cada grau acrescenta **24% de vida e 18% de dano** sobre os valores básicos para unidades ativas e futuras invocações; os custos são 2, 4 e 6 fragmentos.
+- **Experiência (novo):** cada inimigo derrotado concede XP. Subir de nível aumenta a vida máxima (+12), ânima máxima (+7) e potência das habilidades, além de curar parte da vida.
+- **Equipamentos (novo):** a cada duas vitórias, um item cai no cenário. Aproxime-se para coletar automaticamente. **Foco arcano** aumenta o dano do necromante; **manto** acrescenta vida e reduz o dano recebido. Itens superiores substituem os anteriores e duplicados viram fragmentos de alma. Ambos chegam até **grau 3**.
+- **HUD (novo):** vida, ânima, XP, nível, foco, manto, fragmentos e capacidade do exército aparecem diretamente durante o jogo.
+- **Objetivo do prólogo:** derrotar e ressuscitar a sentinela, liberando espaço de comando se necessário.
+
+### Notas sobre a progressão
+
+Nesta fase, níveis, equipamentos e melhorias duram **somente a expedição atual**. Salvamento e progressão permanente ficarão para o desenvolvimento da cripta, conforme o GDD. A direção visual ainda utiliza desenhos vetoriais originais e provisórios.
 
 ## Compilação e testes
 
-Com JDK 17, SDK Android 35 e Gradle 8.9:
+JDK 17, Android SDK 35, Gradle 8.9:
 
 ```sh
 gradle :app:assembleDebug
 ```
 
-O pipeline `.github/workflows/android.yml` executa testes JVM independentes do Android e compila o APK. Fontes: `app/src/main/java/com/takeo/necromancer/`; testes: `tests/com/takeo/necromancer/`.
+A automação do GitHub executa `WorldSmokeTest` e `WorldProgressionTest` com Java puro, compila o APK e anexa o resultado. Fonte Android: `app/src/main/java/com/takeo/necromancer/`.
 
-## Próximas etapas
-
-A versão 0.3 implementará níveis, equipamentos e melhorias de criaturas. As versões seguintes acrescentarão regiões, chefes, cripta, rituais, evolução e polimento visual. Todos os recursos gráficos implementados são originais; Wild Tamer e Necromancer (Prismathunder) são apenas referências conceituais.
+Próxima etapa planejada: **0.4, exploração**, com novas regiões, coleta de recursos e chefes. Wild Tamer e Necromancer (Prismathunder) são referências conceituais, não fontes de sprites ou código.
