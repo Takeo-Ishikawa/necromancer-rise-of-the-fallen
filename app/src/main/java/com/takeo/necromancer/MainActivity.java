@@ -94,12 +94,15 @@ public final class MainActivity extends Activity {
             actual.translate(-cameraX,-cameraY);
             drawCavern(actual);
             drawCorpses(actual);
+            drawLoot(actual);
             drawEntities(actual);
             drawEffects(actual);
             actual.restore();
             drawHud(actual);
-            if(world.status==World.PLAY)drawControls(actual);
-            else drawOverlay(actual);
+            if(world.status==World.PLAY) {
+                if(world.upgradeMenu)drawUpgradeMenu(actual);
+                else drawControls(actual);
+            } else drawOverlay(actual);
             actual.restore();
             postInvalidateOnAnimation();
         }
@@ -213,6 +216,24 @@ public final class MainActivity extends Activity {
             }
         }
 
+        private void drawLoot(Canvas c) {
+            for(World.Loot item:world.drops) {
+                c.save();c.translate(item.x,item.y);
+                float bob=(float)Math.sin(world.time*4+item.x)*4;
+                oval(c,-15,9,15,16,Color.argb(160,14,18,29));
+                c.translate(0,bob);
+                int tint=item.slot==0?Color.rgb(166,190,240):Color.rgb(225,174,116);
+                circle(c,0,-5,17,Color.argb(70,190,205,210));
+                Path gem=new Path();
+                gem.moveTo(0,-22);gem.lineTo(13,-7);gem.lineTo(0,9);
+                gem.lineTo(-13,-7);gem.close();
+                path(c,gem,tint);
+                text(c,item.slot==0?"F":"M",0,-3,12,INK,true,true);
+                text(c,"T"+item.tier,0,24,11,WHITE,true,true);
+                c.restore();
+            }
+        }
+
         private void drawEntities(Canvas c) {
             for(World.Unit enemy:world.enemies)drawUnit(c,enemy);
             for(World.Unit servant:world.servants)drawUnit(c,servant);
@@ -287,6 +308,11 @@ public final class MainActivity extends Activity {
                 line(c,-14,13,14,13,3,Color.rgb(200,178,155));
             }
             if(unit.ally) {
+                int grade=world.speciesRank[unit.kind];
+                if(grade>0) {
+                    circle(c,0,-unit.radius-18,10,Color.argb(130,25,57,48));
+                    text(c,""+grade,0,-unit.radius-14,11,WHITE,true,true);
+                }
                 circle(c,0,-unit.radius-17,4.3f,GREEN);
                 circle(c,0,-unit.radius-17,8,Color.argb(50,163,229,170));
             }
@@ -307,11 +333,11 @@ public final class MainActivity extends Activity {
             // Cajado, roupa, capuz e máscara cadavérica: design original.
             line(c,19,-32,29+swing,-54,4,Color.rgb(158,135,113));
             line(c,29+swing,-54,34+swing,-69,4,Color.rgb(158,135,113));
-            circle(c,35+swing,-70,9,Color.rgb(76,110,105));
-            circle(c,35+swing,-70,4,GREEN);
+            circle(c,35+swing,-70,9,world.staffTier>0?Color.rgb(110,102,171):Color.rgb(76,110,105));
+            circle(c,35+swing,-70,4,world.staffTier>0?Color.rgb(219,202,255):GREEN);
             Path cape=new Path();cape.moveTo(-12,-17);cape.lineTo(12,-18);
             cape.lineTo(25,20);cape.quadTo(0,30,-25,20);cape.close();
-            path(c,cape,Color.rgb(21,22,33));
+            path(c,cape,world.mantleTier>0?Color.rgb(40,36,66):Color.rgb(21,22,33));
             Path inside=new Path();inside.moveTo(-8,-16);inside.lineTo(8,-16);
             inside.lineTo(14,17);inside.lineTo(-15,17);inside.close();
             path(c,inside,Color.rgb(75,66,91));
@@ -358,26 +384,33 @@ public final class MainActivity extends Activity {
         }
 
         private void drawHud(Canvas c) {
-            rect(c,0,0,420,149,Color.argb(208,19,22,32));
+            rect(c,0,0,420,199,Color.argb(208,19,22,32));
             text(c,"✦  NECROMANCER  ✦",210,30,15,WHITE,true,true);
             text(c,"A CAVERNA ESQUECIDA",210,47,10,LILAC,true,true);
-            bar(c,25,62,280,13,world.hp/world.maxHp,Color.rgb(202,107,113),"VIDA");
-            bar(c,25,83,280,13,world.mana/world.maxMana,Color.rgb(147,169,214),"ÂNIMA");
-            text(c,Math.round(world.hp)+"/"+(int)world.maxHp,380,74,12,WHITE,true,true);
-            text(c,Math.round(world.mana)+"/"+(int)world.maxMana,380,96,12,WHITE,true,true);
+            bar(c,25,59,280,12,world.hp/world.maxHp,Color.rgb(202,107,113),"VIDA");
+            bar(c,25,80,280,12,world.mana/world.maxMana,Color.rgb(147,169,214),"ÂNIMA");
+            bar(c,25,101,280,12,(float)world.experience/world.xpToNext(),
+                    Color.rgb(163,193,154),"EXP");
+            text(c,Math.round(world.hp)+"/"+(int)world.maxHp,380,69,12,WHITE,true,true);
+            text(c,Math.round(world.mana)+"/"+(int)world.maxMana,380,90,12,WHITE,true,true);
+            text(c,world.experience+"/"+world.xpToNext(),380,111,12,WHITE,true,true);
+            text(c,"NECROMANTE · NÍVEL "+world.level,210,130,11,LILAC,true,true);
             if(world.kills==0) {
-                text(c,"O DESPERTAR",210,120,11,GREEN,true,true);
-                text(c,"Derrote seu primeiro monstro",210,138,13,WHITE,true,false);
+                text(c,"O DESPERTAR",210,149,10,GREEN,true,true);
+                text(c,"Derrote seu primeiro monstro",210,166,12,WHITE,true,false);
             } else if(world.guardianDefeated) {
-                text(c,"O RITUAL FINAL",210,120,11,GREEN,true,true);
-                text(c,"Ressuscite a sentinela derrotada",210,138,13,WHITE,true,false);
+                text(c,"O RITUAL FINAL",210,149,10,GREEN,true,true);
+                text(c,"Ressuscite a sentinela derrotada",210,166,12,WHITE,true,false);
             } else if(world.servants.isEmpty()) {
-                text(c,"A PRIMEIRA ALMA",210,120,11,GREEN,true,true);
-                text(c,"Ressuscite um cadáver próximo",210,138,13,WHITE,true,false);
+                text(c,"A PRIMEIRA ALMA",210,149,10,GREEN,true,true);
+                text(c,"Ressuscite um cadáver próximo",210,166,12,WHITE,true,false);
             } else {
-                text(c,"A SENTINELA",210,120,11,GREEN,true,true);
-                text(c,"Encontre e derrote o guardião",210,138,13,WHITE,true,false);
+                text(c,"A SENTINELA",210,149,10,GREEN,true,true);
+                text(c,"Encontre e derrote o guardião",210,166,12,WHITE,true,false);
             }
+            text(c,"FOCO T"+world.staffTier+"   ·   MANTO T"+world.mantleTier+
+                     "   ·   ESSÊNCIAS "+world.soulShards,
+                    210,188,10,PALE,true,true);
             rounded(c,103,sceneHeight-53,317,sceneHeight-29,10,Color.argb(187,20,22,31));
             text(c,"SERVOS "+world.servants.size()+"  ·  COMANDO "+world.commandUsed()+"/4",
                     210,sceneHeight-37,11,PALE,true,true);
@@ -411,6 +444,14 @@ public final class MainActivity extends Activity {
             if(world.attackTimer>0)text(c,String.format(java.util.Locale.US,"%.1f",world.attackTimer),
                     ax,ay+43,10,PALE,true,false);
 
+            // Evolucao de especies em um painel que pausa a batalha.
+            float ux=106,uy=sceneHeight-212;
+            circle(c,ux,uy,37,Color.argb(222,45,73,63));
+            style(GREEN);p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(2);c.drawCircle(ux,uy,35,p);
+            text(c,"✦",ux,uy+6,27,GREEN,true,true);
+            text(c,"EVOLUIR",ux,uy+24,9,WHITE,true,true);
+
             // Toque para alternar entre guardar o heroi e perseguir inimigos.
             float ox=238,oy=sceneHeight-212;
             circle(c,ox,oy,36,Color.argb(216,57,52,76));
@@ -426,6 +467,36 @@ public final class MainActivity extends Activity {
             p.setStrokeWidth(2);c.drawCircle(rx,ry,35,p);
             text(c,"☠",rx,ry+7,29,GREEN,true,true);
             text(c,"REVIVER",rx,ry+24,9,WHITE,true,true);
+        }
+
+        private void drawUpgradeMenu(Canvas c) {
+            rect(c,0,0,420,sceneHeight,Color.argb(220,11,13,22));
+            float top=sceneHeight*.17f;
+            rounded(c,24,top,396,top+417,15,Color.rgb(35,37,50));
+            style(Color.rgb(130,155,143));
+            p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1.5f);
+            c.drawRoundRect(24,top,396,top+417,15,15,p);
+            text(c,"EVOLUÇÃO DO EXÉRCITO",210,top+37,19,WHITE,true,true);
+            text(c,"FRAGMENTOS DE ALMA: "+world.soulShards,
+                    210,top+61,12,GREEN,true,true);
+            text(c,"Cada grau aumenta vida em 24% e dano em 18%",
+                    210,top+80,11,PALE,true,false);
+            for(int kind=0;kind<3;kind++) {
+                float y=top+94+kind*84;
+                int cost=world.upgradeCost(kind);
+                boolean can=cost>=0 && world.soulShards>=cost;
+                rounded(c,42,y,378,y+72,10,can?Color.rgb(51,79,67):Color.rgb(51,50,61));
+                text(c,World.speciesName(kind),59,y+24,15,WHITE,false,true);
+                text(c,"GRAU "+world.speciesRank[kind]+"/3",59,y+48,11,LILAC,false,true);
+                rounded(c,261,y+15,365,y+57,8,can?Color.rgb(146,187,151):Color.rgb(86,89,95));
+                text(c,cost<0?"MÁXIMO":"CUSTO "+cost,313,y+41,12,
+                        can?INK:WHITE,true,true);
+            }
+            rounded(c,79,top+359,341,top+400,9,Color.rgb(115,113,132));
+            text(c,"VOLTAR AO COMBATE",210,top+385,13,WHITE,true,true);
+            if(world.messageTimer>0) {
+                text(c,world.message,210,top+440,11,GREEN,true,true);
+            }
         }
 
         private void drawOverlay(Canvas c) {
@@ -470,6 +541,22 @@ public final class MainActivity extends Activity {
                     world.reset();world.start();previousFrame=System.nanoTime();
                     return true;
                 }
+                if(world.upgradeMenu) {
+                    float top=sceneHeight*.17f;
+                    boolean tapped=false;
+                    if(px>=42 && px<=378) {
+                        for(int kind=0;kind<3;kind++) {
+                            float row=top+94+kind*84;
+                            if(py>=row && py<=row+72) {
+                                world.upgradeSpecies(kind);
+                                tapped=true;
+                                break;
+                            }
+                        }
+                    }
+                    if(!tapped)world.toggleUpgradeMenu();
+                    return true;
+                }
                 if(px<175 && py>sceneHeight-205) {
                     if(joystickPointer==-1) {
                         joystickPointer=event.getPointerId(index);
@@ -482,6 +569,9 @@ public final class MainActivity extends Activity {
                     raisePressedAt=System.nanoTime();
                 } else if(dist(px,py,238,sceneHeight-212)<41) {
                     world.toggleOrders();
+                } else if(dist(px,py,106,sceneHeight-212)<41) {
+                    joystickPointer=-1;joystickX=0;joystickY=0;
+                    world.toggleUpgradeMenu();
                 }
             } else if(action==MotionEvent.ACTION_MOVE) {
                 int current=event.findPointerIndex(joystickPointer);
