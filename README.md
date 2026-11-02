@@ -1,61 +1,36 @@
-# Necromancer: Rise of the Fallen
+# Necromancer: Rise of the Fallen — Android
 
-Protótipo 0.1 de um RPG de ação e fantasia sombria para Android (primeiro executado no navegador).
+Protótipo nativo **Android** em Java (Canvas 2D), criado a partir do roteiro/GDD original. **Não é um jogo de navegador**.
 
-O necromante desperta em uma caverna sem seus poderes. Seu primeiro confronto é com os próprios punhos; ao derrotar uma criatura, desperta uma habilidade espiritual. A habilidade de ressuscitar os inimigos será implementada na etapa 0.2.
+## Instalação
 
-## Jogar
+Baixe o arquivo `necromancer-prototipo-android` na seção *Actions → Android APK → artefatos* no GitHub. Extraia `app-debug.apk` e instale no Android (pode ser necessário habilitar instalação de APKs do navegador/gerenciador de arquivos).
 
-Abra [index.html](index.html) por um servidor HTTP local. Por exemplo:
+## Compilação
 
-```sh
-python -m http.server 8000
-```
-
-Visite `http://localhost:8000` no navegador. Para testar no celular, use um endereço acessível na rede local ou publique o repositório no GitHub Pages (raiz da branch `main`).
-
-**Controles:** joystick virtual no lado esquerdo e botão de ataque no direito; no computador, WASD / setas para mover e espaço / J para atacar. Enter inicia e R reinicia após a derrota ou vitória.
-
-## Escopo da versão 0.1
-
-- Mapa único de caverna, câmera que segue o personagem e obstáculos sólidos.
-- Movimento em oito direções com joystick virtual e teclado.
-- Inimigos de três espécies com perseguição, aproximação, ataque e barra de vida.
-- Combate em tempo real e habilidade ofensiva ativa (sem ataque básico automático).
-- Primeira derrota por punhos desperta um ataque espiritual à distância.
-- Guardião opcional de elite e conclusão curta do prólogo.
-- Interface vertical, arte vetorial original desenhada via Canvas e adaptação a telas móveis.
-- Lógica de colisão com testes automatizados.
-
-O protótipo usa um micro-motor 2D próprio baseado em Canvas, com atualização em passo de tempo, câmera, colisão e entidades separadas. Não utiliza sprites nem códigos de jogos de terceiros.
-
-## Testes
+Requer Android SDK 35, JDK 17 e Gradle 8.9:
 
 ```sh
-npm test
+gradle assembleDebug
 ```
 
-Necessário Node.js 20 ou superior. Não há dependências para instalação.
+APK gerado em: `app/build/outputs/apk/debug/app-debug.apk`.
 
-## Roadmap do GDD
+O workflow `.github/workflows/android.yml` compila e publica o APK debug automaticamente após cada push em `main`.
 
-| Versão | Entregas |
-| --- | --- |
-| 0.1 | Movimento, combate, inimigos, habilidade ativa, colisões e câmera |
-| 0.2 | Corpos, energia de invocação, ressurreição, IA dos servos, formação e comando |
-| 0.3 | Níveis, equipamentos, melhorias e mais criaturas |
-| 0.4 | Regiões adicionais, coleta de recursos e chefes |
-| 0.5 | Cripta, gerenciamento de servos e rituais |
-| 0.6 | Conteúdo avançado, balanceamento e preparação Android |
+## Jogabilidade atual
 
-O roteiro é derivado do GDD fornecido pelo autor. Qualquer referência a Wild Tamer ou Necromancer/Prismathunder serve apenas como inspiração conceitual: os recursos do projeto são originais.
+- Exploração livre por joystick em mapa único de caverna, orientação vertical.
+- Necromante começa sem magia: derrota o primeiro inimigo com um golpe corporal.
+- Ao derrotar o primeiro monstro, desperta o projétil espiritual (ataque ativo).
+- Inimigos perseguem e combatem com comportamento automático.
+- Cadáveres permanecem temporariamente e podem ser ressuscitados com gasto de ânima.
+- Servos persistem enquanto vivos, seguem o jogador e lutam automaticamente; pontos de comando limitam o exército.
+- Ratos, morcegos, limos e sentinela de elite. Vitória ao derrotar a sentinela.
+- Gráficos vetoriais estilizados e **originais**, desenhados em Canvas. Sem recursos importados de jogos terceiros.
 
-## Organização
+**Controles:** joystick inferior esquerdo para movimentar; botão grande inferior direito para golpear/lançar magia; botão de caveira acima para ressuscitar cadáver próximo. A interface orienta o início do jogo.
 
-- `index.html` e `styles.css`: interface e área de jogo.
-- `src/data.js`: configurações, mapa e fichas dos inimigos.
-- `src/physics.js`: geometria e resolução de colisões.
-- `src/input.js`: joystick, teclado e botão ativo.
-- `src/render.js`: câmera e desenho 2D estilizado.
-- `src/game.js`: simulação, IA e progressão do prólogo.
-- `tests/`: testes de lógica independentes do navegador.
+Esta entrega contém as fundações de 0.1 com uma implementação preliminar da necromancia 0.2 para testar cedo o ciclo central do jogo. Próximas etapas: animação/sprites ilustrados autorais, sonorização, melhorias do pathfinding, expansão da cripta/equipamentos, save local e balanceamento.
+
+© Projeto original. Wild Tamer e Necromancer (Prismathunder) foram considerados referências de gênero e atmosfera; nenhum recurso de terceiros foi copiado.
