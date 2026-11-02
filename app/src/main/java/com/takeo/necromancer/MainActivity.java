@@ -468,9 +468,10 @@ public final class MainActivity extends Activity {
         }
 
         private void drawHud(Canvas c) {
-            rect(c,0,0,420,199,Color.argb(208,19,22,32));
+            rect(c,0,0,420,217,Color.argb(208,19,22,32));
             text(c,"✦  NECROMANCER  ✦",210,30,15,WHITE,true,true);
-            text(c,world.baseClaimed?"SANTUARIO DAS ALMAS":"A CAVERNA ESQUECIDA",210,47,10,LILAC,true,true);
+            text(c,world.region==World.CAVE && world.baseClaimed?
+                    "SANTUÁRIO DAS ALMAS":World.regionName(world.region),210,47,10,LILAC,true,true);
             bar(c,25,59,280,12,world.hp/world.maxHp,Color.rgb(202,107,113),"VIDA");
             bar(c,25,80,280,12,world.mana/world.maxMana,Color.rgb(147,169,214),"ÂNIMA");
             bar(c,25,101,280,12,(float)world.experience/world.xpToNext(),
@@ -479,9 +480,16 @@ public final class MainActivity extends Activity {
             text(c,Math.round(world.mana)+"/"+(int)world.maxMana,380,90,12,WHITE,true,true);
             text(c,world.experience+"/"+world.xpToNext(),380,111,12,WHITE,true,true);
             text(c,"NECROMANTE · NÍVEL "+world.level,210,130,11,LILAC,true,true);
-            if(world.baseClaimed) {
+            if(world.region==World.GRAVEYARD) {
+                text(c,world.regionBossBound[World.GRAVEYARD]?"PORTAL ABERTO":"O CAVALEIRO DAS CINZAS",210,149,10,GREEN,true,true);
+                text(c,world.regionBossBound[World.GRAVEYARD]?
+                        "Use o portal para o pântano":"Derrote e ressuscite o Cavaleiro",210,166,12,WHITE,true,false);
+            } else if(world.region==World.MARSH) {
+                text(c,"O COLOSSO DO PÂNTANO",210,149,10,GREEN,true,true);
+                text(c,"Derrote e ressuscite o Colosso",210,166,12,WHITE,true,false);
+            } else if(world.baseClaimed) {
                 text(c,"A PRIMEIRA BASE",210,149,10,GREEN,true,true);
-                text(c,"Sua caverna agora pertence ao necromante",210,166,12,WHITE,true,false);
+                text(c,"Entre no portal do santuário",210,166,12,WHITE,true,false);
             } else if(world.kills==0) {
                 text(c,"O DESPERTAR",210,149,10,GREEN,true,true);
                 text(c,"Derrote seu primeiro monstro",210,166,12,WHITE,true,false);
@@ -498,6 +506,8 @@ public final class MainActivity extends Activity {
             text(c,"FOCO T"+world.staffTier+"   ·   MANTO T"+world.mantleTier+
                      "   ·   ESSÊNCIAS "+world.soulShards,
                     210,188,10,PALE,true,true);
+            text(c,"RECURSOS "+world.gathered+"  ·  REGIÃO "+(world.region+1)+"/3",
+                    210,207,9,GREEN,true,true);
             rounded(c,103,sceneHeight-53,317,sceneHeight-29,10,Color.argb(187,20,22,31));
             text(c,"SERVOS "+world.servants.size()+"  ·  COMANDO "+world.commandUsed()+"/4",
                     210,sceneHeight-37,11,PALE,true,true);
@@ -594,10 +604,13 @@ public final class MainActivity extends Activity {
             p.setStyle(Paint.Style.STROKE);
             c.drawRoundRect(21,sceneHeight*.22f,399,sceneHeight*.78f,14,14,p);
             float top=sceneHeight*.22f;
-            text(c,"PRÓLOGO · A CAVERNA ESQUECIDA",210,top+38,12,GREEN,true,true);
+            text(c,world.region==World.CAVE?"PRÓLOGO · A CAVERNA ESQUECIDA":
+                    "EXPLORAÇÃO · "+World.regionName(world.region),
+                    210,top+38,12,GREEN,true,true);
             text(c,"☾",210,top+122,85,LILAC,true,false);
             String heading=world.status==World.MENU?"O PRIMEIRO DESPERTAR":
-                    world.status==World.DEAD?"O FIM DO RITUAL":"O EXERCITO DESPERTA";
+                    world.status==World.DEAD?"O FIM DO RITUAL":
+                    world.region==World.MARSH?"O EXÉRCITO DESPERTA":"A PRIMEIRA BASE";
             text(c,heading,210,top+171,22,WHITE,true,true);
             if(world.status==World.MENU) {
                 text(c,"Você despertou sem poderes.",210,top+218,16,PALE,true,false);
@@ -606,13 +619,18 @@ public final class MainActivity extends Activity {
             } else if(world.status==World.DEAD) {
                 text(c,"Seus servos foram dispersos.",210,top+226,16,PALE,true,false);
                 text(c,"Tente uma nova expedição.",210,top+251,16,PALE,true,false);
+            } else if(world.region==World.MARSH) {
+                text(c,"O Colosso agora obedece ao exército.",210,top+226,15,PALE,true,false);
+                text(c,"Três regiões foram conquistadas.",210,top+251,15,PALE,true,false);
             } else {
-                text(c,"A sentinela agora obedece a voce.",210,top+226,16,PALE,true,false);
-                text(c,"Criaturas vencidas: "+world.kills,210,top+251,16,PALE,true,false);
+                text(c,"A caverna tornou-se sua primeira base.",210,top+226,15,PALE,true,false);
+                text(c,"Explore o portal do santuário.",210,top+251,15,PALE,true,false);
             }
             float bottom=sceneHeight*.78f;
             rounded(c,56,bottom-88,364,bottom-34,9,Color.rgb(122,148,130));
-            text(c,world.status==World.MENU?"DESPERTAR":world.status==World.WIN?"ENTRAR NA BASE":"JOGAR NOVAMENTE",
+            text(c,world.status==World.MENU?"DESPERTAR":world.status==World.WIN?
+                    (world.region==World.CAVE?"ENTRAR NA BASE":"CONTINUAR EXPLORANDO"):
+                    "JOGAR NOVAMENTE",
                     210,bottom-54,17,INK,true,true);
             text(c,"Mover: joystick · Atacar: magia ou punhos",210,bottom-11,11,PALE,true,false);
             text(c,"REVIVER: toque · Dispensar servo: segure",210,bottom+4,10,PALE,true,false);
@@ -627,7 +645,9 @@ public final class MainActivity extends Activity {
                 if(world.status!=World.PLAY) {
                     if(world.status==World.WIN) {
                         world.status=World.PLAY;
-                        world.say("Santuário conquistado! Explore sua primeira base.");
+                        world.say(world.region==World.CAVE?
+                                "Santuario conquistado! Procure o portal para explorar.":
+                                "O pantano foi conquistado! Explore livremente.");
                     } else {
                         world.reset();world.start();
                     }
