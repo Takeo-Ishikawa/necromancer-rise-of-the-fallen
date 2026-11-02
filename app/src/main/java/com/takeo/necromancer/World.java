@@ -25,8 +25,8 @@ final class World {
             maxHp = new float[]{34, 54, 30, 230}[kind] * (friendly ? .89f : 1f);
             hp = maxHp;
             speed = new float[]{76, 51, 100, 57}[kind];
-            attack = new float[]{8, 10, 7, 15}[kind] * (friendly ? 1.4f : 1f);
-            range = new float[]{28, 32, 29, 41}[kind];
+            attack = new float[]{8, 10, 6, 15}[kind] * (friendly ? 1.4f : 1f);
+            range = new float[]{28, 32, 107, 41}[kind];
             cooldown = new float[]{1.2f, 1.55f, 1.1f, 1.6f}[kind];
         }
     }
@@ -34,7 +34,7 @@ final class World {
         final int kind;
         final float x, y;
         float time = 32f;
-        Corpse(Unit unit) { kind = unit.kind; x = unit.x; y = unit.y; }
+        Corpse(Unit unit) { kind = unit.kind; x = unit.x; y = unit.y; if(kind==WARDEN)time=90f; }
     }
     static final class Projectile {
         float x,y,vx,vy,life = .78f;
@@ -64,6 +64,9 @@ final class World {
         {170,1170,43}, {1550,1240,80}, {1090,1340,50}, {875,910,30}
     };
 
+    /** 0: defender o necromante; 1: caçar criaturas nos arredores. */
+    int orders = 0;
+    boolean guardianDefeated = false;
     int status = MENU, kills = 0;
     float x = 335, y = 1015, dirX = 1, dirY = 0, hp = 115, mana = 55;
     final float maxHp = 115, maxMana = 55;
@@ -78,7 +81,7 @@ final class World {
     void reset() {
         status = MENU; x=335; y=1015; dirX=1; dirY=0;
         hp=maxHp; mana=maxMana; attackTimer=0; attackFlash=0; hitFlash=0;
-        kills=0; time=0; message=""; messageTimer=0; spellUnlocked=false;
+        kills=0; time=0; message=""; messageTimer=0; spellUnlocked=false; orders=0; guardianDefeated=false;
         enemies.clear(); servants.clear(); corpses.clear(); projectiles.clear(); effects.clear();
         spawn(RAT,460,990); spawn(SLIME,615,1105);
         spawn(RAT,755,965); spawn(BAT,830,775);
@@ -105,14 +108,37 @@ final class World {
 
     void say(String msg) { message=msg; messageTimer=2.6f; }
 
-    boolean raise() {
-        if(status!=PLAY) return false;
-        Corpse closest=null;
-        float best=85*85;
+    /** Seleção espacial usada pelo ritual e pelo indicador no cenário. */
+    Corpse nearestCorpse(float radius) {
+        Corpse selected = null;
+        float nearest = radius * radius;
         for(Corpse corpse:corpses) {
             float d=dist2(x,y,corpse.x,corpse.y);
-            if(d<best){best=d; closest=corpse;}
+            if(d<nearest) {nearest=d; selected=corpse;}
         }
+        return selected;
+    }
+
+    void toggleOrders() {
+        if(status!=PLAY) return;
+        orders=1-orders;
+        say(orders==0 ? "Ordem: proteger o necromante." : "Ordem: cacar monstros proximos.");
+    }
+
+    /** Retira um servo ativo sem criar novo cadáver ou devolver a ânima gasta. */
+    boolean dismiss() {
+        if(status!=PLAY) return false;
+        Unit selected=closest(servants,x,y,165f);
+        if(selected==null) {say("Aproxime-se de um servo para dispensa-lo."); return false;}
+        servants.remove(selected);
+        effects.add(new Effect(selected.x,selected.y,3,.6f));
+        say("Servo dispensado. Pontos de comando liberados.");
+        return true;
+    }
+
+    boolean raise() {
+        if(status!=PLAY) return false;
+        Corpse closest=nearestCorpse(95f);
         if(closest==null) { say("Aproxime-se de um corpo para ressuscitar."); return false; }
         if(commandUsed()+costCommand(closest.kind)>4) {
             say("Limite de comando atingido: 4 pontos."); return false;
@@ -124,7 +150,11 @@ final class World {
         servants.add(revived);
         corpses.remove(closest);
         effects.add(new Effect(revived.x,revived.y,3,.8f));
-        say("Alma vinculada! O servo lutará por você.");
+        if(revived.kind==WARDEN) {
+            status=WIN;
+        } else {
+            say("Alma vinculada! O servo lutara por voce.");
+        }
         return true;
     }
 
@@ -183,19 +213,19 @@ final class World {
             if(best>aggression*aggression) continue;
             float tx=target==null?x:target.x, ty=target==null?y:target.y;
             float dist=(float)Math.sqrt(best);
-            if(dist>enemy.range+((target==null)?15:target.radius)-3) {
-                moveUnit(enemy,(tx-enemy.x)/dist*enemy.speed*dt,
-                        (ty-enemy.y)/dist*enemy.speed*dt);
+            if(dist>enemy.range+((target==null)?15:target.radius)-3
+                    || lineBlocked(enemy.x,enemy.y,tx,ty)) {
+                moveSteered(enemy,tx,ty,enemy.speed*dt);
             } else if(enemy.attackTimer<=0) {
                 enemy.attackTimer=enemy.cooldown;
                 if(target==null) {
                     hp-=enemy.attack;
                     hitFlash=.25f;
-                    effects.add(new Effect(x,y,1,.3f));
+                    effects.add(new Effect(x,y,enemy.kind==BAT?4:1,.3f));
                 } else {
                     target.hp-=enemy.attack;
                     target.flash=.23f;
-                    effects.add(new Effect(target.x,target.y,1,.3f));
+                    effects.add(new Effect(target.x,target.y,enemy.kind==BAT?4:1,.3f));
                 }
             }
         }
@@ -205,16 +235,19 @@ final class World {
             ally.flash=Math.max(0,ally.flash-dt);
             ally.attackTimer=Math.max(0,ally.attackTimer-dt);
             ally.anim+=dt;
-            Unit target=closest(enemies,ally.x,ally.y,220f);
+            // Defesa reativa ou caçada estendida; ninguém se afasta indefinidamente.
+            float leash=dist2(ally.x,ally.y,x,y);
+            Unit target=leash>390f*390f ? null :
+                    closest(enemies,ally.x,ally.y,orders==0?185f:370f);
             if(target!=null) {
                 float d=(float)Math.sqrt(dist2(ally.x,ally.y,target.x,target.y));
-                if(d>ally.range+target.radius-3f) {
-                    moveUnit(ally,(target.x-ally.x)/Math.max(1,d)*ally.speed*1.19f*dt,
-                            (target.y-ally.y)/Math.max(1,d)*ally.speed*1.19f*dt);
+                if(d>ally.range+target.radius-3f
+                        || lineBlocked(ally.x,ally.y,target.x,target.y)) {
+                    moveSteered(ally,target.x,target.y,ally.speed*1.19f*dt);
                 } else if(ally.attackTimer<=0) {
                     ally.attackTimer=ally.cooldown;
                     damage(target,ally.attack);
-                    effects.add(new Effect(target.x,target.y,0,.23f));
+                    effects.add(new Effect(target.x,target.y,ally.kind==BAT?4:0,.23f));
                 }
             } else {
                 float angle=(float)(i*2.3999632+Math.PI/2);
@@ -223,8 +256,7 @@ final class World {
                 float d=(float)Math.sqrt(dist2(ally.x,ally.y,tx,ty));
                 if(d>15) {
                     float speed=Math.min(ally.speed*1.65f,d*3.7f);
-                    moveUnit(ally,(tx-ally.x)/Math.max(1,d)*speed*dt,
-                            (ty-ally.y)/Math.max(1,d)*speed*dt);
+                    moveSteered(ally,tx,ty,speed*dt);
                 }
             }
         }
@@ -267,9 +299,11 @@ final class World {
             mana=Math.min(maxMana,mana+6);
             if(!spellUnlocked) {
                 spellUnlocked=true;
-                say("Você despertou o projétil espiritual! Toque no ataque.");
-            } else if(unit.kind==WARDEN) {
-                status=WIN;
+                say("Voce despertou o projetil espiritual!");
+            }
+            if(unit.kind==WARDEN) {
+                guardianDefeated=true;
+                say("A sentinela caiu! Reviva seu corpo para concluir.");
             }
         }
     }
@@ -299,8 +333,35 @@ final class World {
         if(!blocked(x+dx,y,16f))x+=dx;
         if(!blocked(x,y+dy,16f))y+=dy;
     }
-    private void moveUnit(Unit unit,float dx,float dy) {
-        if(!blocked(unit.x+dx,unit.y,unit.radius))unit.x+=dx;
-        if(!blocked(unit.x,unit.y+dy,unit.radius))unit.y+=dy;
+    /** Seleção determinística de trajetórias tangentes ao obstáculo imediato. */
+    private void moveSteered(Unit unit,float tx,float ty,float step) {
+        float distance=(float)Math.hypot(tx-unit.x,ty-unit.y);
+        if(distance<1f)return;
+        float angle=(float)Math.atan2(ty-unit.y,tx-unit.x);
+        // Primeiro o destino; em seguida variações laterais para contornar rochas.
+        float[] detours={0f,.37f,-.37f,.75f,-.75f,1.16f,-1.16f,1.57f,-1.57f};
+        for(float detour:detours) {
+            float a=angle+detour;
+            float nx=unit.x+(float)Math.cos(a)*Math.min(step,distance);
+            float ny=unit.y+(float)Math.sin(a)*Math.min(step,distance);
+            if(!blocked(nx,ny,unit.radius+1f)) {
+                unit.x=nx;unit.y=ny;
+                return;
+            }
+        }
+    }
+
+    /** Evita que disparos à distância atravessem rochas. */
+    boolean lineBlocked(float ax,float ay,float bx,float by) {
+        float distance=(float)Math.hypot(bx-ax,by-ay);
+        int steps=(int)(distance/18f);
+        for(int i=1;i<steps;i++) {
+            float t=(float)i/steps;
+            for(float[] rock:rocks) {
+                float px=ax+(bx-ax)*t,py=ay+(by-ay)*t;
+                if(dist2(px,py,rock[0],rock[1])<(rock[2]+3)*(rock[2]+3))return true;
+            }
+        }
+        return false;
     }
 }
