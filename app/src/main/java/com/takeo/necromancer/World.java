@@ -42,6 +42,15 @@ final class World {
             x=px; y=py; vx=dx*460; vy=dy*460;
         }
     }
+    /** Equipamento que surge no chao e e coletado ao passar por perto. */
+    static final class Loot {
+        final float x,y;
+        final int slot; // 0: foco arcano, 1: manto
+        final int tier;
+        Loot(float px,float py,int itemSlot,int itemTier) {
+            x=px; y=py; slot=itemSlot; tier=itemTier;
+        }
+    }
     static final class Effect {
         float x,y,time,life;
         int type; // 0: golpe, 1: sangue, 2: magia, 3: ressurreição
@@ -55,6 +64,14 @@ final class World {
     final List<Corpse> corpses = new ArrayList<>();
     final List<Projectile> projectiles = new ArrayList<>();
     final List<Effect> effects = new ArrayList<>();
+    final List<Loot> drops = new ArrayList<>();
+
+    // Progressao limitada a esta expedicao; a cripta persistente virá em 0.5.
+    int level=1, experience=0, soulShards=0;
+    int staffTier=0, mantleTier=0;
+    final int[] speciesRank={0,0,0,0};
+    boolean upgradeMenu=false;
+    int lastUpgradeKind=-1;
 
     // Rochas circulares; colisões por eixo permitem escorregar ao longo da borda.
     final float[][] rocks = {
@@ -69,7 +86,7 @@ final class World {
     boolean guardianDefeated = false;
     int status = MENU, kills = 0;
     float x = 335, y = 1015, dirX = 1, dirY = 0, hp = 115, mana = 55;
-    final float maxHp = 115, maxMana = 55;
+    float maxHp = 115, maxMana = 55;
     float attackTimer = 0, attackFlash = 0, hitFlash = 0, time = 0;
     float messageTimer = 0;
     String message = "";
@@ -80,9 +97,12 @@ final class World {
 
     void reset() {
         status = MENU; x=335; y=1015; dirX=1; dirY=0;
+        level=1; experience=0; soulShards=0; staffTier=0; mantleTier=0;
+        maxHp=115; maxMana=55; upgradeMenu=false; lastUpgradeKind=-1;
+        for(int i=0;i<speciesRank.length;i++)speciesRank[i]=0;
         hp=maxHp; mana=maxMana; attackTimer=0; attackFlash=0; hitFlash=0;
         kills=0; time=0; message=""; messageTimer=0; spellUnlocked=false; orders=0; guardianDefeated=false;
-        enemies.clear(); servants.clear(); corpses.clear(); projectiles.clear(); effects.clear();
+        enemies.clear(); servants.clear(); corpses.clear(); projectiles.clear(); effects.clear(); drops.clear();
         spawn(RAT,460,990); spawn(SLIME,615,1105);
         spawn(RAT,755,965); spawn(BAT,830,775);
         spawn(SLIME,970,965); spawn(BAT,705,650);
@@ -101,6 +121,47 @@ final class World {
         int value=0;
         for(Unit u : servants) value += costCommand(u.kind);
         return value;
+    }
+
+    int xpToNext() { return 28 + level*18; }
+    static int xpValue(int kind) { return kind==WARDEN ? 100 : kind==SLIME ? 20 : kind==BAT ? 17 : 14; }
+    static String speciesName(int kind) {
+        return kind==RAT ? "RATOS" : kind==SLIME ? "LIMOS" : kind==BAT ? "MORCEGOS" : "SENTINELAS";
+    }
+    int upgradeCost(int kind) {
+        if(kind<0 || kind>=3 || speciesRank[kind]>=3)return -1;
+        return 2+2*speciesRank[kind];
+    }
+    void toggleUpgradeMenu() {
+        if(status!=PLAY)return;
+        upgradeMenu=!upgradeMenu;
+    }
+    /** Evolui uma especie em todo o exercito, inclusive futuros ressuscitados. */
+    boolean upgradeSpecies(int kind) {
+        if(status!=PLAY || !upgradeMenu || kind<0 || kind>=3)return false;
+        int cost=upgradeCost(kind);
+        if(cost<0) {say("Esta especie ja atingiu o grau maximo.");return false;}
+        if(soulShards<cost) {say("Fragmentos de alma insuficientes.");return false;}
+        soulShards-=cost;
+        speciesRank[kind]++;
+        lastUpgradeKind=kind;
+        for(Unit ally:servants) {
+            if(ally.kind!=kind)continue;
+            float gained=ally.maxHp*.24f/(1+.24f*(speciesRank[kind]-1));
+            ally.maxHp+=gained;
+            ally.hp=Math.min(ally.maxHp,ally.hp+gained);
+            ally.attack*= (1+.18f*speciesRank[kind])/(1+.18f*(speciesRank[kind]-1));
+        }
+        say(speciesName(kind)+" evoluiram para grau "+speciesRank[kind]+"!");
+        return true;
+    }
+
+    /** Crescimento incremental de 24% vida e 18% dano por grau. */
+    void applySpeciesBonus(Unit ally) {
+        int rank=speciesRank[ally.kind];
+        ally.maxHp*=1+.24f*rank;
+        ally.hp=ally.maxHp;
+        ally.attack*=1+.18f*rank;
     }
 
     static int costCommand(int kind) { return kind==SLIME ? 2 : kind==WARDEN ? 3 : 1; }
@@ -146,7 +207,7 @@ final class World {
         if(mana<costMana(closest.kind)) { say("Ânima insuficiente para o ritual."); return false; }
         mana-=costMana(closest.kind);
         Unit revived=new Unit(closest.kind,closest.x,closest.y,true);
-        revived.hp=revived.maxHp;
+        applySpeciesBonus(revived);
         servants.add(revived);
         corpses.remove(closest);
         effects.add(new Effect(revived.x,revived.y,3,.8f));
@@ -159,13 +220,13 @@ final class World {
     }
 
     void attack() {
-        if(status!=PLAY || attackTimer>0) return;
+        if(status!=PLAY || upgradeMenu || attackTimer>0) return;
         if(!spellUnlocked) {
             attackTimer=.46f;
             attackFlash=.20f;
             effects.add(new Effect(x+dirX*30,y+dirY*30,0,.25f));
             Unit nearest=closest(enemies,x,y,66f);
-            if(nearest!=null) damage(nearest,26f);
+            if(nearest!=null) damage(nearest,26f+staffTier*5f+(level-1)*2f);
         } else {
             if(mana<9) {say("Ânima insuficiente.");return;}
             mana-=9; attackTimer=.72f; attackFlash=.16f;
@@ -183,14 +244,14 @@ final class World {
     }
 
     void update(float dt, float moveX, float moveY) {
-        if(status!=PLAY) return;
+        if(status!=PLAY || upgradeMenu) return;
         dt=Math.max(0,Math.min(.05f,dt));
         time+=dt;
         attackTimer=Math.max(0,attackTimer-dt);
         attackFlash=Math.max(0,attackFlash-dt);
         hitFlash=Math.max(0,hitFlash-dt);
         messageTimer=Math.max(0,messageTimer-dt);
-        mana=Math.min(maxMana,mana+5.5f*dt);
+        mana=Math.min(maxMana,mana+(5.5f+(level-1)*.4f)*dt);
 
         float m=(float)Math.hypot(moveX,moveY);
         if(m>.08f) {
@@ -200,6 +261,7 @@ final class World {
         }
 
         for(Unit enemy:enemies) {
+            if(enemy.hp<=0)continue;
             enemy.attackTimer=Math.max(0,enemy.attackTimer-dt);
             enemy.flash=Math.max(0,enemy.flash-dt);
             enemy.anim+=dt;
@@ -219,7 +281,7 @@ final class World {
             } else if(enemy.attackTimer<=0) {
                 enemy.attackTimer=enemy.cooldown;
                 if(target==null) {
-                    hp-=enemy.attack;
+                    hp-=Math.max(1,enemy.attack-mantleTier*1.8f);
                     hitFlash=.25f;
                     effects.add(new Effect(x,y,enemy.kind==BAT?4:1,.3f));
                 } else {
@@ -232,6 +294,7 @@ final class World {
 
         for(int i=0;i<servants.size();i++) {
             Unit ally=servants.get(i);
+            if(ally.hp<=0)continue;
             ally.flash=Math.max(0,ally.flash-dt);
             ally.attackTimer=Math.max(0,ally.attackTimer-dt);
             ally.anim+=dt;
@@ -268,11 +331,40 @@ final class World {
             for(Unit target:enemies) {
                 if(target.hp>0 && dist2(target.x,target.y,bolt.x,bolt.y)<
                         (target.radius+12)*(target.radius+12)) {
-                    damage(target,34f); effects.add(new Effect(bolt.x,bolt.y,2,.35f));
+                    damage(target,34f+staffTier*8f+(level-1)*3f);
+                    effects.add(new Effect(bolt.x,bolt.y,2,.35f));
                     impact=true;break;
                 }
             }
             if(bolt.life<=0 || impact || blocked(bolt.x,bolt.y,5)) it.remove();
+        }
+
+        // Passar pelo item o coleta e equipa automaticamente se superar o anterior.
+        for(Iterator<Loot> it=drops.iterator();it.hasNext();) {
+            Loot item=it.next();
+            if(dist2(x,y,item.x,item.y)>43f*43f)continue;
+            it.remove();
+            if(item.slot==0) {
+                if(item.tier>staffTier) {
+                    staffTier=item.tier;
+                    say("Foco arcano equipado: grau "+staffTier+". Magia fortalecida.");
+                } else {
+                    soulShards+=1;
+                    say("Foco repetido convertido em fragmento de alma.");
+                }
+            } else {
+                if(item.tier>mantleTier) {
+                    float increase=18f*(item.tier-mantleTier);
+                    mantleTier=item.tier;
+                    maxHp+=increase;
+                    hp=Math.min(maxHp,hp+increase);
+                    say("Manto equipado: grau "+mantleTier+". Defesa fortalecida.");
+                } else {
+                    soulShards+=1;
+                    say("Manto repetido convertido em fragmento de alma.");
+                }
+            }
+            effects.add(new Effect(item.x,item.y,3,.45f));
         }
 
         enemies.removeIf(unit->unit.hp<=0);
@@ -296,6 +388,23 @@ final class World {
         if(unit.hp<=0) {
             kills++;
             corpses.add(new Corpse(unit));
+            soulShards+=unit.kind==WARDEN?4:1;
+            experience+=xpValue(unit.kind);
+            while(experience>=xpToNext()) {
+                experience-=xpToNext();
+                level++;
+                maxHp+=12f;
+                maxMana+=7f;
+                hp=Math.min(maxHp,hp+20f);
+                mana=Math.min(maxMana,mana+13f);
+                say("Nivel "+level+"! Vida, anima e magia fortalecidas.");
+            }
+            // Recompensas visiveis no mapa: uma peca a cada duas vitorias.
+            if(kills%2==0 || unit.kind==WARDEN) {
+                int slot=(kills/2)%2;
+                int tier=Math.min(3,1+Math.max(0,kills-1)/5);
+                drops.add(new Loot(unit.x,unit.y,slot,tier));
+            }
             mana=Math.min(maxMana,mana+6);
             if(!spellUnlocked) {
                 spellUnlocked=true;
