@@ -49,6 +49,8 @@ public final class MainActivity extends Activity {
         private final World world = new World();
         private final CaveScene caveScene;
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final ExpeditionScene expeditionScene = new ExpeditionScene();
+        private final WitchSprite witchSprite = new WitchSprite();
         private final Random decoration = new Random(2026);
         private final float[][] flecks = new float[165][3];
         private float scale=1, sceneHeight=780, cameraX=0, cameraY=0;
@@ -94,7 +96,10 @@ public final class MainActivity extends Activity {
             actual.save();
             actual.clipRect(0,0,420,sceneHeight);
             actual.translate(-cameraX,-cameraY);
-            caveScene.draw(actual,world,cameraX,cameraY,sceneHeight);
+            if(world.region==World.CAVE)caveScene.draw(actual,world,cameraX,cameraY,sceneHeight);
+            else expeditionScene.draw(actual,world,cameraX,cameraY,sceneHeight);
+            drawPortals(actual);
+            drawResources(actual);
             drawCorpses(actual);
             drawLoot(actual);
             drawEntities(actual);
@@ -218,6 +223,48 @@ public final class MainActivity extends Activity {
             }
         }
 
+        private void drawPortals(Canvas c) {
+            if(world.region>World.CAVE) {
+                float x=world.returnPortalX(),y=world.returnPortalY();
+                ExpeditionScene.portal(c,x,y,Color.rgb(169,180,220),world.time,"BACK");
+                text(c,"RETORNAR",x,y-83,13,WHITE,true,true);
+            }
+            if(world.region<World.MARSH) {
+                float x=world.forwardPortalX(),y=world.forwardPortalY();
+                if(world.forwardPortalOpen()) {
+                    ExpeditionScene.portal(c,x,y,Color.rgb(137,221,190),world.time,"NEXT");
+                    text(c,"PRÓXIMA REGIÃO",x,y-83,13,GREEN,true,true);
+                } else if(world.region==World.GRAVEYARD) {
+                    circle(c,x,y,32,Color.argb(80,22,29,35));
+                    text(c,"LACRADO",x,y-49,12,PALE,true,true);
+                }
+            }
+        }
+
+        private void drawResources(Canvas c) {
+            for(World.Resource resource:world.resources) {
+                c.save();c.translate(resource.x,resource.y);
+                float pulse=(float)Math.sin(world.time*3+resource.y)*3;
+                oval(c,-22,6,22,12,Color.argb(120,14,18,28));
+                circle(c,0,-13,21+pulse,Color.argb(68,146,219,197));
+                if(resource.kind==0) {
+                    Path gem=new Path();
+                    gem.moveTo(0,-40);gem.lineTo(14,-16);gem.lineTo(2,2);
+                    gem.lineTo(-14,-15);gem.close();
+                    path(c,gem,Color.rgb(165,229,220));
+                } else if(resource.kind==1) {
+                    line(c,-14,-8,13,-28,5,Color.rgb(222,204,200));
+                    line(c,-11,-29,14,-8,4,Color.rgb(216,198,213));
+                    circle(c,11,-28,6,Color.rgb(227,211,221));
+                } else {
+                    line(c,0,1,0,-19,6,Color.rgb(210,218,191));
+                    oval(c,-19,-31,19,-12,Color.rgb(153,214,166));
+                    circle(c,9,-25,4,Color.rgb(230,241,216));
+                }
+                c.restore();
+            }
+        }
+
         private void drawLoot(Canvas c) {
             for(World.Loot item:world.drops) {
                 c.save();c.translate(item.x,item.y);
@@ -239,7 +286,7 @@ public final class MainActivity extends Activity {
         private void drawEntities(Canvas c) {
             for(World.Unit enemy:world.enemies)drawUnit(c,enemy);
             for(World.Unit servant:world.servants)drawUnit(c,servant);
-            drawHero(c);
+            witchSprite.draw(c,world);
         }
 
         private void drawUnit(Canvas c,World.Unit unit) {
@@ -255,7 +302,12 @@ public final class MainActivity extends Activity {
             int base=unit.ally?Color.rgb(163,198,181):
                     unit.kind==World.RAT?Color.rgb(179,125,132):
                     unit.kind==World.SLIME?Color.rgb(154,165,114):
-                    unit.kind==World.BAT?Color.rgb(134,116,165):Color.rgb(146,123,137);
+                    unit.kind==World.BAT?Color.rgb(134,116,165):
+                    unit.kind==World.SKELETON?Color.rgb(206,194,181):
+                    unit.kind==World.WISP?Color.rgb(145,207,210):
+                    unit.kind==World.GRAVE_LORD?Color.rgb(166,142,189):
+                    unit.kind==World.MARSH_LORD?Color.rgb(124,175,143):
+                    Color.rgb(146,123,137);
             if(unit.flash>0)base=WHITE;
             if(unit.kind==World.RAT) {
                 line(c,-11,1,-25,-9,4,base);
@@ -293,6 +345,26 @@ public final class MainActivity extends Activity {
                 path(c,ears,base);
                 circle(c,-4,-5,2.4f,Color.rgb(238,198,172));
                 circle(c,5,-5,2.4f,Color.rgb(238,198,172));
+            } else if(unit.kind==World.SKELETON) {
+                oval(c,-18,-20,18,14,outline);
+                oval(c,-15,-19,15,12,base);
+                oval(c,-11,-18,11,-1,Color.rgb(239,222,197));
+                circle(c,-5,-11,3,outline);circle(c,5,-11,3,outline);
+                line(c,-9,2,9,2,3,outline);
+                line(c,18,-7,29,-34,4,Color.rgb(184,182,184));
+                line(c,22,-20,34,-17,3,Color.rgb(184,182,184));
+                line(c,-10,11,-10,20,4,base);line(c,10,11,10,20,4,base);
+            } else if(unit.kind==World.WISP) {
+                circle(c,0,-10,unit.radius+10,Color.argb(70,145,215,220));
+                Path spirit=new Path();
+                spirit.moveTo(0,-35);
+                spirit.cubicTo(23,-33,27,-8,13,9);
+                spirit.lineTo(7,19);spirit.lineTo(0,12);
+                spirit.lineTo(-9,19);spirit.lineTo(-13,9);
+                spirit.cubicTo(-26,-9,-18,-35,0,-35);
+                spirit.close();path(c,spirit,base);
+                circle(c,-7,-12,3,outline);circle(c,7,-12,3,outline);
+                circle(c,-7,-12,1,WHITE);circle(c,7,-12,1,WHITE);
             } else {
                 // Guardião de elite: couraça antiga, chifres e arma rachada.
                 line(c,-22,0,-35,-35,6,Color.rgb(105,101,101));
@@ -308,6 +380,14 @@ public final class MainActivity extends Activity {
                 circle(c,8,-15,3,Color.rgb(92,182,145));
                 line(c,-21,5,21,5,3,Color.rgb(200,178,155));
                 line(c,-14,13,14,13,3,Color.rgb(200,178,155));
+                if(unit.kind==World.GRAVE_LORD) {
+                    line(c,-25,-7,26,-7,4,Color.rgb(219,195,214));
+                    circle(c,0,-43,12,Color.argb(98,186,152,226));
+                } else if(unit.kind==World.MARSH_LORD) {
+                    circle(c,-25,5,10,Color.rgb(100,145,119));
+                    circle(c,25,5,10,Color.rgb(100,145,119));
+                    circle(c,0,-42,13,Color.argb(110,158,219,162));
+                }
             }
             if(unit.ally) {
                 int grade=world.speciesRank[unit.kind];
@@ -318,8 +398,10 @@ public final class MainActivity extends Activity {
                 circle(c,0,-unit.radius-17,4.3f,GREEN);
                 circle(c,0,-unit.radius-17,8,Color.argb(50,163,229,170));
             }
-            if(unit.hp<unit.maxHp || unit.kind==World.WARDEN) {
-                float w=unit.kind==World.WARDEN?70:39;
+            if(unit.hp<unit.maxHp || unit.kind==World.WARDEN ||
+                    unit.kind==World.GRAVE_LORD || unit.kind==World.MARSH_LORD) {
+                float w=(unit.kind==World.WARDEN || unit.kind==World.GRAVE_LORD ||
+                        unit.kind==World.MARSH_LORD)?70:39;
                 rounded(c,-w/2,-unit.radius-29,w/2,-unit.radius-24,3,INK);
                 rounded(c,-w/2,-unit.radius-29,
                         -w/2+w*clamp(unit.hp/unit.maxHp,0,1),-unit.radius-24,
@@ -386,9 +468,10 @@ public final class MainActivity extends Activity {
         }
 
         private void drawHud(Canvas c) {
-            rect(c,0,0,420,199,Color.argb(208,19,22,32));
+            rect(c,0,0,420,217,Color.argb(208,19,22,32));
             text(c,"✦  NECROMANCER  ✦",210,30,15,WHITE,true,true);
-            text(c,world.baseClaimed?"SANTUARIO DAS ALMAS":"A CAVERNA ESQUECIDA",210,47,10,LILAC,true,true);
+            text(c,world.region==World.CAVE && world.baseClaimed?
+                    "SANTUÁRIO DAS ALMAS":World.regionName(world.region),210,47,10,LILAC,true,true);
             bar(c,25,59,280,12,world.hp/world.maxHp,Color.rgb(202,107,113),"VIDA");
             bar(c,25,80,280,12,world.mana/world.maxMana,Color.rgb(147,169,214),"ÂNIMA");
             bar(c,25,101,280,12,(float)world.experience/world.xpToNext(),
@@ -397,9 +480,16 @@ public final class MainActivity extends Activity {
             text(c,Math.round(world.mana)+"/"+(int)world.maxMana,380,90,12,WHITE,true,true);
             text(c,world.experience+"/"+world.xpToNext(),380,111,12,WHITE,true,true);
             text(c,"NECROMANTE · NÍVEL "+world.level,210,130,11,LILAC,true,true);
-            if(world.baseClaimed) {
+            if(world.region==World.GRAVEYARD) {
+                text(c,world.regionBossBound[World.GRAVEYARD]?"PORTAL ABERTO":"O CAVALEIRO DAS CINZAS",210,149,10,GREEN,true,true);
+                text(c,world.regionBossBound[World.GRAVEYARD]?
+                        "Use o portal para o pântano":"Derrote e ressuscite o Cavaleiro",210,166,12,WHITE,true,false);
+            } else if(world.region==World.MARSH) {
+                text(c,"O COLOSSO DO PÂNTANO",210,149,10,GREEN,true,true);
+                text(c,"Derrote e ressuscite o Colosso",210,166,12,WHITE,true,false);
+            } else if(world.baseClaimed) {
                 text(c,"A PRIMEIRA BASE",210,149,10,GREEN,true,true);
-                text(c,"Sua caverna agora pertence ao necromante",210,166,12,WHITE,true,false);
+                text(c,"Entre no portal do santuário",210,166,12,WHITE,true,false);
             } else if(world.kills==0) {
                 text(c,"O DESPERTAR",210,149,10,GREEN,true,true);
                 text(c,"Derrote seu primeiro monstro",210,166,12,WHITE,true,false);
@@ -416,6 +506,8 @@ public final class MainActivity extends Activity {
             text(c,"FOCO T"+world.staffTier+"   ·   MANTO T"+world.mantleTier+
                      "   ·   ESSÊNCIAS "+world.soulShards,
                     210,188,10,PALE,true,true);
+            text(c,"RECURSOS "+world.gathered+"  ·  REGIÃO "+(world.region+1)+"/3",
+                    210,207,9,GREEN,true,true);
             rounded(c,103,sceneHeight-53,317,sceneHeight-29,10,Color.argb(187,20,22,31));
             text(c,"SERVOS "+world.servants.size()+"  ·  COMANDO "+world.commandUsed()+"/4",
                     210,sceneHeight-37,11,PALE,true,true);
@@ -476,31 +568,33 @@ public final class MainActivity extends Activity {
 
         private void drawUpgradeMenu(Canvas c) {
             rect(c,0,0,420,sceneHeight,Color.argb(220,11,13,22));
-            float top=sceneHeight*.17f;
-            rounded(c,24,top,396,top+417,15,Color.rgb(35,37,50));
+            float top=Math.max(10,sceneHeight*.045f);
+            rounded(c,24,top,396,top+550,15,Color.rgb(35,37,50));
             style(Color.rgb(130,155,143));
             p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1.5f);
-            c.drawRoundRect(24,top,396,top+417,15,15,p);
+            c.drawRoundRect(24,top,396,top+550,15,15,p);
             text(c,"EVOLUÇÃO DO EXÉRCITO",210,top+37,19,WHITE,true,true);
             text(c,"FRAGMENTOS DE ALMA: "+world.soulShards,
                     210,top+61,12,GREEN,true,true);
             text(c,"Cada grau aumenta vida em 24% e dano em 18%",
                     210,top+80,11,PALE,true,false);
-            for(int kind=0;kind<3;kind++) {
-                float y=top+94+kind*84;
+            int[] kinds={World.RAT,World.SLIME,World.BAT,World.SKELETON,World.WISP};
+            for(int row=0;row<kinds.length;row++) {
+                int kind=kinds[row];
+                float y=top+92+row*73;
                 int cost=world.upgradeCost(kind);
                 boolean can=cost>=0 && world.soulShards>=cost;
-                rounded(c,42,y,378,y+72,10,can?Color.rgb(51,79,67):Color.rgb(51,50,61));
-                text(c,World.speciesName(kind),59,y+24,15,WHITE,false,true);
-                text(c,"GRAU "+world.speciesRank[kind]+"/3",59,y+48,11,LILAC,false,true);
-                rounded(c,261,y+15,365,y+57,8,can?Color.rgb(146,187,151):Color.rgb(86,89,95));
-                text(c,cost<0?"MÁXIMO":"CUSTO "+cost,313,y+41,12,
+                rounded(c,42,y,378,y+63,10,can?Color.rgb(51,79,67):Color.rgb(51,50,61));
+                text(c,World.speciesName(kind),59,y+24,14,WHITE,false,true);
+                text(c,"GRAU "+world.speciesRank[kind]+"/3",59,y+46,11,LILAC,false,true);
+                rounded(c,261,y+13,365,y+50,8,can?Color.rgb(146,187,151):Color.rgb(86,89,95));
+                text(c,cost<0?"MÁXIMO":"CUSTO "+cost,313,y+38,12,
                         can?INK:WHITE,true,true);
             }
-            rounded(c,79,top+359,341,top+400,9,Color.rgb(115,113,132));
-            text(c,"VOLTAR AO COMBATE",210,top+385,13,WHITE,true,true);
+            rounded(c,79,top+468,341,top+512,9,Color.rgb(115,113,132));
+            text(c,"VOLTAR AO COMBATE",210,top+496,13,WHITE,true,true);
             if(world.messageTimer>0) {
-                text(c,world.message,210,top+440,11,GREEN,true,true);
+                text(c,world.message,210,top+538,10,GREEN,true,true);
             }
         }
 
@@ -512,10 +606,13 @@ public final class MainActivity extends Activity {
             p.setStyle(Paint.Style.STROKE);
             c.drawRoundRect(21,sceneHeight*.22f,399,sceneHeight*.78f,14,14,p);
             float top=sceneHeight*.22f;
-            text(c,"PRÓLOGO · A CAVERNA ESQUECIDA",210,top+38,12,GREEN,true,true);
+            text(c,world.region==World.CAVE?"PRÓLOGO · A CAVERNA ESQUECIDA":
+                    "EXPLORAÇÃO · "+World.regionName(world.region),
+                    210,top+38,12,GREEN,true,true);
             text(c,"☾",210,top+122,85,LILAC,true,false);
             String heading=world.status==World.MENU?"O PRIMEIRO DESPERTAR":
-                    world.status==World.DEAD?"O FIM DO RITUAL":"O EXERCITO DESPERTA";
+                    world.status==World.DEAD?"O FIM DO RITUAL":
+                    world.region==World.MARSH?"O EXÉRCITO DESPERTA":"A PRIMEIRA BASE";
             text(c,heading,210,top+171,22,WHITE,true,true);
             if(world.status==World.MENU) {
                 text(c,"Você despertou sem poderes.",210,top+218,16,PALE,true,false);
@@ -524,13 +621,18 @@ public final class MainActivity extends Activity {
             } else if(world.status==World.DEAD) {
                 text(c,"Seus servos foram dispersos.",210,top+226,16,PALE,true,false);
                 text(c,"Tente uma nova expedição.",210,top+251,16,PALE,true,false);
+            } else if(world.region==World.MARSH) {
+                text(c,"O Colosso agora obedece ao exército.",210,top+226,15,PALE,true,false);
+                text(c,"Três regiões foram conquistadas.",210,top+251,15,PALE,true,false);
             } else {
-                text(c,"A sentinela agora obedece a voce.",210,top+226,16,PALE,true,false);
-                text(c,"Criaturas vencidas: "+world.kills,210,top+251,16,PALE,true,false);
+                text(c,"A caverna tornou-se sua primeira base.",210,top+226,15,PALE,true,false);
+                text(c,"Explore o portal do santuário.",210,top+251,15,PALE,true,false);
             }
             float bottom=sceneHeight*.78f;
             rounded(c,56,bottom-88,364,bottom-34,9,Color.rgb(122,148,130));
-            text(c,world.status==World.MENU?"DESPERTAR":world.status==World.WIN?"ENTRAR NA BASE":"JOGAR NOVAMENTE",
+            text(c,world.status==World.MENU?"DESPERTAR":world.status==World.WIN?
+                    (world.region==World.CAVE?"ENTRAR NA BASE":"CONTINUAR EXPLORANDO"):
+                    "JOGAR NOVAMENTE",
                     210,bottom-54,17,INK,true,true);
             text(c,"Mover: joystick · Atacar: magia ou punhos",210,bottom-11,11,PALE,true,false);
             text(c,"REVIVER: toque · Dispensar servo: segure",210,bottom+4,10,PALE,true,false);
@@ -545,7 +647,9 @@ public final class MainActivity extends Activity {
                 if(world.status!=World.PLAY) {
                     if(world.status==World.WIN) {
                         world.status=World.PLAY;
-                        world.say("Santuário conquistado! Explore sua primeira base.");
+                        world.say(world.region==World.CAVE?
+                                "Santuario conquistado! Procure o portal para explorar.":
+                                "O pantano foi conquistado! Explore livremente.");
                     } else {
                         world.reset();world.start();
                     }
@@ -553,13 +657,14 @@ public final class MainActivity extends Activity {
                     return true;
                 }
                 if(world.upgradeMenu) {
-                    float top=sceneHeight*.17f;
+                    float top=Math.max(10,sceneHeight*.045f);
                     boolean tapped=false;
+                    int[] kinds={World.RAT,World.SLIME,World.BAT,World.SKELETON,World.WISP};
                     if(px>=42 && px<=378) {
-                        for(int kind=0;kind<3;kind++) {
-                            float row=top+94+kind*84;
-                            if(py>=row && py<=row+72) {
-                                world.upgradeSpecies(kind);
+                        for(int i=0;i<kinds.length;i++) {
+                            float row=top+92+i*73;
+                            if(py>=row && py<=row+63) {
+                                world.upgradeSpecies(kinds[i]);
                                 tapped=true;
                                 break;
                             }

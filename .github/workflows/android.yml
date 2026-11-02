@@ -27,9 +27,10 @@ jobs:
       - name: Verify combat and summoning rules
         run: |
           mkdir -p "$RUNNER_TEMP/world-tests"
-          javac -d "$RUNNER_TEMP/world-tests" app/src/main/java/com/takeo/necromancer/World.java tests/com/takeo/necromancer/WorldSmokeTest.java tests/com/takeo/necromancer/WorldProgressionTest.java tests/com/takeo/necromancer/CaveExpansionTest.java
+          javac -d "$RUNNER_TEMP/world-tests" app/src/main/java/com/takeo/necromancer/World.java tests/com/takeo/necromancer/WorldSmokeTest.java tests/com/takeo/necromancer/WorldProgressionTest.java tests/com/takeo/necromancer/WorldExplorationTest.java tests/com/takeo/necromancer/CaveExpansionTest.java
           java -cp "$RUNNER_TEMP/world-tests" com.takeo.necromancer.WorldSmokeTest
           java -cp "$RUNNER_TEMP/world-tests" com.takeo.necromancer.WorldProgressionTest
+          java -cp "$RUNNER_TEMP/world-tests" com.takeo.necromancer.WorldExplorationTest
           java -cp "$RUNNER_TEMP/world-tests" com.takeo.necromancer.CaveExpansionTest
       - name: Install Android SDK 35
         run: |

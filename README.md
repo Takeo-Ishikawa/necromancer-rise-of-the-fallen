@@ -1,39 +1,35 @@
 # Necromancer: Rise of the Fallen — Android 0.4
 
-RPG de ação e necromancia **nativo para Android** (Java e Canvas 2D), com controle por toque, combate em tempo real e servos autônomos. Não usa WebView, navegador ou recursos de outros jogos.
+Jogo Android **nativo** (Java e Canvas), com controles por toque, combate automático do exército, progressão de níveis e equipamentos.
 
-## Instalar
+## Instalação
 
-Acesse as [compilações no GitHub](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/android.yml), escolha a execução mais recente e baixe o artefato `necromancer-android-v0.4`. Extraia `app-debug.apk` e instale no Android 8.0+.
+Baixe o artefato **necromancer-android-v0.4** na [execução mais recente do GitHub Actions](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/android.yml). Extraia o ZIP e instale **app-debug.apk** no Android 8.0+.
 
-## Controles e novidades
+## Novidades — Exploração
 
-- **Joystick:** movimento livre. **GOLPE/MAGIA:** ataque ativo; a magia é liberada depois da primeira criatura derrotada.
-- **REVIVER:** toque perto de um cadáver para recrutar o monstro, pagando ânima e respeitando o limite de comando 4. Segure REVIVER para dispensar um servo.
-- **DEFESA/CAÇA:** alterna o comportamento automático dos servos.
-- **EVOLUIR (novo):** abre um painel e pausa o combate. Gaste fragmentos de alma, recebidos ao derrotar inimigos, para evoluir **ratos, limos e morcegos**. Cada espécie tem até **3 graus**. Cada grau acrescenta **24% de vida e 18% de dano** sobre os valores básicos para unidades ativas e futuras invocações; os custos são 2, 4 e 6 fragmentos.
-- **Experiência (novo):** cada inimigo derrotado concede XP. Subir de nível aumenta a vida máxima (+12), ânima máxima (+7) e potência das habilidades, além de curar parte da vida.
-- **Equipamentos (novo):** a cada duas vitórias, um item cai no cenário. Aproxime-se para coletar automaticamente. **Foco arcano** aumenta o dano do necromante; **manto** acrescenta vida e reduz o dano recebido. Itens superiores substituem os anteriores e duplicados viram fragmentos de alma. Ambos chegam até **grau 3**.
-- **HUD (novo):** vida, ânima, XP, nível, foco, manto, fragmentos e capacidade do exército aparecem diretamente durante o jogo.
-- **Objetivo do prólogo:** derrotar e ressuscitar a sentinela, liberando espaço de comando se necessário.
+1. **Caverna Esquecida:** mantém o grande mapa e a conquista da base. Após derrotar todos os inimigos e vincular a sentinela, toque em *ENTRAR NA BASE* e aproxime-se do portal no Santuário das Almas (centro da caverna).
+2. **Necrópole das Cinzas:** mapa original com lápides, mausoléu, esqueletos e espíritos. Colete ossos rituais. Derrote e ressuscite o Cavaleiro das Cinzas para liberar o portal do pântano.
+3. **Pântano dos Sussurros:** novo mapa de lagoas sombrias, fungos espectrais e encontros mais difíceis. Derrote e ressuscite o Colosso para finalizar o capítulo.
+4. **Portais bidirecionais:** retornam às regiões já descobertas. Inimigos remanescentes, itens e recursos coletados são preservados entre visitas, assim como o exército e a progressão.
+5. **Recursos coletáveis:** cristais, ossos e fungos fornecem fragmentos de alma e restauram um pouco de vida e ânima quando o jogador se aproxima.
+6. **Novos servos:** esqueletos (combatentes resistentes, custo de comando 2), espíritos (ataques de alcance, custo 1), Cavaleiro das Cinzas (3) e Colosso (4). Esqueletos e espíritos também podem ser aprimorados no painel EVOLUIR.
+7. **Novo visual da protagonista:** arte vetorial original adaptada ao conceito compartilhado, com chapéu largo, cabelo claro, manto, cajado e lanterna. A arte final animada ainda será desenvolvida.
 
-### Notas sobre a progressão
+Os controles permanecem: joystick à esquerda; GOLPE/MAGIA, REVIVER e DEFESA/CAÇA à direita; EVOLUIR abre o painel de melhorias. Segure REVIVER para dispensar um servo e liberar capacidade de comando.
 
-Nesta fase, níveis, equipamentos e melhorias duram **somente a expedição atual**. Salvamento e progressão permanente ficarão para o desenvolvimento da cripta, conforme o GDD. A direção visual ainda utiliza desenhos vetoriais originais e provisórios.
+### Observações
 
-## Compilação e testes
+O progresso continua restrito à expedição; sistema de salvamento e melhorias permanentes ficam previstos para a versão 0.5 (Cripta). A direção de arte usa elementos originais. Não foram copiados recursos do Wild Tamer ou de Necromancer/Prismathunder.
 
-JDK 17, Android SDK 35, Gradle 8.9:
+### Verificação
+
+O GitHub Actions compila com JDK 17, Gradle 8.9 e SDK Android 35; roda os testes `WorldSmokeTest`, `WorldProgressionTest` e `WorldExplorationTest`, publicando o APK nativo como artefato.
 
 ```sh
 gradle :app:assembleDebug
 ```
 
-A automação do GitHub executa `WorldSmokeTest` e `WorldProgressionTest` com Java puro, compila o APK e anexa o resultado. Fonte Android: `app/src/main/java/com/takeo/necromancer/`.
+### Compatibilidade com a caverna ampliada
 
-Próxima etapa planejada: **0.5, expansão da exploração**, com novas regiões, coleta de recursos e chefes. Wild Tamer e Necromancer (Prismathunder) são referências conceituais, não fontes de sprites ou código.
-
-
-## Caverna inicial ampliada (0.4)
-
-A primeira arena agora é uma câmara 3072 × 2048, com espaços abertos. Ao eliminar os monstros e a sentinela, a caverna se torna a primeira base. Consulte [a documentação da caverna](docs/CAVERNA_INICIAL.md) para configurar o visual e os arquivos de mapa.
+A atualização paralela do layout de 3072 × 2048 e o arquivo `assets/caverna_inicial_map.json` foram preservados. O pipeline roda também o `CaveExpansionTest` e valida a conquista da base.
