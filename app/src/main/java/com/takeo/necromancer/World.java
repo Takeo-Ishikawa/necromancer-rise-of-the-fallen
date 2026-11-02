@@ -12,7 +12,7 @@ import java.util.Random;
 final class World {
     static final int MENU = 0, PLAY = 1, DEAD = 2, WIN = 3;
     static final int RAT = 0, SLIME = 1, BAT = 2, WARDEN = 3;
-    static final float WIDTH = 1750f, HEIGHT = 1500f;
+    static final float WIDTH = 3072f, HEIGHT = 2048f;
 
     static final class Unit {
         final int kind;
@@ -75,17 +75,19 @@ final class World {
 
     // Rochas circulares; colisões por eixo permitem escorregar ao longo da borda.
     final float[][] rocks = {
-        {235,785,52}, {560,810,43}, {770,1180,61}, {990,1120,59},
-        {1120,735,51}, {1240,990,41}, {1360,555,57}, {1600,780,67},
-        {540,418,60}, {285,350,80}, {825,370,52}, {1100,250,67},
-        {170,1170,43}, {1550,1240,80}, {1090,1340,50}, {875,910,30}
+        {235,785,52}, {195,1080,65}, {340,1470,45},
+        {475,345,53}, {960,225,43}, {2010,270,48},
+        {2630,370,57}, {2870,690,63}, {2870,1280,52},
+        {2600,1760,71}, {2120,1860,46}, {720,1850,55},
+        {1580,1950,35}, {580,630,28}
     };
 
     /** 0: defender o necromante; 1: caçar criaturas nos arredores. */
     int orders = 0;
     boolean guardianDefeated = false;
+    boolean baseClaimed = false, wardenBound = false;
     int status = MENU, kills = 0;
-    float x = 335, y = 1015, dirX = 1, dirY = 0, hp = 115, mana = 55;
+    float x = 1490, y = 1740, dirX = 1, dirY = 0, hp = 115, mana = 55;
     float maxHp = 115, maxMana = 55;
     float attackTimer = 0, attackFlash = 0, hitFlash = 0, time = 0;
     float messageTimer = 0;
@@ -96,21 +98,20 @@ final class World {
     World() { reset(); }
 
     void reset() {
-        status = MENU; x=335; y=1015; dirX=1; dirY=0;
+        status = MENU; x=1490; y=1740; dirX=1; dirY=0;
         level=1; experience=0; soulShards=0; staffTier=0; mantleTier=0;
         maxHp=115; maxMana=55; upgradeMenu=false; lastUpgradeKind=-1;
         for(int i=0;i<speciesRank.length;i++)speciesRank[i]=0;
         hp=maxHp; mana=maxMana; attackTimer=0; attackFlash=0; hitFlash=0;
-        kills=0; time=0; message=""; messageTimer=0; spellUnlocked=false; orders=0; guardianDefeated=false;
+        kills=0; time=0; message=""; messageTimer=0; spellUnlocked=false; orders=0; guardianDefeated=false; baseClaimed=false; wardenBound=false;
         enemies.clear(); servants.clear(); corpses.clear(); projectiles.clear(); effects.clear(); drops.clear();
-        spawn(RAT,460,990); spawn(SLIME,615,1105);
-        spawn(RAT,755,965); spawn(BAT,830,775);
-        spawn(SLIME,970,965); spawn(BAT,705,650);
-        spawn(RAT,480,610); spawn(SLIME,1025,610);
-        spawn(RAT,1170,820); spawn(BAT,1290,665);
-        spawn(SLIME,1375,1045); spawn(RAT,1510,960);
-        spawn(BAT,1190,435); spawn(SLIME,1490,460);
-        spawn(WARDEN,1510,260);
+        // Encontros espaçados: o piso central permanece aberto para combate e servos.
+        spawn(RAT,1460,1600); spawn(SLIME,1170,1460);
+        spawn(RAT,1790,1510); spawn(BAT,930,1190);
+        spawn(SLIME,2200,1400); spawn(RAT,620,1060);
+        spawn(BAT,1940,850); spawn(RAT,2480,970);
+        spawn(SLIME,1270,630); spawn(BAT,2520,610);
+        spawn(RAT,880,450); spawn(WARDEN,1540,385);
     }
 
     void start() { status=PLAY; say("Explore a caverna. Derrote a primeira criatura com os punhos."); }
@@ -212,7 +213,9 @@ final class World {
         corpses.remove(closest);
         effects.add(new Effect(revived.x,revived.y,3,.8f));
         if(revived.kind==WARDEN) {
-            status=WIN;
+            wardenBound=true;
+            if(baseClaimed || enemies.isEmpty())status=WIN;
+            else say("A sentinela obedece. Limpe a caverna para conquistar a base.");
         } else {
             say("Alma vinculada! O servo lutara por voce.");
         }
@@ -368,6 +371,12 @@ final class World {
         }
 
         enemies.removeIf(unit->unit.hp<=0);
+        if(!baseClaimed && guardianDefeated && enemies.isEmpty()) {
+            baseClaimed=true;
+            effects.add(new Effect(1536,1070,3,2f));
+            say("Caverna conquistada! O santuario tornou-se sua primeira base.");
+            if(wardenBound)status=WIN;
+        }
         servants.removeIf(unit->unit.hp<=0);
         for(Iterator<Corpse> it=corpses.iterator();it.hasNext();) {
             Corpse corpse=it.next();corpse.time-=dt;
@@ -412,7 +421,7 @@ final class World {
             }
             if(unit.kind==WARDEN) {
                 guardianDefeated=true;
-                say("A sentinela caiu! Reviva seu corpo para concluir.");
+                say("A sentinela caiu. Limpe os outros monstros para tomar a caverna.");
             }
         }
     }

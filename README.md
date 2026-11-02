@@ -32,3 +32,8 @@ gradle :app:assembleDebug
 A automação do GitHub executa `WorldSmokeTest` e `WorldProgressionTest` com Java puro, compila o APK e anexa o resultado. Fonte Android: `app/src/main/java/com/takeo/necromancer/`.
 
 Próxima etapa planejada: **0.4, exploração**, com novas regiões, coleta de recursos e chefes. Wild Tamer e Necromancer (Prismathunder) são referências conceituais, não fontes de sprites ou código.
+
+
+## Caverna inicial ampliada (0.4)
+
+A primeira arena agora é uma câmara 3072 × 2048, com espaços abertos. Ao eliminar os monstros e a sentinela, a caverna se torna a primeira base. Consulte [a documentação da caverna](docs/CAVERNA_INICIAL.md) para configurar o visual e os arquivos de mapa.

@@ -1,0 +1,45 @@
+{
+  "version": "0.4-caverna",
+  "engine": "Android Java Canvas 2D",
+  "width": 3072,
+  "height": 2048,
+  "pixelsPerUnit": "1 unit of scene coordinate; viewport ~420 world units wide",
+  "origin": "top-left",
+  "start": {
+    "x": 1490,
+    "y": 1740
+  },
+  "focalPoint": {
+    "x": 1536,
+    "y": 1070,
+    "type": "ritual_seal",
+    "changesWhen": "baseClaimed"
+  },
+  "guardian": {
+    "x": 1540,
+    "y": 385
+  },
+  "backgroundAsset": "app/src/main/assets/caverna_inicial.png",
+  "backgroundAssetOptional": true,
+  "layout": "open central floor, rocks near borders, small distant hostile groups",
+  "monsters": [
+    "rat",
+    "slime",
+    "bat",
+    "warden"
+  ],
+  "futureMonsters": [
+    "spider",
+    "snake"
+  ],
+  "captureCondition": "guardianDefeated && enemies.isEmpty()",
+  "layers": [
+    "background_bitmap_or_procedural",
+    "ritual_seal",
+    "base_furnishings_on_capture",
+    "entities",
+    "effects",
+    "hud"
+  ],
+  "navigable": "full rectangle with solid round rocks; image is decorative only"
+}

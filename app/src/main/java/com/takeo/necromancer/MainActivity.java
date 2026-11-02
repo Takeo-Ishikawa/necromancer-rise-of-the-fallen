@@ -47,6 +47,7 @@ public final class MainActivity extends Activity {
 
     static final class GameView extends View {
         private final World world = new World();
+        private final CaveScene caveScene;
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Random decoration = new Random(2026);
         private final float[][] flecks = new float[165][3];
@@ -65,6 +66,7 @@ public final class MainActivity extends Activity {
 
         GameView(Context context) {
             super(context);
+            caveScene=new CaveScene(context);
             setFocusable(true);
             setKeepScreenOn(true);
             for(int i=0;i<flecks.length;i++) {
@@ -92,7 +94,7 @@ public final class MainActivity extends Activity {
             actual.save();
             actual.clipRect(0,0,420,sceneHeight);
             actual.translate(-cameraX,-cameraY);
-            drawCavern(actual);
+            caveScene.draw(actual,world,cameraX,cameraY,sceneHeight);
             drawCorpses(actual);
             drawLoot(actual);
             drawEntities(actual);
@@ -386,7 +388,7 @@ public final class MainActivity extends Activity {
         private void drawHud(Canvas c) {
             rect(c,0,0,420,199,Color.argb(208,19,22,32));
             text(c,"✦  NECROMANCER  ✦",210,30,15,WHITE,true,true);
-            text(c,"A CAVERNA ESQUECIDA",210,47,10,LILAC,true,true);
+            text(c,world.baseClaimed?"SANTUARIO DAS ALMAS":"A CAVERNA ESQUECIDA",210,47,10,LILAC,true,true);
             bar(c,25,59,280,12,world.hp/world.maxHp,Color.rgb(202,107,113),"VIDA");
             bar(c,25,80,280,12,world.mana/world.maxMana,Color.rgb(147,169,214),"ÂNIMA");
             bar(c,25,101,280,12,(float)world.experience/world.xpToNext(),
@@ -395,12 +397,15 @@ public final class MainActivity extends Activity {
             text(c,Math.round(world.mana)+"/"+(int)world.maxMana,380,90,12,WHITE,true,true);
             text(c,world.experience+"/"+world.xpToNext(),380,111,12,WHITE,true,true);
             text(c,"NECROMANTE · NÍVEL "+world.level,210,130,11,LILAC,true,true);
-            if(world.kills==0) {
+            if(world.baseClaimed) {
+                text(c,"A PRIMEIRA BASE",210,149,10,GREEN,true,true);
+                text(c,"Sua caverna agora pertence ao necromante",210,166,12,WHITE,true,false);
+            } else if(world.kills==0) {
                 text(c,"O DESPERTAR",210,149,10,GREEN,true,true);
                 text(c,"Derrote seu primeiro monstro",210,166,12,WHITE,true,false);
             } else if(world.guardianDefeated) {
                 text(c,"O RITUAL FINAL",210,149,10,GREEN,true,true);
-                text(c,"Ressuscite a sentinela derrotada",210,166,12,WHITE,true,false);
+                text(c,"Derrote os monstros restantes",210,166,12,WHITE,true,false);
             } else if(world.servants.isEmpty()) {
                 text(c,"A PRIMEIRA ALMA",210,149,10,GREEN,true,true);
                 text(c,"Ressuscite um cadáver próximo",210,166,12,WHITE,true,false);
@@ -525,7 +530,7 @@ public final class MainActivity extends Activity {
             }
             float bottom=sceneHeight*.78f;
             rounded(c,56,bottom-88,364,bottom-34,9,Color.rgb(122,148,130));
-            text(c,world.status==World.MENU?"DESPERTAR":"JOGAR NOVAMENTE",
+            text(c,world.status==World.MENU?"DESPERTAR":world.status==World.WIN?"ENTRAR NA BASE":"JOGAR NOVAMENTE",
                     210,bottom-54,17,INK,true,true);
             text(c,"Mover: joystick · Atacar: magia ou punhos",210,bottom-11,11,PALE,true,false);
             text(c,"REVIVER: toque · Dispensar servo: segure",210,bottom+4,10,PALE,true,false);
@@ -538,7 +543,13 @@ public final class MainActivity extends Activity {
                     action==MotionEvent.ACTION_POINTER_DOWN) {
                 float px=event.getX(index)/scale,py=event.getY(index)/scale;
                 if(world.status!=World.PLAY) {
-                    world.reset();world.start();previousFrame=System.nanoTime();
+                    if(world.status==World.WIN) {
+                        world.status=World.PLAY;
+                        world.say("Santuário conquistado! Explore sua primeira base.");
+                    } else {
+                        world.reset();world.start();
+                    }
+                    previousFrame=System.nanoTime();
                     return true;
                 }
                 if(world.upgradeMenu) {
