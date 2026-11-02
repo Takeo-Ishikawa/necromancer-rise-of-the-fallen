@@ -181,14 +181,14 @@ final class World {
     }
 
     void toggleOrders() {
-        if(status!=PLAY) return;
+        if(status!=PLAY || upgradeMenu) return;
         orders=1-orders;
         say(orders==0 ? "Ordem: proteger o necromante." : "Ordem: cacar monstros proximos.");
     }
 
     /** Retira um servo ativo sem criar novo cadáver ou devolver a ânima gasta. */
     boolean dismiss() {
-        if(status!=PLAY) return false;
+        if(status!=PLAY || upgradeMenu) return false;
         Unit selected=closest(servants,x,y,165f);
         if(selected==null) {say("Aproxime-se de um servo para dispensa-lo."); return false;}
         servants.remove(selected);
@@ -198,7 +198,7 @@ final class World {
     }
 
     boolean raise() {
-        if(status!=PLAY) return false;
+        if(status!=PLAY || upgradeMenu) return false;
         Corpse closest=nearestCorpse(95f);
         if(closest==null) { say("Aproxime-se de um corpo para ressuscitar."); return false; }
         if(commandUsed()+costCommand(closest.kind)>4) {
