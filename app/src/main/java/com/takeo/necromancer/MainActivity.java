@@ -49,6 +49,8 @@ public final class MainActivity extends Activity {
         private final World world = new World();
         private final CaveScene caveScene;
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final ExpeditionScene expeditionScene = new ExpeditionScene();
+        private final WitchSprite witchSprite = new WitchSprite();
         private final Random decoration = new Random(2026);
         private final float[][] flecks = new float[165][3];
         private float scale=1, sceneHeight=780, cameraX=0, cameraY=0;
@@ -94,7 +96,10 @@ public final class MainActivity extends Activity {
             actual.save();
             actual.clipRect(0,0,420,sceneHeight);
             actual.translate(-cameraX,-cameraY);
-            caveScene.draw(actual,world,cameraX,cameraY,sceneHeight);
+            if(world.region==World.CAVE)caveScene.draw(actual,world,cameraX,cameraY,sceneHeight);
+            else expeditionScene.draw(actual,world,cameraX,cameraY,sceneHeight);
+            drawPortals(actual);
+            drawResources(actual);
             drawCorpses(actual);
             drawLoot(actual);
             drawEntities(actual);
@@ -218,6 +223,48 @@ public final class MainActivity extends Activity {
             }
         }
 
+        private void drawPortals(Canvas c) {
+            if(world.region>World.CAVE) {
+                float x=world.returnPortalX(),y=world.returnPortalY();
+                ExpeditionScene.portal(c,x,y,Color.rgb(169,180,220),world.time,"BACK");
+                text(c,"RETORNAR",x,y-83,13,WHITE,true,true);
+            }
+            if(world.region<World.MARSH) {
+                float x=world.forwardPortalX(),y=world.forwardPortalY();
+                if(world.forwardPortalOpen()) {
+                    ExpeditionScene.portal(c,x,y,Color.rgb(137,221,190),world.time,"NEXT");
+                    text(c,"PRÓXIMA REGIÃO",x,y-83,13,GREEN,true,true);
+                } else if(world.region==World.GRAVEYARD) {
+                    circle(c,x,y,32,Color.argb(80,22,29,35));
+                    text(c,"LACRADO",x,y-49,12,PALE,true,true);
+                }
+            }
+        }
+
+        private void drawResources(Canvas c) {
+            for(World.Resource resource:world.resources) {
+                c.save();c.translate(resource.x,resource.y);
+                float pulse=(float)Math.sin(world.time*3+resource.y)*3;
+                oval(c,-22,6,22,12,Color.argb(120,14,18,28));
+                circle(c,0,-13,21+pulse,Color.argb(68,146,219,197));
+                if(resource.kind==0) {
+                    Path gem=new Path();
+                    gem.moveTo(0,-40);gem.lineTo(14,-16);gem.lineTo(2,2);
+                    gem.lineTo(-14,-15);gem.close();
+                    path(c,gem,Color.rgb(165,229,220));
+                } else if(resource.kind==1) {
+                    line(c,-14,-8,13,-28,5,Color.rgb(222,204,200));
+                    line(c,-11,-29,14,-8,4,Color.rgb(216,198,213));
+                    circle(c,11,-28,6,Color.rgb(227,211,221));
+                } else {
+                    line(c,0,1,0,-19,6,Color.rgb(210,218,191));
+                    oval(c,-19,-31,19,-12,Color.rgb(153,214,166));
+                    circle(c,9,-25,4,Color.rgb(230,241,216));
+                }
+                c.restore();
+            }
+        }
+
         private void drawLoot(Canvas c) {
             for(World.Loot item:world.drops) {
                 c.save();c.translate(item.x,item.y);
@@ -239,7 +286,7 @@ public final class MainActivity extends Activity {
         private void drawEntities(Canvas c) {
             for(World.Unit enemy:world.enemies)drawUnit(c,enemy);
             for(World.Unit servant:world.servants)drawUnit(c,servant);
-            drawHero(c);
+            witchSprite.draw(c,world);
         }
 
         private void drawUnit(Canvas c,World.Unit unit) {
@@ -255,7 +302,12 @@ public final class MainActivity extends Activity {
             int base=unit.ally?Color.rgb(163,198,181):
                     unit.kind==World.RAT?Color.rgb(179,125,132):
                     unit.kind==World.SLIME?Color.rgb(154,165,114):
-                    unit.kind==World.BAT?Color.rgb(134,116,165):Color.rgb(146,123,137);
+                    unit.kind==World.BAT?Color.rgb(134,116,165):
+                    unit.kind==World.SKELETON?Color.rgb(206,194,181):
+                    unit.kind==World.WISP?Color.rgb(145,207,210):
+                    unit.kind==World.GRAVE_LORD?Color.rgb(166,142,189):
+                    unit.kind==World.MARSH_LORD?Color.rgb(124,175,143):
+                    Color.rgb(146,123,137);
             if(unit.flash>0)base=WHITE;
             if(unit.kind==World.RAT) {
                 line(c,-11,1,-25,-9,4,base);
@@ -293,6 +345,26 @@ public final class MainActivity extends Activity {
                 path(c,ears,base);
                 circle(c,-4,-5,2.4f,Color.rgb(238,198,172));
                 circle(c,5,-5,2.4f,Color.rgb(238,198,172));
+            } else if(unit.kind==World.SKELETON) {
+                oval(c,-18,-20,18,14,outline);
+                oval(c,-15,-19,15,12,base);
+                oval(c,-11,-18,11,-1,Color.rgb(239,222,197));
+                circle(c,-5,-11,3,outline);circle(c,5,-11,3,outline);
+                line(c,-9,2,9,2,3,outline);
+                line(c,18,-7,29,-34,4,Color.rgb(184,182,184));
+                line(c,22,-20,34,-17,3,Color.rgb(184,182,184));
+                line(c,-10,11,-10,20,4,base);line(c,10,11,10,20,4,base);
+            } else if(unit.kind==World.WISP) {
+                circle(c,0,-10,unit.radius+10,Color.argb(70,145,215,220));
+                Path spirit=new Path();
+                spirit.moveTo(0,-35);
+                spirit.cubicTo(23,-33,27,-8,13,9);
+                spirit.lineTo(7,19);spirit.lineTo(0,12);
+                spirit.lineTo(-9,19);spirit.lineTo(-13,9);
+                spirit.cubicTo(-26,-9,-18,-35,0,-35);
+                spirit.close();path(c,spirit,base);
+                circle(c,-7,-12,3,outline);circle(c,7,-12,3,outline);
+                circle(c,-7,-12,1,WHITE);circle(c,7,-12,1,WHITE);
             } else {
                 // Guardião de elite: couraça antiga, chifres e arma rachada.
                 line(c,-22,0,-35,-35,6,Color.rgb(105,101,101));
@@ -308,6 +380,14 @@ public final class MainActivity extends Activity {
                 circle(c,8,-15,3,Color.rgb(92,182,145));
                 line(c,-21,5,21,5,3,Color.rgb(200,178,155));
                 line(c,-14,13,14,13,3,Color.rgb(200,178,155));
+                if(unit.kind==World.GRAVE_LORD) {
+                    line(c,-25,-7,26,-7,4,Color.rgb(219,195,214));
+                    circle(c,0,-43,12,Color.argb(98,186,152,226));
+                } else if(unit.kind==World.MARSH_LORD) {
+                    circle(c,-25,5,10,Color.rgb(100,145,119));
+                    circle(c,25,5,10,Color.rgb(100,145,119));
+                    circle(c,0,-42,13,Color.argb(110,158,219,162));
+                }
             }
             if(unit.ally) {
                 int grade=world.speciesRank[unit.kind];
@@ -318,8 +398,10 @@ public final class MainActivity extends Activity {
                 circle(c,0,-unit.radius-17,4.3f,GREEN);
                 circle(c,0,-unit.radius-17,8,Color.argb(50,163,229,170));
             }
-            if(unit.hp<unit.maxHp || unit.kind==World.WARDEN) {
-                float w=unit.kind==World.WARDEN?70:39;
+            if(unit.hp<unit.maxHp || unit.kind==World.WARDEN ||
+                    unit.kind==World.GRAVE_LORD || unit.kind==World.MARSH_LORD) {
+                float w=(unit.kind==World.WARDEN || unit.kind==World.GRAVE_LORD ||
+                        unit.kind==World.MARSH_LORD)?70:39;
                 rounded(c,-w/2,-unit.radius-29,w/2,-unit.radius-24,3,INK);
                 rounded(c,-w/2,-unit.radius-29,
                         -w/2+w*clamp(unit.hp/unit.maxHp,0,1),-unit.radius-24,
