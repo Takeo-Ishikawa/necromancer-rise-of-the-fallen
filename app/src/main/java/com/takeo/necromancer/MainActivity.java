@@ -568,31 +568,33 @@ public final class MainActivity extends Activity {
 
         private void drawUpgradeMenu(Canvas c) {
             rect(c,0,0,420,sceneHeight,Color.argb(220,11,13,22));
-            float top=sceneHeight*.17f;
-            rounded(c,24,top,396,top+417,15,Color.rgb(35,37,50));
+            float top=Math.max(10,sceneHeight*.045f);
+            rounded(c,24,top,396,top+550,15,Color.rgb(35,37,50));
             style(Color.rgb(130,155,143));
             p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1.5f);
-            c.drawRoundRect(24,top,396,top+417,15,15,p);
+            c.drawRoundRect(24,top,396,top+550,15,15,p);
             text(c,"EVOLUÇÃO DO EXÉRCITO",210,top+37,19,WHITE,true,true);
             text(c,"FRAGMENTOS DE ALMA: "+world.soulShards,
                     210,top+61,12,GREEN,true,true);
             text(c,"Cada grau aumenta vida em 24% e dano em 18%",
                     210,top+80,11,PALE,true,false);
-            for(int kind=0;kind<3;kind++) {
-                float y=top+94+kind*84;
+            int[] kinds={World.RAT,World.SLIME,World.BAT,World.SKELETON,World.WISP};
+            for(int row=0;row<kinds.length;row++) {
+                int kind=kinds[row];
+                float y=top+92+row*73;
                 int cost=world.upgradeCost(kind);
                 boolean can=cost>=0 && world.soulShards>=cost;
-                rounded(c,42,y,378,y+72,10,can?Color.rgb(51,79,67):Color.rgb(51,50,61));
-                text(c,World.speciesName(kind),59,y+24,15,WHITE,false,true);
-                text(c,"GRAU "+world.speciesRank[kind]+"/3",59,y+48,11,LILAC,false,true);
-                rounded(c,261,y+15,365,y+57,8,can?Color.rgb(146,187,151):Color.rgb(86,89,95));
-                text(c,cost<0?"MÁXIMO":"CUSTO "+cost,313,y+41,12,
+                rounded(c,42,y,378,y+63,10,can?Color.rgb(51,79,67):Color.rgb(51,50,61));
+                text(c,World.speciesName(kind),59,y+24,14,WHITE,false,true);
+                text(c,"GRAU "+world.speciesRank[kind]+"/3",59,y+46,11,LILAC,false,true);
+                rounded(c,261,y+13,365,y+50,8,can?Color.rgb(146,187,151):Color.rgb(86,89,95));
+                text(c,cost<0?"MÁXIMO":"CUSTO "+cost,313,y+38,12,
                         can?INK:WHITE,true,true);
             }
-            rounded(c,79,top+359,341,top+400,9,Color.rgb(115,113,132));
-            text(c,"VOLTAR AO COMBATE",210,top+385,13,WHITE,true,true);
+            rounded(c,79,top+468,341,top+512,9,Color.rgb(115,113,132));
+            text(c,"VOLTAR AO COMBATE",210,top+496,13,WHITE,true,true);
             if(world.messageTimer>0) {
-                text(c,world.message,210,top+440,11,GREEN,true,true);
+                text(c,world.message,210,top+538,10,GREEN,true,true);
             }
         }
 
@@ -655,13 +657,14 @@ public final class MainActivity extends Activity {
                     return true;
                 }
                 if(world.upgradeMenu) {
-                    float top=sceneHeight*.17f;
+                    float top=Math.max(10,sceneHeight*.045f);
                     boolean tapped=false;
+                    int[] kinds={World.RAT,World.SLIME,World.BAT,World.SKELETON,World.WISP};
                     if(px>=42 && px<=378) {
-                        for(int kind=0;kind<3;kind++) {
-                            float row=top+94+kind*84;
-                            if(py>=row && py<=row+72) {
-                                world.upgradeSpecies(kind);
+                        for(int i=0;i<kinds.length;i++) {
+                            float row=top+92+i*73;
+                            if(py>=row && py<=row+63) {
+                                world.upgradeSpecies(kinds[i]);
                                 tapped=true;
                                 break;
                             }
