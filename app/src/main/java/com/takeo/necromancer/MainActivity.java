@@ -54,6 +54,8 @@ public final class MainActivity extends Activity {
         private long previousFrame=0;
         private float joystickX=0,joystickY=0;
         private int joystickPointer=-1;
+        private int raisePointer=-1;
+        private long raisePressedAt=0;
         private static final int WHITE=Color.rgb(243,234,224);
         private static final int PALE=Color.rgb(204,205,198);
         private static final int INK=Color.rgb(24,26,37);
@@ -183,10 +185,21 @@ public final class MainActivity extends Activity {
         }
 
         private void drawCorpses(Canvas c) {
+            World.Corpse selected=world.nearestCorpse(95f);
             for(World.Corpse body:world.corpses) {
                 float alpha=clamp(body.time/5,0,1);
                 if(alpha<=0)continue;
                 c.save();c.translate(body.x,body.y);
+                if(body==selected && world.status==World.PLAY) {
+                    boolean eligible=world.mana>=World.costMana(body.kind)
+                            && world.commandUsed()+World.costCommand(body.kind)<=4;
+                    style(eligible?GREEN:RED);
+                    p.setStrokeWidth(2.5f);
+                    p.setStyle(Paint.Style.STROKE);
+                    c.drawCircle(0,0,27+(float)Math.sin(world.time*4)*2,p);
+                    text(c,"ANIMA "+World.costMana(body.kind),
+                            0,-32,11,eligible?GREEN:RED,true,true);
+                }
                 oval(c,-19,0,19,10,Color.rgb(20,23,31));
                 oval(c,-13,-8,14,3,Color.rgb(119,116,126));
                 circle(c,-4,-7,5,Color.rgb(208,197,177));
@@ -332,6 +345,7 @@ public final class MainActivity extends Activity {
                 float ratio=1-fx.time/fx.life;
                 int alpha=(int)(170*(1-ratio));
                 int tint=fx.type==1?Color.argb(alpha,218,123,123):
+                        fx.type==4?Color.argb(alpha,195,156,226):
                         fx.type==0?Color.argb(alpha,235,213,178):
                         Color.argb(alpha,154,233,185);
                 style(tint);p.setStyle(Paint.Style.STROKE);
@@ -354,6 +368,9 @@ public final class MainActivity extends Activity {
             if(world.kills==0) {
                 text(c,"O DESPERTAR",210,120,11,GREEN,true,true);
                 text(c,"Derrote seu primeiro monstro",210,138,13,WHITE,true,false);
+            } else if(world.guardianDefeated) {
+                text(c,"O RITUAL FINAL",210,120,11,GREEN,true,true);
+                text(c,"Ressuscite a sentinela derrotada",210,138,13,WHITE,true,false);
             } else if(world.servants.isEmpty()) {
                 text(c,"A PRIMEIRA ALMA",210,120,11,GREEN,true,true);
                 text(c,"Ressuscite um cadáver próximo",210,138,13,WHITE,true,false);
@@ -361,8 +378,8 @@ public final class MainActivity extends Activity {
                 text(c,"A SENTINELA",210,120,11,GREEN,true,true);
                 text(c,"Encontre e derrote o guardião",210,138,13,WHITE,true,false);
             }
-            rounded(c,128,sceneHeight-53,292,sceneHeight-29,10,Color.argb(187,20,22,31));
-            text(c,"ALMAS: "+world.servants.size()+"   COMANDO: "+world.commandUsed()+"/4",
+            rounded(c,103,sceneHeight-53,317,sceneHeight-29,10,Color.argb(187,20,22,31));
+            text(c,"SERVOS "+world.servants.size()+"  ·  COMANDO "+world.commandUsed()+"/4",
                     210,sceneHeight-37,11,PALE,true,true);
             if(world.messageTimer>0 && world.status==World.PLAY) {
                 rounded(c,20,sceneHeight*.31f,400,sceneHeight*.31f+45,12,Color.argb(204,23,28,37));
@@ -394,8 +411,17 @@ public final class MainActivity extends Activity {
             if(world.attackTimer>0)text(c,String.format(java.util.Locale.US,"%.1f",world.attackTimer),
                     ax,ay+43,10,PALE,true,false);
 
+            // Toque para alternar entre guardar o heroi e perseguir inimigos.
+            float ox=238,oy=sceneHeight-212;
+            circle(c,ox,oy,36,Color.argb(216,57,52,76));
+            style(LILAC);p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(2);c.drawCircle(ox,oy,34,p);
+            text(c,world.orders==0?"✥":"⚔",ox,oy+6,27,WHITE,true,true);
+            text(c,world.orders==0?"DEFESA":"CAÇA",ox,oy+24,9,WHITE,true,true);
+
             float rx=336,ry=sceneHeight-212;
-            circle(c,rx,ry,37,Color.argb(216,38,64,59));
+            boolean canRaise=world.nearestCorpse(95f)!=null;
+            circle(c,rx,ry,37,canRaise?Color.argb(225,38,82,65):Color.argb(216,38,64,59));
             style(Color.rgb(173,208,180));p.setStyle(Paint.Style.STROKE);
             p.setStrokeWidth(2);c.drawCircle(rx,ry,35,p);
             text(c,"☠",rx,ry+7,29,GREEN,true,true);
@@ -413,7 +439,7 @@ public final class MainActivity extends Activity {
             text(c,"PRÓLOGO · A CAVERNA ESQUECIDA",210,top+38,12,GREEN,true,true);
             text(c,"☾",210,top+122,85,LILAC,true,false);
             String heading=world.status==World.MENU?"O PRIMEIRO DESPERTAR":
-                    world.status==World.DEAD?"O FIM DO RITUAL":"A CAVERNA SE CURVA";
+                    world.status==World.DEAD?"O FIM DO RITUAL":"O EXERCITO DESPERTA";
             text(c,heading,210,top+171,22,WHITE,true,true);
             if(world.status==World.MENU) {
                 text(c,"Você despertou sem poderes.",210,top+218,16,PALE,true,false);
@@ -423,15 +449,15 @@ public final class MainActivity extends Activity {
                 text(c,"Seus servos foram dispersos.",210,top+226,16,PALE,true,false);
                 text(c,"Tente uma nova expedição.",210,top+251,16,PALE,true,false);
             } else {
-                text(c,"A sentinela foi derrotada.",210,top+226,16,PALE,true,false);
+                text(c,"A sentinela agora obedece a voce.",210,top+226,16,PALE,true,false);
                 text(c,"Criaturas vencidas: "+world.kills,210,top+251,16,PALE,true,false);
             }
             float bottom=sceneHeight*.78f;
             rounded(c,56,bottom-88,364,bottom-34,9,Color.rgb(122,148,130));
             text(c,world.status==World.MENU?"DESPERTAR":"JOGAR NOVAMENTE",
                     210,bottom-54,17,INK,true,true);
-            text(c,"Arraste para mover · toque para atacar e reviver",
-                    210,bottom-10,11,PALE,true,false);
+            text(c,"Mover: joystick · Atacar: magia ou punhos",210,bottom-11,11,PALE,true,false);
+            text(c,"REVIVER: toque · Dispensar servo: segure",210,bottom+4,10,PALE,true,false);
         }
 
         @Override public boolean onTouchEvent(MotionEvent event) {
@@ -451,8 +477,11 @@ public final class MainActivity extends Activity {
                     }
                 } else if(dist(px,py,330,sceneHeight-100)<70) {
                     world.attack();
-                } else if(dist(px,py,336,sceneHeight-212)<55) {
-                    world.raise();
+                } else if(dist(px,py,336,sceneHeight-212)<42) {
+                    raisePointer=event.getPointerId(index);
+                    raisePressedAt=System.nanoTime();
+                } else if(dist(px,py,238,sceneHeight-212)<41) {
+                    world.toggleOrders();
                 }
             } else if(action==MotionEvent.ACTION_MOVE) {
                 int current=event.findPointerIndex(joystickPointer);
@@ -460,9 +489,18 @@ public final class MainActivity extends Activity {
             } else if(action==MotionEvent.ACTION_UP ||
                     action==MotionEvent.ACTION_POINTER_UP ||
                     action==MotionEvent.ACTION_CANCEL) {
-                if(action==MotionEvent.ACTION_CANCEL ||
-                        event.getPointerId(index)==joystickPointer) {
-                    joystickPointer=-1;joystickX=0;joystickY=0;
+                if(action==MotionEvent.ACTION_CANCEL) {
+                    joystickPointer=-1;joystickX=0;joystickY=0;raisePointer=-1;
+                } else {
+                    int pointerId=event.getPointerId(index);
+                    if(pointerId==raisePointer) {
+                        if(System.nanoTime()-raisePressedAt>=650_000_000L)world.dismiss();
+                        else world.raise();
+                        raisePointer=-1;
+                    }
+                    if(pointerId==joystickPointer) {
+                        joystickPointer=-1;joystickX=0;joystickY=0;
+                    }
                 }
             }
             return true;
