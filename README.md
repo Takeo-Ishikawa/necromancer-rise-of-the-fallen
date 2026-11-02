@@ -1,4 +1,12 @@
-# Necromancer: Rise of the Fallen — Android 0.4
+# Necromancer: Rise of the Fallen — Unity 2D em migracao
+
+**Motor principal para novas implementacoes: Unity 2022.3 LTS.** O novo projeto esta em [`unity/`](unity/README.md), com prototipo C# de exploracao, IA de servos, magia, reanimacao e duas areas (caverna e tuneis). O Unity Hub cria automaticamente a cena inicial ao abrir o projeto. A arte ilustrada pode ser importada em `unity/Assets/Resources/Backgrounds/`.
+
+**Status importante:** os scripts Unity foram integrados ao GitHub, mas ainda nao foram compilados/testados dentro do Unity Editor. **Nao ha APK Unity validado**. A versao abaixo e a compilacao Android legada em Java/Canvas, preservada para comparacao e regressao.
+
+---
+
+# Prototipo Android legado — 0.4
 
 Jogo Android **nativo** (Java e Canvas), com controles por toque, combate automático do exército, progressão de níveis e equipamentos.
 

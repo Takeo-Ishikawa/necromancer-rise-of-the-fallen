@@ -1,0 +1,22 @@
+name: Unity project structure
+on:
+  push:
+    paths:
+      - 'unity/**'
+      - 'tests/check_unity_project.py'
+      - '.github/workflows/unity-structure.yml'
+      - 'README.md'
+  pull_request:
+    paths:
+      - 'unity/**'
+      - 'tests/check_unity_project.py'
+      - '.github/workflows/unity-structure.yml'
+jobs:
+  data-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python tests/check_unity_project.py
