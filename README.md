@@ -1,10 +1,10 @@
-# Necromancer: Rise of the Fallen — Android 0.3
+# Necromancer: Rise of the Fallen — Android 0.4
 
 RPG de ação e necromancia **nativo para Android** (Java e Canvas 2D), com controle por toque, combate em tempo real e servos autônomos. Não usa WebView, navegador ou recursos de outros jogos.
 
 ## Instalar
 
-Acesse as [compilações no GitHub](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/android.yml), escolha a execução mais recente e baixe o artefato `necromancer-android-v0.3`. Extraia `app-debug.apk` e instale no Android 8.0+.
+Acesse as [compilações no GitHub](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/android.yml), escolha a execução mais recente e baixe o artefato `necromancer-android-v0.4`. Extraia `app-debug.apk` e instale no Android 8.0+.
 
 ## Controles e novidades
 
@@ -31,7 +31,7 @@ gradle :app:assembleDebug
 
 A automação do GitHub executa `WorldSmokeTest` e `WorldProgressionTest` com Java puro, compila o APK e anexa o resultado. Fonte Android: `app/src/main/java/com/takeo/necromancer/`.
 
-Próxima etapa planejada: **0.4, exploração**, com novas regiões, coleta de recursos e chefes. Wild Tamer e Necromancer (Prismathunder) são referências conceituais, não fontes de sprites ou código.
+Próxima etapa planejada: **0.5, expansão da exploração**, com novas regiões, coleta de recursos e chefes. Wild Tamer e Necromancer (Prismathunder) são referências conceituais, não fontes de sprites ou código.
 
 
 ## Caverna inicial ampliada (0.4)
