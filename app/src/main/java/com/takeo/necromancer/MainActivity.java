@@ -1,0 +1,482 @@
+package com.takeo.necromancer;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
+import android.graphics.Typeface;
+import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
+
+import java.util.Random;
+
+/** Activity sem WebView: o jogo é inteiramente desenhado no Canvas do Android. */
+public final class MainActivity extends Activity {
+    private GameView game;
+
+    @Override public void onCreate(Bundle state) {
+        super.onCreate(state);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        game = new GameView(this);
+        setContentView(game);
+        immersive();
+    }
+
+    @Override public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) immersive();
+    }
+
+    private void immersive() {
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+
+    static final class GameView extends View {
+        private final World world = new World();
+        private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Random decoration = new Random(2026);
+        private final float[][] flecks = new float[165][3];
+        private float scale=1, sceneHeight=780, cameraX=0, cameraY=0;
+        private long previousFrame=0;
+        private float joystickX=0,joystickY=0;
+        private int joystickPointer=-1;
+        private static final int WHITE=Color.rgb(243,234,224);
+        private static final int PALE=Color.rgb(204,205,198);
+        private static final int INK=Color.rgb(24,26,37);
+        private static final int GREEN=Color.rgb(169,217,175);
+        private static final int LILAC=Color.rgb(178,164,210);
+        private static final int RED=Color.rgb(207,123,123);
+
+        GameView(Context context) {
+            super(context);
+            setFocusable(true);
+            setKeepScreenOn(true);
+            for(int i=0;i<flecks.length;i++) {
+                flecks[i][0]=decoration.nextFloat()*World.WIDTH;
+                flecks[i][1]=decoration.nextFloat()*World.HEIGHT;
+                flecks[i][2]=1+decoration.nextFloat()*4;
+            }
+        }
+
+        @Override protected void onDraw(Canvas actual) {
+            super.onDraw(actual);
+            long now=System.nanoTime();
+            float dt=previousFrame==0 ? .016f : Math.min(.04f,(now-previousFrame)/1_000_000_000f);
+            previousFrame=now;
+            if(getWidth()<1 || getHeight()<1)return;
+            scale=getWidth()/420f;
+            sceneHeight=getHeight()/scale;
+            world.update(dt,joystickX,joystickY);
+            cameraX=clamp(world.x-210,0,Math.max(0,World.WIDTH-420));
+            cameraY=clamp(world.y-sceneHeight*.52f,0,Math.max(0,World.HEIGHT-sceneHeight));
+
+            actual.drawColor(INK);
+            actual.save();
+            actual.scale(scale,scale);
+            actual.save();
+            actual.clipRect(0,0,420,sceneHeight);
+            actual.translate(-cameraX,-cameraY);
+            drawCavern(actual);
+            drawCorpses(actual);
+            drawEntities(actual);
+            drawEffects(actual);
+            actual.restore();
+            drawHud(actual);
+            if(world.status==World.PLAY)drawControls(actual);
+            else drawOverlay(actual);
+            actual.restore();
+            postInvalidateOnAnimation();
+        }
+
+        private static float clamp(float x,float lo,float hi) {
+            return Math.max(lo,Math.min(hi,x));
+        }
+        private void style(int color) {
+            p.reset();p.setAntiAlias(true);p.setColor(color);p.setStyle(Paint.Style.FILL);
+        }
+        private void rect(Canvas c,float left,float top,float right,float bottom,int color) {
+            style(color);c.drawRect(left,top,right,bottom,p);
+        }
+        private void circle(Canvas c,float x,float y,float radius,int color) {
+            style(color);c.drawCircle(x,y,radius,p);
+        }
+        private void oval(Canvas c,float l,float t,float r,float b,int color) {
+            style(color);c.drawOval(l,t,r,b,p);
+        }
+        private void rounded(Canvas c,float l,float t,float r,float b,float radius,int color) {
+            style(color);c.drawRoundRect(l,t,r,b,radius,radius,p);
+        }
+        private void line(Canvas c,float x,float y,float x2,float y2,float width,int color) {
+            style(color);p.setStrokeWidth(width);p.setStrokeCap(Paint.Cap.ROUND);
+            c.drawLine(x,y,x2,y2,p);
+        }
+        private void path(Canvas c,Path path,int color) {
+            style(color);c.drawPath(path,p);
+        }
+        private void text(Canvas c,String message,float x,float y,float size,int color,boolean center,boolean bold) {
+            style(color);p.setTypeface(Typeface.create(bold?Typeface.SANS_SERIF:Typeface.SERIF,
+                    bold?Typeface.BOLD:Typeface.NORMAL));
+            p.setTextSize(size);
+            if(center)p.setTextAlign(Paint.Align.CENTER);
+            c.drawText(message,x,y,p);
+        }
+
+        private void drawCavern(Canvas c) {
+            rect(c,0,0,World.WIDTH,World.HEIGHT,Color.rgb(35,39,48));
+            for(int gx=0;gx<World.WIDTH;gx+=112) {
+                for(int gy=0;gy<World.HEIGHT;gy+=112) {
+                    float shift=(gx/112%2)*23;
+                    oval(c,gx+shift,gy,gx+shift+92,gy+64,Color.rgb(39,42,51));
+                    line(c,gx+12,gy+72,gx+61,gy+72,1,Color.rgb(46,49,59));
+                }
+            }
+            // Faixa de caminho natural que conecta a entrada à sentinela.
+            Path road=new Path();
+            road.moveTo(285,1480);road.cubicTo(405,1110,875,980,735,740);
+            road.cubicTo(600,510,1380,650,1470,170);
+            style(Color.rgb(56,53,57));p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(120);p.setStrokeCap(Paint.Cap.ROUND);
+            c.drawPath(road,p);
+            style(Color.rgb(66,60,65));p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(93);c.drawPath(road,p);
+
+            for(float[] speck:flecks) {
+                float x=speck[0],y=speck[1],size=speck[2];
+                oval(c,x,y,x+size*2,y+size*.7f,Color.rgb(83,79,87));
+                if(size>3.3f)circle(c,x+11,y-9,2.2f,Color.rgb(107,96,106));
+            }
+            for(float[] rock:world.rocks)drawRock(c,rock[0],rock[1],rock[2]);
+            // Portais e brasas do salão final.
+            for(int i=-1;i<=1;i+=2) {
+                float x=1510+i*115,y=220;
+                oval(c,x-22,y-15,x+22,y+12,Color.rgb(17,19,29));
+                rounded(c,x-9,y-37,x+9,y-3,3,Color.rgb(85,79,87));
+                circle(c,x,y-46,13,Color.rgb(69,118,111));
+                circle(c,x,y-47,7,Color.rgb(159,208,176));
+                circle(c,x,y-50,3,Color.rgb(224,237,205));
+            }
+        }
+
+        private void drawRock(Canvas c,float x,float y,float r) {
+            oval(c,x-r,y+r*.45f,x+r,y+r*.94f,Color.rgb(15,18,27));
+            oval(c,x-r*.92f,y-r*.68f,x+r*.92f,y+r*.75f,Color.rgb(54,55,67));
+            oval(c,x-r*.8f,y-r*.66f,x+r*.7f,y+r*.4f,Color.rgb(76,73,84));
+            Path facet=new Path();facet.moveTo(x-r*.73f,y-r*.22f);
+            facet.lineTo(x-r*.2f,y-r*.66f);facet.lineTo(x+r*.3f,y-r*.4f);
+            facet.lineTo(x+r*.1f,y+r*.12f);facet.close();
+            path(c,facet,Color.rgb(97,89,96));
+            line(c,x-r*.2f,y-r*.65f,x+r*.06f,y-r*.04f,2,Color.rgb(122,110,116));
+        }
+
+        private void drawCorpses(Canvas c) {
+            for(World.Corpse body:world.corpses) {
+                float alpha=clamp(body.time/5,0,1);
+                if(alpha<=0)continue;
+                c.save();c.translate(body.x,body.y);
+                oval(c,-19,0,19,10,Color.rgb(20,23,31));
+                oval(c,-13,-8,14,3,Color.rgb(119,116,126));
+                circle(c,-4,-7,5,Color.rgb(208,197,177));
+                circle(c,4,-7,5,Color.rgb(208,197,177));
+                circle(c,-4,-7,2,Color.rgb(37,38,49));
+                circle(c,4,-7,2,Color.rgb(37,38,49));
+                if(body.time<7) {
+                    circle(c,0,-13,8,Color.argb((int)(90*alpha),156,206,159));
+                }
+                c.restore();
+            }
+        }
+
+        private void drawEntities(Canvas c) {
+            for(World.Unit enemy:world.enemies)drawUnit(c,enemy);
+            for(World.Unit servant:world.servants)drawUnit(c,servant);
+            drawHero(c);
+        }
+
+        private void drawUnit(Canvas c,World.Unit unit) {
+            c.save();c.translate(unit.x,unit.y);
+            float bob=(float)Math.sin(world.time*5+unit.x)*2;
+            oval(c,-unit.radius*1.05f,unit.radius*.55f,
+                    unit.radius*1.1f,unit.radius*1.06f,Color.rgb(20,21,30));
+            c.translate(0,bob);
+            if(unit.ally) {
+                circle(c,0,0,unit.radius+9,Color.argb(45,142,238,181));
+            }
+            int outline=Color.rgb(41,37,49);
+            int base=unit.ally?Color.rgb(163,198,181):
+                    unit.kind==World.RAT?Color.rgb(179,125,132):
+                    unit.kind==World.SLIME?Color.rgb(154,165,114):
+                    unit.kind==World.BAT?Color.rgb(134,116,165):Color.rgb(146,123,137);
+            if(unit.flash>0)base=WHITE;
+            if(unit.kind==World.RAT) {
+                line(c,-11,1,-25,-9,4,base);
+                oval(c,-18,-9,17,12,outline);
+                oval(c,-15,-12,17,11,base);
+                circle(c,-9,-12,7,base);circle(c,10,-13,7,base);
+                circle(c,-9,-12,3,Color.rgb(222,171,170));
+                circle(c,10,-13,3,Color.rgb(222,171,170));
+                oval(c,-3,-6,13,4,Color.rgb(208,185,172));
+                circle(c,0,-4,2.4f,outline);circle(c,9,-4,2.4f,outline);
+                circle(c,5,3,2.2f,Color.rgb(245,165,172));
+            } else if(unit.kind==World.SLIME) {
+                Path slime=new Path();slime.moveTo(-21,12);
+                slime.cubicTo(-28,-1,-16,-14,-7,-17);
+                slime.cubicTo(7,-32,22,-8,22,8);
+                slime.quadTo(18,16,7,13);slime.quadTo(-7,17,-21,12);slime.close();
+                path(c,slime,outline);
+                c.save();c.scale(.86f,.88f);path(c,slime,base);c.restore();
+                oval(c,-13,-4,9,1,Color.argb(70,232,232,203));
+                circle(c,-6,-7,2.6f,outline);circle(c,7,-7,2.6f,outline);
+                line(c,-3,2,4,3,2,outline);
+            } else if(unit.kind==World.BAT) {
+                Path wing=new Path();
+                wing.moveTo(-3,-2);wing.quadTo(-26,-29,-30,-12);
+                wing.lineTo(-28,4);wing.lineTo(-18,0);wing.lineTo(-11,8);
+                wing.lineTo(0,2);wing.lineTo(10,8);wing.lineTo(18,0);
+                wing.lineTo(28,4);wing.lineTo(30,-12);
+                wing.quadTo(26,-29,3,-2);wing.close();
+                path(c,wing,outline);
+                c.save();c.scale(.89f,.82f);path(c,wing,base);c.restore();
+                oval(c,-10,-15,10,9,base);
+                Path ears=new Path();
+                ears.moveTo(-9,-9);ears.lineTo(-9,-23);ears.lineTo(-1,-12);
+                ears.lineTo(4,-12);ears.lineTo(10,-23);ears.lineTo(9,-9);ears.close();
+                path(c,ears,base);
+                circle(c,-4,-5,2.4f,Color.rgb(238,198,172));
+                circle(c,5,-5,2.4f,Color.rgb(238,198,172));
+            } else {
+                // Guardião de elite: couraça antiga, chifres e arma rachada.
+                line(c,-22,0,-35,-35,6,Color.rgb(105,101,101));
+                circle(c,-36,-38,7,Color.rgb(153,204,168));
+                oval(c,-28,-17,28,30,outline);
+                oval(c,-24,-20,24,26,base);
+                Path helm=new Path();helm.moveTo(-19,-16);helm.lineTo(-26,-42);
+                helm.lineTo(-10,-29);helm.lineTo(0,-36);helm.lineTo(10,-29);
+                helm.lineTo(26,-42);helm.lineTo(19,-16);helm.close();
+                path(c,helm,Color.rgb(99,95,109));
+                oval(c,-15,-24,15,-1,Color.rgb(206,193,181));
+                circle(c,-7,-15,3,Color.rgb(92,182,145));
+                circle(c,8,-15,3,Color.rgb(92,182,145));
+                line(c,-21,5,21,5,3,Color.rgb(200,178,155));
+                line(c,-14,13,14,13,3,Color.rgb(200,178,155));
+            }
+            if(unit.ally) {
+                circle(c,0,-unit.radius-17,4.3f,GREEN);
+                circle(c,0,-unit.radius-17,8,Color.argb(50,163,229,170));
+            }
+            if(unit.hp<unit.maxHp || unit.kind==World.WARDEN) {
+                float w=unit.kind==World.WARDEN?70:39;
+                rounded(c,-w/2,-unit.radius-29,w/2,-unit.radius-24,3,INK);
+                rounded(c,-w/2,-unit.radius-29,
+                        -w/2+w*clamp(unit.hp/unit.maxHp,0,1),-unit.radius-24,
+                        2,unit.ally?GREEN:RED);
+            }
+            c.restore();
+        }
+
+        private void drawHero(Canvas c) {
+            c.save();c.translate(world.x,world.y);
+            float swing=world.attackFlash>0?12:0;
+            oval(c,-22,10,24,20,Color.rgb(14,17,25));
+            // Cajado, roupa, capuz e máscara cadavérica: design original.
+            line(c,19,-32,29+swing,-54,4,Color.rgb(158,135,113));
+            line(c,29+swing,-54,34+swing,-69,4,Color.rgb(158,135,113));
+            circle(c,35+swing,-70,9,Color.rgb(76,110,105));
+            circle(c,35+swing,-70,4,GREEN);
+            Path cape=new Path();cape.moveTo(-12,-17);cape.lineTo(12,-18);
+            cape.lineTo(25,20);cape.quadTo(0,30,-25,20);cape.close();
+            path(c,cape,Color.rgb(21,22,33));
+            Path inside=new Path();inside.moveTo(-8,-16);inside.lineTo(8,-16);
+            inside.lineTo(14,17);inside.lineTo(-15,17);inside.close();
+            path(c,inside,Color.rgb(75,66,91));
+            line(c,-11,18,11,18,3,Color.rgb(140,122,159));
+            oval(c,-17,-34,17,-9,Color.rgb(28,29,42));
+            Path hood=new Path();hood.moveTo(-18,-21);hood.quadTo(-20,-43,0,-48);
+            hood.quadTo(20,-44,18,-21);hood.lineTo(12,-13);
+            hood.lineTo(-13,-13);hood.close();path(c,hood,Color.rgb(40,37,54));
+            oval(c,-11,-31,11,-12,Color.rgb(200,200,194));
+            oval(c,-10,-28,10,-15,Color.rgb(212,205,190));
+            oval(c,-8,-25,-2,-20,Color.rgb(36,42,49));
+            oval(c,3,-25,9,-20,Color.rgb(36,42,49));
+            circle(c,-5,-23,1.5f,GREEN);circle(c,6,-23,1.5f,GREEN);
+            line(c,-2,-17,3,-17,2,Color.rgb(76,62,69));
+            oval(c,-16,-37,-9,-26,Color.rgb(64,60,79));
+            oval(c,9,-37,16,-26,Color.rgb(64,60,79));
+            if(world.attackFlash>0)circle(c,31,-51,12,Color.argb(75,151,237,186));
+            if(world.hitFlash>0) {
+                circle(c,0,-16,24,Color.argb(85,239,106,107));
+            }
+            c.restore();
+        }
+
+        private void drawEffects(Canvas c) {
+            for(World.Projectile b:world.projectiles) {
+                circle(c,b.x,b.y,15,Color.argb(62,133,224,177));
+                circle(c,b.x,b.y,8,Color.rgb(115,196,162));
+                circle(c,b.x,b.y,4,Color.rgb(234,248,216));
+            }
+            for(World.Effect fx:world.effects) {
+                float ratio=1-fx.time/fx.life;
+                int alpha=(int)(170*(1-ratio));
+                int tint=fx.type==1?Color.argb(alpha,218,123,123):
+                        fx.type==0?Color.argb(alpha,235,213,178):
+                        Color.argb(alpha,154,233,185);
+                style(tint);p.setStyle(Paint.Style.STROKE);
+                p.setStrokeWidth(fx.type==3?5:3);
+                c.drawCircle(fx.x,fx.y,(fx.type==3?12:8)+ratio*(fx.type==3?40:27),p);
+                if(fx.type==3) {
+                    circle(c,fx.x,fx.y-13*(1-ratio),4,Color.argb(alpha,225,246,215));
+                }
+            }
+        }
+
+        private void drawHud(Canvas c) {
+            rect(c,0,0,420,149,Color.argb(208,19,22,32));
+            text(c,"✦  NECROMANCER  ✦",210,30,15,WHITE,true,true);
+            text(c,"A CAVERNA ESQUECIDA",210,47,10,LILAC,true,true);
+            bar(c,25,62,280,13,world.hp/world.maxHp,Color.rgb(202,107,113),"VIDA");
+            bar(c,25,83,280,13,world.mana/world.maxMana,Color.rgb(147,169,214),"ÂNIMA");
+            text(c,Math.round(world.hp)+"/"+(int)world.maxHp,380,74,12,WHITE,true,true);
+            text(c,Math.round(world.mana)+"/"+(int)world.maxMana,380,96,12,WHITE,true,true);
+            if(world.kills==0) {
+                text(c,"O DESPERTAR",210,120,11,GREEN,true,true);
+                text(c,"Derrote seu primeiro monstro",210,138,13,WHITE,true,false);
+            } else if(world.servants.isEmpty()) {
+                text(c,"A PRIMEIRA ALMA",210,120,11,GREEN,true,true);
+                text(c,"Ressuscite um cadáver próximo",210,138,13,WHITE,true,false);
+            } else {
+                text(c,"A SENTINELA",210,120,11,GREEN,true,true);
+                text(c,"Encontre e derrote o guardião",210,138,13,WHITE,true,false);
+            }
+            rounded(c,128,sceneHeight-53,292,sceneHeight-29,10,Color.argb(187,20,22,31));
+            text(c,"ALMAS: "+world.servants.size()+"   COMANDO: "+world.commandUsed()+"/4",
+                    210,sceneHeight-37,11,PALE,true,true);
+            if(world.messageTimer>0 && world.status==World.PLAY) {
+                rounded(c,20,sceneHeight*.31f,400,sceneHeight*.31f+45,12,Color.argb(204,23,28,37));
+                text(c,world.message,210,sceneHeight*.31f+27,11,WHITE,true,true);
+            }
+        }
+
+        private void bar(Canvas c,float x,float y,float width,float height,
+                         float portion,int fill,String caption) {
+            text(c,caption,x,y+10,10,PALE,false,true);
+            rounded(c,x+51,y,width+x,y+height,5,Color.rgb(67,62,73));
+            rounded(c,x+51,y,x+51+(width-51)*clamp(portion,0,1),y+height,5,fill);
+        }
+
+        private void drawControls(Canvas c) {
+            float jx=91,jy=sceneHeight-111;
+            circle(c,jx,jy,62,Color.argb(105,19,20,33));
+            style(Color.argb(135,175,183,199));p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(2);c.drawCircle(jx,jy,59,p);
+            circle(c,jx+joystickX*40,jy+joystickY*40,27,Color.argb(190,77,73,92));
+            circle(c,jx+joystickX*40,jy+joystickY*40,15,Color.argb(118,174,166,185));
+
+            float ax=330,ay=sceneHeight-100;
+            circle(c,ax,ay,50,Color.argb(225,46,42,64));
+            style(Color.rgb(192,184,203));p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(3);c.drawCircle(ax,ay,48,p);
+            text(c,world.spellUnlocked?"✧":"✥",ax,ay+5,32,WHITE,true,true);
+            text(c,world.spellUnlocked?"MAGIA":"GOLPE",ax,ay+29,10,WHITE,true,true);
+            if(world.attackTimer>0)text(c,String.format(java.util.Locale.US,"%.1f",world.attackTimer),
+                    ax,ay+43,10,PALE,true,false);
+
+            float rx=336,ry=sceneHeight-212;
+            circle(c,rx,ry,37,Color.argb(216,38,64,59));
+            style(Color.rgb(173,208,180));p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(2);c.drawCircle(rx,ry,35,p);
+            text(c,"☠",rx,ry+7,29,GREEN,true,true);
+            text(c,"REVIVER",rx,ry+24,9,WHITE,true,true);
+        }
+
+        private void drawOverlay(Canvas c) {
+            rect(c,0,0,420,sceneHeight,Color.argb(205,11,14,24));
+            rounded(c,21,sceneHeight*.22f,399,sceneHeight*.78f,14,
+                    Color.rgb(37,37,50));
+            style(Color.rgb(122,121,132));p.setStrokeWidth(1.5f);
+            p.setStyle(Paint.Style.STROKE);
+            c.drawRoundRect(21,sceneHeight*.22f,399,sceneHeight*.78f,14,14,p);
+            float top=sceneHeight*.22f;
+            text(c,"PRÓLOGO · A CAVERNA ESQUECIDA",210,top+38,12,GREEN,true,true);
+            text(c,"☾",210,top+122,85,LILAC,true,false);
+            String heading=world.status==World.MENU?"O PRIMEIRO DESPERTAR":
+                    world.status==World.DEAD?"O FIM DO RITUAL":"A CAVERNA SE CURVA";
+            text(c,heading,210,top+171,22,WHITE,true,true);
+            if(world.status==World.MENU) {
+                text(c,"Você despertou sem poderes.",210,top+218,16,PALE,true,false);
+                text(c,"Derrote inimigos e domine suas almas.",210,top+242,15,PALE,true,false);
+                text(c,"Forme um exército e desafie a sentinela.",210,top+266,15,PALE,true,false);
+            } else if(world.status==World.DEAD) {
+                text(c,"Seus servos foram dispersos.",210,top+226,16,PALE,true,false);
+                text(c,"Tente uma nova expedição.",210,top+251,16,PALE,true,false);
+            } else {
+                text(c,"A sentinela foi derrotada.",210,top+226,16,PALE,true,false);
+                text(c,"Criaturas vencidas: "+world.kills,210,top+251,16,PALE,true,false);
+            }
+            float bottom=sceneHeight*.78f;
+            rounded(c,56,bottom-88,364,bottom-34,9,Color.rgb(122,148,130));
+            text(c,world.status==World.MENU?"DESPERTAR":"JOGAR NOVAMENTE",
+                    210,bottom-54,17,INK,true,true);
+            text(c,"Arraste para mover · toque para atacar e reviver",
+                    210,bottom-10,11,PALE,true,false);
+        }
+
+        @Override public boolean onTouchEvent(MotionEvent event) {
+            int action=event.getActionMasked();
+            int index=event.getActionIndex();
+            if(action==MotionEvent.ACTION_DOWN ||
+                    action==MotionEvent.ACTION_POINTER_DOWN) {
+                float px=event.getX(index)/scale,py=event.getY(index)/scale;
+                if(world.status!=World.PLAY) {
+                    world.reset();world.start();previousFrame=System.nanoTime();
+                    return true;
+                }
+                if(px<175 && py>sceneHeight-205) {
+                    if(joystickPointer==-1) {
+                        joystickPointer=event.getPointerId(index);
+                        updateStick(px,py);
+                    }
+                } else if(dist(px,py,330,sceneHeight-100)<70) {
+                    world.attack();
+                } else if(dist(px,py,336,sceneHeight-212)<55) {
+                    world.raise();
+                }
+            } else if(action==MotionEvent.ACTION_MOVE) {
+                int current=event.findPointerIndex(joystickPointer);
+                if(current>=0)updateStick(event.getX(current)/scale,event.getY(current)/scale);
+            } else if(action==MotionEvent.ACTION_UP ||
+                    action==MotionEvent.ACTION_POINTER_UP ||
+                    action==MotionEvent.ACTION_CANCEL) {
+                if(action==MotionEvent.ACTION_CANCEL ||
+                        event.getPointerId(index)==joystickPointer) {
+                    joystickPointer=-1;joystickX=0;joystickY=0;
+                }
+            }
+            return true;
+        }
+
+        private static float dist(float ax,float ay,float bx,float by) {
+            return (float)Math.hypot(ax-bx,ay-by);
+        }
+        private void updateStick(float px,float py) {
+            float dx=px-91,dy=py-(sceneHeight-111);
+            float d=(float)Math.hypot(dx,dy);
+            float multiple=Math.min(1,40/Math.max(1,d));
+            joystickX=clamp(dx*multiple/40,-1,1);
+            joystickY=clamp(dy*multiple/40,-1,1);
+        }
+    }
+}
