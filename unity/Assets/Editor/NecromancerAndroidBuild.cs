@@ -17,6 +17,8 @@ namespace Necromancer.EditorTools
             const string scenePath = "Assets/Scenes/NecromancerPrototype.unity";
             // The empty template is generated at first import, but the batch process may
             // invoke build before EditorApplication.delayCall has executed.
+            // Test serialization before exporting a player.
+            NecroSaveEditorCheck.Verify();
             NecroSceneBootstrap.Setup();
             if(!File.Exists(scenePath))
                 throw new BuildFailedException("Missing scene: " + scenePath);
@@ -33,6 +35,8 @@ namespace Necromancer.EditorTools
                 "com.takeo.necromancer.unity");
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+            PlayerSettings.bundleVersion = "0.5.0";
+            PlayerSettings.Android.bundleVersionCode = 5;
             // Unity requires IL2CPP for ARM64 Android player builds.
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
