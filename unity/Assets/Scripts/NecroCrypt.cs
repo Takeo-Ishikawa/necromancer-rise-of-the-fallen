@@ -353,6 +353,12 @@ namespace Necromancer
             SaveProgress();
         }
 
+        // Some Android builds report a focus loss before OnApplicationPause.
+        void OnApplicationFocus(bool hasFocus)
+        {
+            if(!hasFocus)SaveProgress();
+        }
+
         void RecoverAfterDeath()
         {
             gameOver=false;
