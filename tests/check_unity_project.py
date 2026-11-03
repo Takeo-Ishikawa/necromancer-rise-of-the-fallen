@@ -21,6 +21,8 @@ required = [
     "Assets/Scripts/NecroPolishedHUD.cs",
     "Assets/Scripts/NecroCreatureArt.cs",
     "Assets/Scripts/NecroCreatureView.cs",
+    "Assets/Scripts/NecroFrameLibrary.cs",
+    "Assets/Editor/NecroFrameEditorCheck.cs",
     "Assets/Scripts/NecroCombatFx.cs",
     "Assets/Scripts/NecroScenery.cs",
     "Assets/Editor/NecroVisualEditorCheck.cs",
@@ -150,7 +152,26 @@ assert "joystickFingerId" in core and "TouchPhase.Began" in core
 assert "DrawPolishedHUD(w,h);" in ui
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.6.2\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.6.3\"" in builder
+assert "com.takeo.necromancer.unity.preview063" in builder
+assert "NecroFrameEditorCheck.Verify();" in builder
+frame_library=(unity/"Assets/Scripts/NecroFrameLibrary.cs").read_text()
+hero_anim=(unity/"Assets/Scripts/NecroCharacterAnimation.cs").read_text()
+creature_anim=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
+frame_editor=(unity/"Assets/Editor/NecroFrameEditorCheck.cs").read_text()
+for required in ("NecroPose", "NecroDirection", "NecroFrameSet",
+                 "ReadPixels(", "SetPixels32(", "Sprite.Create(", "frame*cell",
+                 "AnimatedCreatures", "NecroPose.Raise", "NecroPose.Hurt"):
+    assert required in frame_library, required
+for required in ("heroineFrames.Frame(", "heroineStrikePulse",
+                 "heroineHitPulse", "DirectionFrom("):
+    assert required in hero_anim, required
+for required in ("frames.Frame(", "currentPose", "currentDirection", "FrameCount"):
+    assert required in (creature_anim+frame_library), required
+assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
+assert "heroineStrikePulse=.38f;" in gameplay
+assert "heroineHitPulse=.20f;" in gameplay
+assert "VerifySet(\"necromante\",true);" in frame_editor
 assert "com.takeo.necromancer.unity.preview062" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
@@ -184,6 +205,6 @@ assert "NECRO_ANDROID_MODE: release" in release_workflow
 assert "ANDROID_KEYSTORE_BASE64" in release_workflow
 assert ".android-release.keystore" in release_workflow
 
-print(f"Unity source verified: {len(levels)} regions, 0.6.2 creatures, scenery, portrait PNG "
+print(f"Unity source verified: {len(levels)} regions, 0.6.3 directional animation, creatures, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")

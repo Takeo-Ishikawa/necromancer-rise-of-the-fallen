@@ -27,3 +27,8 @@ A implementacao Java/Canvas em `app/` continua disponivel para comparacao.
 ### Nova etapa visual 0.6.2
 
 Os dez tipos de criaturas agora têm sprites próprios, animações de combate e diferenciação entre hostis e servos. Cada bioma recebeu decoração 2D original e efeitos de batalha. O APK de teste utiliza o identificador separado `com.takeo.necromancer.unity.preview062` para não afetar o progresso da 0.5. Confira [as instruções da versão](unity/README.md).
+
+
+### Animação por quadros 0.6.3
+
+Agora a necromante e oito tipos de monstros usam atlases de quadros reais no Unity, com direções e estados de gameplay. Os quadros foram derivados da arte original e ainda não representam ilustrações manuais finais. A prévia usa um identificador de aplicativo separado para preservar instalações anteriores. [Mais detalhes](unity/README.md).

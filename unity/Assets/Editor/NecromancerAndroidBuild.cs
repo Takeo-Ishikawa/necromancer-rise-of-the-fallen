@@ -20,6 +20,7 @@ namespace Necromancer.EditorTools
             // Test serialization before exporting a player.
             NecroSaveEditorCheck.Verify();
             NecroVisualEditorCheck.Verify();
+            NecroFrameEditorCheck.Verify();
             NecroSceneBootstrap.Setup();
             if(!File.Exists(scenePath))
                 throw new BuildFailedException("Missing scene: " + scenePath);

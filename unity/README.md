@@ -1,26 +1,26 @@
-# Necromancer — Unity 2D / Android Preview 0.6.2
+# Necromancer — Unity 0.6.3: animação por quadros
 
-O projeto Unity oficial está em `unity/` (Unity 2022.3.62f2, Android IL2CPP ARM64 + ARMv7).
+**Implementado no motor Unity 2022.3 LTS**, para Android ARMv7/ARM64. A versão 0.6.3 substitui a animação por oscilação simples por **quadros distintos armazenados em atlases de sprites**.
 
-## Novidades desta etapa
+## Animação real integrada ao gameplay
 
-- **10 espécies visualmente diferenciadas:** rato, morcego, limo, aranha, cobra, esqueleto, espírito, Sentinela, Cavaleiro das Cinzas e Colosso do Pântano. Os sprites são originais e gerados uma vez pelo Unity em `NecroCreatureArt.cs`. Sprites PNG importados continuam tendo prioridade.
-- **Animação das criaturas:** voos leves de morcegos e espíritos, oscilação dos limos, passos e balanços dos inimigos, movimento mais pesado dos chefes, reação de dano e círculo de aura nos servos.
-- **Combate mais legível:** efeitos rápidos de impacto, círculo espectral ao ressuscitar e efeito especial ao derrotar chefes. O número de efeitos simultâneos é limitado para reduzir o custo em celulares.
-- **Ambientes com identidade própria:** estalagmites e cristais na caverna, ossos e fungos nos túneis, lápides e lanternas na necrópole, juncos, cogumelos e poças no pântano. A decoração usa posições determinísticas, não bloqueia passagens e evita aparecer sobre inimigos/recursos.
-- **Nenhuma mudança nas mecânicas ou no formato de salvamento.** A Cripta, equipamentos, rituais, IA, portais e os dados existentes permanecem disponíveis.
-- **Teste de arte no Editor:** antes do APK, `NecroVisualEditorCheck` rasteriza e inspeciona as 10 criaturas e 10 elementos de cenário.
+A biblioteca `NecroFrameLibrary.cs` constrói atlases de frames a partir das ilustrações originais, mantendo o visual das criaturas e da necromante. Cada quadro é uma `Sprite` independente acessada pela `SpriteRenderer.sprite`, e o atlas é gerado apenas uma vez por espécie.
 
-## Segurança ao instalar
+- **Protagonista:** quatro direções (frente, costas aproximadas, esquerda e direita); três quadros em repouso, seis na caminhada, quatro no ataque, quatro na magia, cinco na ressurreição e dois no dano.
+- **Oito categorias de monstros:** rato, morcego, limo, esqueleto, espírito, Sentinela, Cavaleiro das Cinzas e Colosso do Pântano, com estados de repouso, caminhada/voo, ataque e dano em quatro direções. A aranha e a cobra continuam usando animação leve de movimento da etapa 0.6.2.
+- **Gatilhos reais:** movimentação, golpes, projéteis, ressurreição, acerto sofrido e IA dos monstros trocam as sequências automaticamente. A aura dos servos e os efeitos visuais de batalha continuam.
+- **Sem alterações de regras:** IA, colisões, salvamento da Cripta, upgrades, portais e regiões funcionam sem novas estruturas nos arquivos JSON.
 
-Esta compilação é **uma prévia separada**, com pacote `com.takeo.necromancer.unity.preview062`, nome **Necromancer (Preview 0.6.2)** e armazenamento independente. Ela **não substitui** as versões 0.5 nem Preview 0.6.1. O salvamento dessas versões não aparece automaticamente nesta prévia.
+**Limitação artística importante:** estes são *quadros derivados procedimentalmente das ilustrações existentes*, não dezenas de desenhos produzidos manualmente. A direção de costas e os perfis são adaptações da arte frontal; o sprite sheet desenhado à mão em quatro perspectivas ainda é uma melhoria possível. A estrutura já permite substituir os atlases por imagens de produção em `Assets/Resources/AnimationSheets/<especie>.png`, mantendo a convenção de 6 colunas e 4 linhas por estado.
 
-Por causa da assinatura instável das compilações antigas, **não desinstale a 0.5**. O processo de produção já exige chave persistente; o procedimento para migrar manualmente o save está em [assinatura e backup](../docs/ANDROID_SIGNING.md).
+## Testes
 
-## Controles e conteúdo preservados
+`NecroFrameEditorCheck.cs` gera atlases dentro do próprio Editor do Unity antes de compilar Android, inspeciona dimensões, direções e quadros. Ele também verifica cache e disponibilidade das sequências do protagonista, rato e morcego. O teste de estrutura em Python `tests/check_unity_project.py` valida os scripts e seus gatilhos.
 
-Joystick, GOLPE/MAGIA, REVIVER, DEFESA/CAÇA, EVOLUIR, inventário, Cripta e portais continuam implementados. As quatro regiões do jogo são Caverna Esquecida, Túneis Inferiores, Necrópole das Cinzas e Pântano dos Sussurros.
+## Instalando sem perder a versão 0.5
 
-O sprite da protagonista e a HUD da 0.6 continuam. Animações finais desenhadas em múltiplas direções e cenários completos de alta resolução ainda ficam para uma fase posterior. A implementação desta etapa é uma melhoria concreta no Unity, mas não equivale a spritesheets ilustrados finais.
+**Preview 0.6.3** usa o identificador próprio `com.takeo.necromancer.unity.preview063`, que é diferente da 0.5, Preview 0.6.1 e Preview 0.6.2. Este aplicativo aparece como **Necromancer (Preview 0.6.3)** no celular e começa uma campanha independente. Não desinstale a 0.5: a chave antiga não permite uma atualização direta. Consulte [assinatura e backup](../docs/ANDROID_SIGNING.md) antes de migrar dados.
 
-O workflow [Unity Android Preview APK](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/unity-android.yml) produz o APK. A build confirma compilação e arte básica, mas não substitui teste de jogabilidade no dispositivo.
+## Próximas etapas
+
+Substituir os quadros derivados por ilustrações 2D definitivas (com direções e roupas consistentes), otimizar memória dos atlases e adicionar partículas/som mais refinados. Esta versão é um protótipo jogável, não os assets finais.
