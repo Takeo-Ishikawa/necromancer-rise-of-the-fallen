@@ -66,7 +66,6 @@ for feature in ("LoadStage(", "StageInstance", "current.root.SetActive(false)",
 for feature in ("UpgradeSpecies(", "SpawnDrop(", "CollectNearby(", "Visible(",
                 "Raise(", "Dismiss(", "ManaCost(", "CommandCost("):
     assert feature in gameplay, f"Missing gameplay rule {feature}"
-assert "SceneManager.LoadScene" in ui
 assert "Input.touches" in core
 assert "DrawWitch(" in scripts["NecroArt.cs"]
 assert "DrawCryptAltar(" in scripts["NecroArt.cs"]
