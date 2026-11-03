@@ -145,6 +145,29 @@
           "x": 15.4,
           "y": 3.85
         }
+      ],
+      "objective": "Conquiste a caverna e vincule a Sentinela.",
+      "resources": [
+        {
+          "type": "cristal",
+          "x": 17.8,
+          "y": 11.3
+        },
+        {
+          "type": "cristal",
+          "x": 10.2,
+          "y": 9.8
+        },
+        {
+          "type": "cristal",
+          "x": 23.1,
+          "y": 7.9
+        },
+        {
+          "type": "cristal",
+          "x": 15.5,
+          "y": 7.5
+        }
       ]
     },
     {
@@ -231,6 +254,334 @@
           "kind": "spider",
           "x": 15.6,
           "y": 3.7
+        }
+      ],
+      "objective": "Derrote as cobras e aranhas dos tuneis.",
+      "resources": [
+        {
+          "type": "ossos",
+          "x": 8.2,
+          "y": 12.2
+        },
+        {
+          "type": "ossos",
+          "x": 21.5,
+          "y": 7.4
+        },
+        {
+          "type": "ossos",
+          "x": 15.4,
+          "y": 5.6
+        }
+      ]
+    },
+    {
+      "id": "necropolis",
+      "title": "Necropole das Cinzas",
+      "background": "necropole_das_cinzas",
+      "baseBackground": "necropole_purificada",
+      "width": 30.72,
+      "height": 20.48,
+      "startX": 5.6,
+      "startY": 16.7,
+      "sealX": 26.3,
+      "sealY": 4.1,
+      "requiresGuardian": true,
+      "objective": "Derrote e ressuscite o Cavaleiro das Cinzas.",
+      "obstacles": [
+        {
+          "x": 4,
+          "y": 4.1,
+          "r": 0.57
+        },
+        {
+          "x": 6.9,
+          "y": 7.2,
+          "r": 0.58
+        },
+        {
+          "x": 11.4,
+          "y": 3.2,
+          "r": 0.53
+        },
+        {
+          "x": 16.1,
+          "y": 6.4,
+          "r": 0.58
+        },
+        {
+          "x": 20.4,
+          "y": 10.6,
+          "r": 0.62
+        },
+        {
+          "x": 24,
+          "y": 10,
+          "r": 0.45
+        },
+        {
+          "x": 7.5,
+          "y": 14.4,
+          "r": 0.62
+        },
+        {
+          "x": 13,
+          "y": 17.5,
+          "r": 0.57
+        },
+        {
+          "x": 19.2,
+          "y": 17.5,
+          "r": 0.62
+        },
+        {
+          "x": 27.3,
+          "y": 14.8,
+          "r": 0.64
+        },
+        {
+          "x": 28,
+          "y": 7.1,
+          "r": 0.48
+        }
+      ],
+      "enemies": [
+        {
+          "kind": "skeleton",
+          "x": 8.6,
+          "y": 15.7
+        },
+        {
+          "kind": "wisp",
+          "x": 10.9,
+          "y": 14.8
+        },
+        {
+          "kind": "skeleton",
+          "x": 14.5,
+          "y": 13.1
+        },
+        {
+          "kind": "wisp",
+          "x": 19.1,
+          "y": 14.1
+        },
+        {
+          "kind": "skeleton",
+          "x": 24.3,
+          "y": 12.5
+        },
+        {
+          "kind": "skeleton",
+          "x": 8.7,
+          "y": 9.4
+        },
+        {
+          "kind": "wisp",
+          "x": 13.7,
+          "y": 8.5
+        },
+        {
+          "kind": "skeleton",
+          "x": 21.4,
+          "y": 7.3
+        },
+        {
+          "kind": "wisp",
+          "x": 25.4,
+          "y": 8
+        },
+        {
+          "kind": "skeleton",
+          "x": 16.7,
+          "y": 3.5
+        },
+        {
+          "kind": "grave_lord",
+          "x": 26,
+          "y": 3.2
+        }
+      ],
+      "resources": [
+        {
+          "type": "ossos",
+          "x": 9.5,
+          "y": 16.5
+        },
+        {
+          "type": "ossos",
+          "x": 14.1,
+          "y": 11.3
+        },
+        {
+          "type": "ossos",
+          "x": 20.1,
+          "y": 8.1
+        },
+        {
+          "type": "ossos",
+          "x": 9.2,
+          "y": 4.7
+        },
+        {
+          "type": "ossos",
+          "x": 22.8,
+          "y": 15.9
+        }
+      ]
+    },
+    {
+      "id": "marsh",
+      "title": "Pantano dos Sussurros",
+      "background": "pantano_dos_sussurros",
+      "baseBackground": "pantano_purificado",
+      "width": 30.72,
+      "height": 20.48,
+      "startX": 5,
+      "startY": 15.5,
+      "sealX": 26.5,
+      "sealY": 4,
+      "requiresGuardian": true,
+      "objective": "Derrote e ressuscite o Colosso do Pantano.",
+      "obstacles": [
+        {
+          "x": 3.5,
+          "y": 5.9,
+          "r": 0.63
+        },
+        {
+          "x": 7.1,
+          "y": 3,
+          "r": 0.52
+        },
+        {
+          "x": 11.6,
+          "y": 4.8,
+          "r": 0.58
+        },
+        {
+          "x": 16.5,
+          "y": 3.2,
+          "r": 0.6
+        },
+        {
+          "x": 22.8,
+          "y": 6.5,
+          "r": 0.54
+        },
+        {
+          "x": 28,
+          "y": 8.7,
+          "r": 0.75
+        },
+        {
+          "x": 25.7,
+          "y": 14.3,
+          "r": 0.64
+        },
+        {
+          "x": 18,
+          "y": 17.7,
+          "r": 0.58
+        },
+        {
+          "x": 13.3,
+          "y": 14.1,
+          "r": 0.5
+        },
+        {
+          "x": 5.8,
+          "y": 17,
+          "r": 0.67
+        },
+        {
+          "x": 9,
+          "y": 9.6,
+          "r": 0.53
+        }
+      ],
+      "enemies": [
+        {
+          "kind": "wisp",
+          "x": 9,
+          "y": 16.3
+        },
+        {
+          "kind": "slime",
+          "x": 11.9,
+          "y": 14.1
+        },
+        {
+          "kind": "wisp",
+          "x": 16.7,
+          "y": 12.2
+        },
+        {
+          "kind": "skeleton",
+          "x": 19.8,
+          "y": 13.8
+        },
+        {
+          "kind": "slime",
+          "x": 23.9,
+          "y": 11.4
+        },
+        {
+          "kind": "wisp",
+          "x": 10.5,
+          "y": 9.2
+        },
+        {
+          "kind": "slime",
+          "x": 16.3,
+          "y": 7.1
+        },
+        {
+          "kind": "skeleton",
+          "x": 22,
+          "y": 7.8
+        },
+        {
+          "kind": "wisp",
+          "x": 26.5,
+          "y": 8.6
+        },
+        {
+          "kind": "slime",
+          "x": 12.5,
+          "y": 4.1
+        },
+        {
+          "kind": "marsh_lord",
+          "x": 26.5,
+          "y": 3.4
+        }
+      ],
+      "resources": [
+        {
+          "type": "fungo",
+          "x": 9.3,
+          "y": 14.2
+        },
+        {
+          "type": "fungo",
+          "x": 14.6,
+          "y": 11.2
+        },
+        {
+          "type": "fungo",
+          "x": 22.3,
+          "y": 9.6
+        },
+        {
+          "type": "fungo",
+          "x": 8.2,
+          "y": 5.4
+        },
+        {
+          "type": "fungo",
+          "x": 23.8,
+          "y": 17.5
         }
       ]
     }
