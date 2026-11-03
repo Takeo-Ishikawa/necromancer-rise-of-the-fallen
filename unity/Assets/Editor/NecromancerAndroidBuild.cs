@@ -54,6 +54,9 @@ namespace Necromancer.EditorTools
             if(release)
             {
                 string keystore=Environment.GetEnvironmentVariable("NECRO_KEYSTORE_PATH");
+                if(string.IsNullOrEmpty(keystore))
+                    keystore=Path.GetFullPath(
+                        Path.Combine(Application.dataPath,"..",".android-release.keystore"));
                 string storePass=Environment.GetEnvironmentVariable("NECRO_KEYSTORE_PASSWORD");
                 string keyAlias=Environment.GetEnvironmentVariable("NECRO_KEY_ALIAS");
                 string aliasPass=Environment.GetEnvironmentVariable("NECRO_KEY_PASSWORD");
