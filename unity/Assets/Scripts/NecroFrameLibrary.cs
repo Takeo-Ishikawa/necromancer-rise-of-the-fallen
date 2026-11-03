@@ -210,7 +210,7 @@ namespace Necromancer
             float recoilHurt=hurt?(frame==0?-.09f:.04f):0f;
             float perspective=(front||back)?1f:.83f;
             float breath=pose==(int)NecroPose.Idle?
-                (frame==1?.012f:frame==2?-.008f:0f):0f;
+                (frame == 1 ? .012f : frame == 2 ? -.008f : 0f) : 0f;
             bool flip=left;
 
             for(int py=0;py<cell;py++)
@@ -264,8 +264,8 @@ namespace Necromancer
             if(casting || raising)
             {
                 float size=raising?cell*.33f:cell*.15f;
-                int cx=ox+Mathf.RoundToInt(cell*(left?.30f:.74f));
-                int cy=oy+Mathf.RoundToInt(cell*(raising?.28f:.69f));
+                int cx=ox+Mathf.RoundToInt(cell*(left ? .30f : .74f));
+                int cy=oy+Mathf.RoundToInt(cell*(raising ? .28f : .69f));
                 int radius=Mathf.RoundToInt(size*(.65f+.24f*Mathf.Sin(progress*Mathf.PI)));
                 Color32 tint=new Color32(130,242,230,220);
                 for(int angle=0;angle<360;angle+=6)

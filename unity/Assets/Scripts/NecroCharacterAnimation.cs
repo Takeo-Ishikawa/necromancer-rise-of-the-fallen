@@ -110,8 +110,8 @@ namespace Necromancer
 
             if(ritualCircleRenderer!=null)
             {
-                float strength=heroineRaisePulse>0f?.85f:
-                    heroineCastPulse>0f?.51f:.14f;
+                float strength=heroineRaisePulse > 0f ? .85f :
+                    heroineCastPulse > 0f ? .51f : .14f;
                 ritualCircleRenderer.color=new Color(.58f,.88f,1f,strength);
                 ritualCircleTransform.localRotation=Quaternion.Euler(0,0,
                     Time.time*(heroineRaisePulse>0f?58f:18f));
