@@ -29,14 +29,51 @@ namespace Necromancer.EditorTools
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(scenePath, true) };
             AssetDatabase.SaveAssets();
 
+            // Debug signing in ephemeral CI produces a NEW certificate on each run.
+            // Never build the production package name with a temporary debug key.
+            // Preview runs alongside 0.5; production must use a persistent private key.
+            string mode=Environment.GetEnvironmentVariable("NECRO_ANDROID_MODE");
+            if(string.IsNullOrEmpty(mode))mode="preview";
+            bool preview=string.Equals(mode,"preview",StringComparison.OrdinalIgnoreCase);
+            bool release=string.Equals(mode,"release",StringComparison.OrdinalIgnoreCase);
+            if(!preview && !release)
+                throw new BuildFailedException("Invalid NECRO_ANDROID_MODE (preview or release).");
+
             PlayerSettings.companyName = "NecromancerStudio";
-            PlayerSettings.productName = "Necromancer: Rise of the Fallen";
+            PlayerSettings.productName = preview
+                ? "Necromancer (Preview 0.6)"
+                : "Necromancer: Rise of the Fallen";
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android,
-                "com.takeo.necromancer.unity");
+                preview ? "com.takeo.necromancer.unity.preview" :
+                    "com.takeo.necromancer.unity");
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
-            PlayerSettings.bundleVersion = "0.6.0";
-            PlayerSettings.Android.bundleVersionCode = 6;
+            PlayerSettings.bundleVersion = "0.6.1";
+            PlayerSettings.Android.bundleVersionCode = 7;
+
+            if(release)
+            {
+                string keystore=Environment.GetEnvironmentVariable("NECRO_KEYSTORE_PATH");
+                string storePass=Environment.GetEnvironmentVariable("NECRO_KEYSTORE_PASSWORD");
+                string keyAlias=Environment.GetEnvironmentVariable("NECRO_KEY_ALIAS");
+                string aliasPass=Environment.GetEnvironmentVariable("NECRO_KEY_PASSWORD");
+                if(string.IsNullOrEmpty(keystore) || !File.Exists(keystore) ||
+                   string.IsNullOrEmpty(storePass) || string.IsNullOrEmpty(keyAlias) ||
+                   string.IsNullOrEmpty(aliasPass))
+                    throw new BuildFailedException(
+                        "Release signing credentials not configured. See docs/ANDROID_SIGNING.md.");
+                PlayerSettings.Android.useCustomKeystore=true;
+                PlayerSettings.Android.keystoreName=keystore;
+                PlayerSettings.Android.keystorePass=storePass;
+                PlayerSettings.Android.keyaliasName=keyAlias;
+                PlayerSettings.Android.keyaliasPass=aliasPass;
+                Debug.Log("[Necromancer] Production signing: custom persistent keystore.");
+            }
+            else
+            {
+                PlayerSettings.Android.useCustomKeystore=false;
+                Debug.Log("[Necromancer] Isolated preview application; no existing saves will be modified.");
+            }
             // Unity requires IL2CPP for ARM64 Android player builds.
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
