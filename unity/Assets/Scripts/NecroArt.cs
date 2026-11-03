@@ -20,9 +20,20 @@ namespace Necromancer
 
         public static Sprite Get(string kind)
         {
-            Sprite imported=Resources.Load<Sprite>("Sprites/"+kind);
-            if(imported!=null)return imported;
             if(cache.TryGetValue("sprite/"+kind,out Sprite s))return s;
+            Sprite imported=Resources.Load<Sprite>("Sprites/"+kind);
+            if(imported!=null)return cache["sprite/"+kind]=imported;
+            // Art created from the original heroine character study, integrated as
+            // an actual transparent PNG, not a flattened mockup screenshot.
+            Texture2D importedTexture=Resources.Load<Texture2D>("Sprites/"+kind);
+            if(importedTexture!=null)
+            {
+                importedTexture.filterMode=FilterMode.Bilinear;
+                Sprite portrait=Sprite.Create(importedTexture,
+                    new Rect(0,0,importedTexture.width,importedTexture.height),
+                    new Vector2(.5f,.42f),100f);
+                return cache["sprite/"+kind]=portrait;
+            }
             Texture2D t=Make(128);
             if(kind=="necromante")DrawWitch(t);
             else if(kind=="crypt_altar")DrawCryptAltar(t);
