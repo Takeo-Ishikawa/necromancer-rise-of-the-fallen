@@ -1,0 +1,382 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Necromancer
+{
+    /// <summary>
+    /// Independent combat, necromancy, drops and equipment progression.
+    /// Uses persistent actors and stage-owned corpses/resources/monsters.
+    /// </summary>
+    public partial class NecroPrototype
+    {
+        static bool IsBoss(string kind)
+        {
+            return kind=="warden" || kind=="grave_lord" || kind=="marsh_lord";
+        }
+        static int CommandCost(string kind)
+        {
+            return kind=="marsh_lord"?4:
+                kind=="warden"||kind=="grave_lord"?3:
+                kind=="slime"||kind=="skeleton"?2:1;
+        }
+        static int ManaCost(string kind)
+        {
+            return kind=="marsh_lord"?50:
+                kind=="warden"||kind=="grave_lord"?37:
+                kind=="slime"||kind=="skeleton"?22:16;
+        }
+        static int ExperienceValue(string kind)
+        {
+            return IsBoss(kind)?150:kind=="skeleton"?29:kind=="wisp"?25:
+                kind=="slime"?20:kind=="bat"?17:14;
+        }
+        int ExperienceThreshold() {return 28+playerLevel*18;}
+        int CommandUsed()
+        {
+            int used=0;
+            foreach(Actor servant in servants)used+=CommandCost(servant.kind);
+            return used;
+        }
+        int Rank(string kind)
+        {
+            return speciesRanks.TryGetValue(kind,out int result)?result:0;
+        }
+        void ApplySpeciesRank(Actor actor)
+        {
+            int rank=Rank(actor.kind);
+            actor.maxHp*=1+.24f*rank;
+            actor.hp=actor.maxHp;
+            actor.attack*=(1+.18f*rank)*1.4f;
+        }
+        bool UpgradeSpecies(string kind)
+        {
+            int before=Rank(kind);
+            int cost=2+before*2;
+            if(before>=3){Announce("Esta criatura ja esta no grau maximo.");return false;}
+            if(shards<cost){Announce("Fragmentos de alma insuficientes.");return false;}
+            shards-=cost;
+            speciesRanks[kind]=before+1;
+            foreach(Actor servant in servants)
+            {
+                if(servant.kind!=kind)continue;
+                float newMax=servant.maxHp*(1+.24f*(before+1))/(1+.24f*before);
+                servant.hp=Mathf.Min(newMax,servant.hp+(newMax-servant.maxHp));
+                servant.maxHp=newMax;
+                servant.attack*=(1+.18f*(before+1))/(1+.18f*before);
+            }
+            Announce(kind.ToUpperInvariant()+" evoluiu para grau "+(before+1)+".");
+            return true;
+        }
+
+        bool Blocked(Vector2 point,float radius)
+        {
+            if(point.x<radius || point.y<radius ||
+                point.x>level.width-radius || point.y>level.height-radius)return true;
+            foreach(Obstacle obstacle in level.obstacles)
+                if(Vector2.Distance(point,NecroLevels.At(level,obstacle.x,obstacle.y)) <
+                    radius+obstacle.r)return true;
+            return false;
+        }
+        bool Visible(Vector2 from,Vector2 to)
+        {
+            float distance=Vector2.Distance(from,to);
+            int samples=Mathf.CeilToInt(distance/.22f);
+            for(int i=1;i<samples;i++)
+                if(Blocked(Vector2.Lerp(from,to,(float)i/samples),.04f))return false;
+            return true;
+        }
+        void Move(Actor actor,Vector2 displacement)
+        {
+            Vector2 at=actor.body.position;
+            Vector2 x=at+new Vector2(displacement.x,0);
+            if(!Blocked(x,actor.radius))at=x;
+            Vector2 y=at+new Vector2(0,displacement.y);
+            if(!Blocked(y,actor.radius))at=y;
+            actor.body.position=new Vector3(at.x,at.y,0);
+        }
+        void MoveToward(Actor actor,Vector2 destination,float dt)
+        {
+            Vector2 at=actor.body.position;
+            Vector2 delta=destination-at;
+            if(delta.sqrMagnitude<.005f)return;
+            Vector2 normal=delta.normalized;
+            Vector2 direct=normal*actor.speed*dt;
+            Vector2 prior=actor.body.position;
+            Move(actor,direct);
+            if(Vector2.Distance(prior,actor.body.position)>.02f*dt)return;
+            // Sample lateral paths when a rock blocks the direct path.
+            foreach(float angle in new float[]{35,-35,70,-70,105,-105})
+            {
+                Vector2 candidate=Quaternion.Euler(0,0,angle)*normal;
+                Move(actor,candidate*actor.speed*dt);
+                if(Vector2.Distance(prior,actor.body.position)>.02f*dt)break;
+            }
+        }
+        void UpdateActors(List<Actor> actors,float dt,bool friendly)
+        {
+            for(int i=actors.Count-1;i>=0;i--)
+            {
+                if(i>=actors.Count)continue;
+                Actor self=actors[i];
+                if(self.hp<=0)continue;
+                self.cooldown=Mathf.Max(0,self.cooldown-dt);
+                self.flash=Mathf.Max(0,self.flash-dt);
+                Actor target=null;
+                float closest=friendly?(huntOrder?5.6f:3.2f):4.1f;
+                if(friendly)
+                {
+                    foreach(Actor enemy in current.enemies)
+                    {
+                        float distance=Vector2.Distance(self.body.position,enemy.body.position);
+                        if(enemy.hp>0 && distance<closest){closest=distance;target=enemy;}
+                    }
+                    if(Vector2.Distance(self.body.position,player.body.position)>6)target=null;
+                }
+                else
+                {
+                    float distance=Vector2.Distance(self.body.position,player.body.position);
+                    if(player.hp>0 && distance<closest){closest=distance;target=player;}
+                    foreach(Actor friend in servants)
+                    {
+                        distance=Vector2.Distance(self.body.position,friend.body.position);
+                        if(friend.hp>0 && distance<closest){closest=distance;target=friend;}
+                    }
+                }
+                if(target!=null)
+                {
+                    float distance=Vector2.Distance(self.body.position,target.body.position);
+                    bool obstructed=!Visible(self.body.position,target.body.position);
+                    if(distance>self.reach+target.radius || obstructed)
+                        MoveToward(self,target.body.position,dt);
+                    else if(self.cooldown<=0)
+                    {
+                        self.cooldown=IsBoss(self.kind)?1.55f:1.18f;
+                        Damage(target,self.attack);
+                    }
+                }
+                else if(friendly)
+                {
+                    float theta=i*2.399963f;
+                    Vector2 desired=(Vector2)player.body.position+
+                        new Vector2(Mathf.Cos(theta),Mathf.Sin(theta))*.95f;
+                    if(Vector2.Distance(self.body.position,desired)>.32f)
+                        MoveToward(self,desired,dt);
+                }
+            }
+        }
+        void Damage(Actor victim,float amount)
+        {
+            if(victim.hp<=0)return;
+            if(victim==player)amount=Mathf.Max(1,amount-1.8f*mantleTier);
+            victim.hp-=amount;
+            victim.flash=.16f;
+            if(victim==player)hitFlash=.24f;
+            if(victim.hp>0)return;
+            if(victim==player) {
+                gameOver=true;Announce("O necromante caiu. Reinicie sua expedicao.");
+                return;
+            }
+            if(victim.ally)
+            {
+                servants.Remove(victim);
+                Destroy(victim.body.gameObject);
+                return;
+            }
+            current.enemies.Remove(victim);
+            kills++;
+            shards+=IsBoss(victim.kind)?4:1;
+            experience+=ExperienceValue(victim.kind);
+            while(experience>=ExperienceThreshold())
+            {
+                experience-=ExperienceThreshold();
+                playerLevel++;
+                player.maxHp+=12;
+                player.hp=Mathf.Min(player.maxHp,player.hp+20);
+                maxMana+=7;
+                mana=Mathf.Min(maxMana,mana+13);
+                Announce("Necromante alcancou nivel "+playerLevel+".");
+            }
+            if(IsBoss(victim.kind))current.bossDefeated=true;
+            SpriteRenderer marker=Visual("Cadaver: "+victim.kind,victim.body.position,
+                NecroArt.Effect(),9,current.root.transform);
+            Fit(marker,.48f,.48f);
+            marker.color=new Color(.82f,.72f,.9f,.75f);
+            current.corpses.Add(new Corpse {
+                kind=victim.kind,body=marker.transform,time=IsBoss(victim.kind)?500f:42f
+            });
+            if(kills%2==0 || IsBoss(victim.kind))
+                SpawnDrop(victim.body.position,((kills/2)%2),Mathf.Min(3,1+(kills-1)/5));
+            if(!spellUnlocked)
+            {
+                spellUnlocked=true;Announce("A magia espiritual foi despertada!");
+            }
+            if(IsBoss(victim.kind))Announce("Chefe derrotado. Ressuscite-o antes de prosseguir.");
+            Destroy(victim.body.gameObject);
+        }
+        Actor Closest(float maxDistance)
+        {
+            Actor found=null;
+            float best=maxDistance;
+            foreach(Actor actor in current.enemies)
+            {
+                if(actor.hp<=0)continue;
+                float distance=Vector2.Distance(actor.body.position,player.body.position);
+                if(distance<best){best=distance;found=actor;}
+            }
+            return found;
+        }
+        float castCooldown;
+        void Cast()
+        {
+            if(player.hp<=0 || upgradeOpen || castCooldown>Time.time)return;
+            Actor target=Closest(spellUnlocked?3.8f:1.02f);
+            if(target==null){Announce("Nenhum alvo ao alcance.");return;}
+            if(!spellUnlocked)
+            {
+                castCooldown=Time.time+.47f;
+                Damage(target,26+staffTier*5+(playerLevel-1)*2);
+                return;
+            }
+            if(mana<9){Announce("Anima insuficiente.");return;}
+            mana-=9;
+            castCooldown=Time.time+.72f;
+            SpriteRenderer orb=Visual("Orbe espectral",player.body.position,
+                NecroArt.Effect(),20,current.root.transform);
+            Fit(orb,.36f,.36f);
+            Vector2 direction=((Vector2)target.body.position-(Vector2)player.body.position).normalized;
+            if(direction.sqrMagnitude<.01f)direction=facing;
+            projectiles.Add(new Projectile{body=orb.transform,direction=direction,time=.9f});
+        }
+        void UpdateProjectiles(float dt)
+        {
+            for(int i=projectiles.Count-1;i>=0;i--)
+            {
+                Projectile bolt=projectiles[i];
+                bolt.body.position+=(Vector3)(bolt.direction*(dt*7));
+                bolt.time-=dt;
+                bool finished=bolt.time<=0 || Blocked(bolt.body.position,.05f);
+                if(!finished)
+                {
+                    for(int j=current.enemies.Count-1;j>=0;j--)
+                    {
+                        Actor enemy=current.enemies[j];
+                        if(Vector2.Distance(bolt.body.position,enemy.body.position)<enemy.radius+.15f)
+                        {
+                            Damage(enemy,34+staffTier*8+(playerLevel-1)*3);
+                            finished=true;break;
+                        }
+                    }
+                }
+                if(finished)
+                {
+                    Destroy(bolt.body.gameObject);
+                    projectiles.RemoveAt(i);
+                }
+            }
+        }
+        void TickCorpses(float dt)
+        {
+            for(int i=current.corpses.Count-1;i>=0;i--)
+            {
+                Corpse body=current.corpses[i];
+                body.time-=dt;
+                if(body.time<=0)
+                {
+                    Destroy(body.body.gameObject);
+                    current.corpses.RemoveAt(i);
+                }
+            }
+            hitFlash=Mathf.Max(0,hitFlash-dt);
+        }
+        void Raise()
+        {
+            if(player.hp<=0 || upgradeOpen)return;
+            Corpse nearest=null;
+            float best=1.3f;
+            foreach(Corpse body in current.corpses)
+            {
+                float d=Vector2.Distance(body.body.position,player.body.position);
+                if(d<best){best=d;nearest=body;}
+            }
+            if(nearest==null){Announce("Aproxime-se de um cadaver.");return;}
+            int cost=ManaCost(nearest.kind),command=CommandCost(nearest.kind);
+            if(CommandUsed()+command>CommandLimit)
+            {
+                Announce("Comando cheio. Dispense um servo.");return;
+            }
+            if(mana<cost){Announce("Anima insuficiente para ressuscitar.");return;}
+            mana-=cost;
+            Actor servant=Create(nearest.kind,nearest.body.position,true,persistentRoot.transform);
+            servants.Add(servant);
+            if(IsBoss(nearest.kind))current.bossBound=true;
+            Destroy(nearest.body.gameObject);
+            current.corpses.Remove(nearest);
+            Announce("Alma vinculada: "+servant.kind+".");
+        }
+        void Dismiss()
+        {
+            Actor target=null;float best=2.2f;
+            foreach(Actor servant in servants)
+            {
+                float d=Vector2.Distance(servant.body.position,player.body.position);
+                if(d<best){best=d;target=servant;}
+            }
+            if(target==null){Announce("Aproxime-se do servo a dispensar.");return;}
+            servants.Remove(target);
+            Destroy(target.body.gameObject);
+            Announce("Servo dispensado. Pontos de comando liberados.");
+        }
+        void SpawnDrop(Vector2 position,int slot,int tier)
+        {
+            SpriteRenderer marker=Visual(slot==0?"Foco arcano":"Manto",position,
+                NecroArt.Get(slot==0?"focus":"mantle"),8,current.root.transform);
+            Fit(marker,.52f,.52f);
+            current.drops.Add(new Drop{body=marker.transform,slot=slot,tier=tier});
+        }
+        void SpawnResource(string type,Vector2 position)
+        {
+            SpriteRenderer marker=Visual("Recurso "+type,position,
+                NecroArt.Get(type),6,current.root.transform);
+            Fit(marker,.56f,.56f);
+            current.resources.Add(new ResourceNode{body=marker.transform,type=type});
+        }
+        void CollectNearby()
+        {
+            for(int i=current.drops.Count-1;i>=0;i--)
+            {
+                Drop drop=current.drops[i];
+                if(Vector2.Distance(player.body.position,drop.body.position)>.64f)continue;
+                if(drop.slot==0)
+                {
+                    if(drop.tier>staffTier) {
+                        staffTier=drop.tier;Announce("Foco arcano grau "+staffTier+" equipado.");
+                    }
+                    else {shards++;Announce("Foco duplicado convertido em fragmento.");}
+                }
+                else
+                {
+                    if(drop.tier>mantleTier) {
+                        int increase=drop.tier-mantleTier;
+                        mantleTier=drop.tier;
+                        player.maxHp+=18*increase;player.hp=Mathf.Min(player.maxHp,player.hp+18*increase);
+                        Announce("Manto grau "+mantleTier+" equipado.");
+                    }
+                    else {shards++;Announce("Manto duplicado convertido em fragmento.");}
+                }
+                Destroy(drop.body.gameObject);
+                current.drops.RemoveAt(i);
+            }
+            for(int i=current.resources.Count-1;i>=0;i--)
+            {
+                ResourceNode res=current.resources[i];
+                if(Vector2.Distance(player.body.position,res.body.position)>.70f)continue;
+                shards+=2;gathered++;
+                player.hp=Mathf.Min(player.maxHp,player.hp+9);
+                mana=Mathf.Min(maxMana,mana+12);
+                Announce("Recurso "+res.type+" coletado: +2 fragmentos.");
+                Destroy(res.body.gameObject);
+                current.resources.RemoveAt(i);
+            }
+        }
+    }
+}
