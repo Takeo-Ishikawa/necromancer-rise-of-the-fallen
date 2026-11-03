@@ -43,6 +43,7 @@ namespace Necromancer
             public GameObject root;
             public SpriteRenderer backdrop;
             public Transform seal;
+            public Transform cryptAltar;
             public readonly List<Actor> enemies = new List<Actor>();
             public readonly List<Corpse> corpses = new List<Corpse>();
             public readonly List<Drop> drops = new List<Drop>();
@@ -275,6 +276,7 @@ namespace Necromancer
                 Fit(current.backdrop,level.width,level.height);
             }
             current.seal.localScale=Vector3.one*3.2f;
+            if(stage==0)ShowCryptAltar();
             if(stage==levels.Length-1) {
                 completed=true;
                 Announce("As regioes foram conquistadas. Seu exercito prevaleceu!");

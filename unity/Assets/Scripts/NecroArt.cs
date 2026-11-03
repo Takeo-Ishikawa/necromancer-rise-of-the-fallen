@@ -25,6 +25,7 @@ namespace Necromancer
             if(cache.TryGetValue("sprite/"+kind,out Sprite s))return s;
             Texture2D t=Make(128);
             if(kind=="necromante")DrawWitch(t);
+            else if(kind=="crypt_altar")DrawCryptAltar(t);
             else if(kind=="focus"||kind=="mantle"||kind=="cristal"||kind=="ossos"||kind=="fungo")
                 DrawItem(t,kind);
             else DrawMonster(t,kind);
@@ -80,6 +81,30 @@ namespace Necromancer
             Oval(t,116,88,3,5,Color.white);
             Line(t,101,101,119,103,3,gold);
             Oval(t,65,53,5,5,gold);
+        }
+
+        static void DrawCryptAltar(Texture2D t)
+        {
+            // Tomb slab, enchanted crystal, and spectral rising wisps.
+            Oval(t,64,21,43,15,dark);
+            Poly(t,new Color(.28f,.26f,.34f),
+                23,22,35,40,97,40,106,22,95,13,34,13);
+            Poly(t,new Color(.53f,.46f,.54f),
+                31,42,31,78,96,78,97,42);
+            Poly(t,new Color(.35f,.28f,.40f),
+                35,46,35,74,92,74,92,46);
+            Line(t,49,65,78,65,4,gold);
+            Line(t,64,48,64,73,3,bone);
+            Line(t,51,58,77,58,3,bone);
+            Oval(t,64,87,25,17,new Color(.24f,.55f,.53f,.36f));
+            Poly(t,new Color(.58f,.91f,.84f,.86f),
+                64,121,86,90,64,72,42,90);
+            Poly(t,new Color(.86f,.99f,.91f,.95f),
+                64,114,77,92,64,82,52,92);
+            Line(t,38,82,31,106,3,aqua);
+            Line(t,90,80,100,108,3,aqua);
+            Oval(t,29,111,4,5,aqua);
+            Oval(t,100,112,4,5,aqua);
         }
 
         static void DrawMonster(Texture2D t,string kind)

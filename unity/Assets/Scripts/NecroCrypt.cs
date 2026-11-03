@@ -18,6 +18,16 @@ namespace Necromancer
 
         int VaultCapacity() {return 8+vaultRitual*4;}
 
+        void ShowCryptAltar()
+        {
+            if(stage!=0 || current==null || !current.claimed || current.cryptAltar!=null)return;
+            Vector2 at=NecroLevels.At(level,level.sealX,level.sealY);
+            SpriteRenderer altar=Visual("Cripta - Altar de Almas",
+                at+new Vector2(1.25f,.25f),NecroArt.Get("crypt_altar"),-2,current.root.transform);
+            Fit(altar,1.6f,1.6f);
+            current.cryptAltar=altar.transform;
+        }
+
         bool CanAccessCrypt()
         {
             return stage==0 && stages!=null && stages.Length>0 &&
@@ -321,6 +331,7 @@ namespace Necromancer
                     Fit(current.backdrop,level.width,level.height);
                 }
                 current.seal.localScale=Vector3.one*3.2f;
+                if(stage==0)ShowCryptAltar();
             }
         }
 
