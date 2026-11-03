@@ -165,8 +165,9 @@ for creature in ("rat","bat","slime","spider","snake","skeleton","wisp",
 for required in ("LateUpdate()", "Flash()", "Strike()", "Capacity=30"):
     assert required in creature_visual, required
 for scene in ("headstone","broken_cross","lantern","bones","fungus","reeds",
-              "pool","rune","crystal","stalagmite"):
+              "pool","rune","crystal"):
     assert f'case "{scene}"' in scenery, scene
+assert "default: Stalagmite(t)" in scenery
 assert "No illustration" in (unity/"Assets/Editor/NecroVisualEditorCheck.cs").read_text()
 assert 'NECRO_ANDROID_MODE' in builder
 assert "com.takeo.necromancer.unity.preview" in builder
