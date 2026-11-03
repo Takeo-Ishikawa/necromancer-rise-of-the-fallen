@@ -19,6 +19,10 @@ required = [
     "Assets/Scripts/NecroGameplay.cs",
     "Assets/Scripts/NecroUI.cs",
     "Assets/Scripts/NecroPolishedHUD.cs",
+    "Assets/Scripts/NecroCreatureArt.cs",
+    "Assets/Scripts/NecroCreatureVisual.cs",
+    "Assets/Scripts/NecroScenery.cs",
+    "Assets/Editor/NecroVisualEditorCheck.cs",
     "Assets/Scripts/NecroCharacterAnimation.cs",
     "Assets/Resources/Sprites/necromante.png",
     "Assets/Scripts/NecroCrypt.cs",
@@ -145,7 +149,25 @@ assert "joystickFingerId" in core and "TouchPhase.Began" in core
 assert "DrawPolishedHUD(w,h);" in ui
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.6.1\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.6.2\"" in builder
+assert "com.takeo.necromancer.unity.preview062" in builder
+assert "NecroVisualEditorCheck.Verify();" in builder
+creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
+creature_visual=(unity/"Assets/Scripts/NecroCreatureVisual.cs").read_text()
+scenery=(unity/"Assets/Scripts/NecroScenery.cs").read_text()
+assert "NecroCreatureArt.Draw(t,kind)" in scripts["NecroArt.cs"]
+assert "NecroCreatureView.Attach(sprite,kind,ally)" in core
+assert "NecroScenery.Populate(level,next.root.transform)" in core
+assert "NecroCombatFx.Emit(" in gameplay
+for creature in ("rat","bat","slime","spider","snake","skeleton","wisp",
+                 "warden","grave_lord","marsh_lord"):
+    assert f'case "{creature}"' in creature_art, creature
+for required in ("LateUpdate()", "Flash()", "Strike()", "Capacity=30"):
+    assert required in creature_visual, required
+for scene in ("headstone","broken_cross","lantern","bones","fungus","reeds",
+              "pool","rune","crystal","stalagmite"):
+    assert f'case "{scene}"' in scenery, scene
+assert "No illustration" in (unity/"Assets/Editor/NecroVisualEditorCheck.cs").read_text()
 assert 'NECRO_ANDROID_MODE' in builder
 assert "com.takeo.necromancer.unity.preview" in builder
 assert "useCustomKeystore=true" in builder
@@ -157,6 +179,6 @@ assert "NECRO_ANDROID_MODE: release" in release_workflow
 assert "ANDROID_KEYSTORE_BASE64" in release_workflow
 assert ".android-release.keystore" in release_workflow
 
-print(f"Unity source verified: {len(levels)} regions, 0.6 portrait PNG "
+print(f"Unity source verified: {len(levels)} regions, 0.6.2 creatures, scenery, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")

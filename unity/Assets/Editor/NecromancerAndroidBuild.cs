@@ -19,6 +19,7 @@ namespace Necromancer.EditorTools
             // invoke build before EditorApplication.delayCall has executed.
             // Test serialization before exporting a player.
             NecroSaveEditorCheck.Verify();
+            NecroVisualEditorCheck.Verify();
             NecroSceneBootstrap.Setup();
             if(!File.Exists(scenePath))
                 throw new BuildFailedException("Missing scene: " + scenePath);

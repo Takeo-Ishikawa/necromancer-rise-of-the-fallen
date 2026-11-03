@@ -22,3 +22,8 @@ A implementacao Java/Canvas em `app/` continua disponivel para comparacao.
 
 
 **Atenção às atualizações Android:** a 0.5 e a 0.6 usaram assinaturas de depuração distintas. Antes de instalar uma versão diferente, veja [assinatura, prévia e preservação do save](docs/ANDROID_SIGNING.md). A prévia é instalada ao lado da 0.5 e os releases exigem uma chave persistente.
+
+
+### Nova etapa visual 0.6.2
+
+Os dez tipos de criaturas agora têm sprites próprios, animações de combate e diferenciação entre hostis e servos. Cada bioma recebeu decoração 2D original e efeitos de batalha. O APK de teste utiliza o identificador separado `com.takeo.necromancer.unity.preview062` para não afetar o progresso da 0.5. Confira [as instruções da versão](unity/README.md).
