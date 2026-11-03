@@ -1,8 +1,8 @@
-# Necromancer: Rise of the Fallen — Unity 2D em migracao
+# Necromancer: Rise of the Fallen — Unity Android 0.5
 
-**Motor principal: Unity 2022.3 LTS.** O projeto fica em [`unity/`](unity/README.md), com quatro mapas conectados, exercito persistente, progressao de nivel, equipamento, melhorias de especies e shaders/sprites 2D de substituicao. O build Unity gera APK com suporte **ARM64 via IL2CPP**.
+**Motor principal: Unity 2022.3 LTS.** O projeto fica em [`unity/`](unity/README.md), com quatro mapas conectados, exército autônomo, progressão, equipamentos, Cripta, rituais e salvamento local entre sessões. O build Unity gera APK com suporte **ARM64 via IL2CPP**.
 
-**Status:** as regras sao implementadas em C# e o GitHub Actions verifica a estrutura e compila o APK Unity. A versao Android Java/Canvas abaixo esta preservada para referencia e comparacao; o Unity ainda exige testes visuais e jogabilidade em aparelho real.
+**Versão 0.5:** a Cripta está acessível no santuário da caverna conquistada, com armazenamento de servos, expansão de nichos e rituais permanentes. O estado da exploração e do exército é salvo no Android com recuperação por backup. A versão Java/Canvas continua preservada; a migração Unity requer validação de jogabilidade e de salvamento em aparelho real.
 
 ---
 

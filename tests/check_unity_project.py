@@ -16,6 +16,9 @@ required = [
     "Assets/Scripts/NecroPrototype.cs",
     "Assets/Scripts/NecroGameplay.cs",
     "Assets/Scripts/NecroUI.cs",
+    "Assets/Scripts/NecroCrypt.cs",
+    "Assets/Scripts/NecroSaveData.cs",
+    "Assets/Editor/NecroSaveEditorCheck.cs",
     "Assets/Resources/Data/levels.json",
 ]
 for filename in required:
@@ -51,7 +54,8 @@ assert {"rat", "bat", "slime", "spider", "snake", "skeleton",
 
 scripts = {
     name: (unity / "Assets/Scripts" / name).read_text()
-    for name in ("NecroPrototype.cs", "NecroGameplay.cs", "NecroUI.cs", "NecroArt.cs")
+    for name in ("NecroPrototype.cs", "NecroGameplay.cs", "NecroUI.cs",
+                 "NecroArt.cs", "NecroCrypt.cs", "NecroSaveData.cs")
 }
 gameplay = scripts["NecroGameplay.cs"]
 core = scripts["NecroPrototype.cs"]
@@ -65,6 +69,29 @@ for feature in ("UpgradeSpecies(", "SpawnDrop(", "CollectNearby(", "Visible(",
 assert "SceneManager.LoadScene" in ui
 assert "Input.touches" in core
 assert "DrawWitch(" in scripts["NecroArt.cs"]
+assert "DrawCryptAltar(" in scripts["NecroArt.cs"]
+crypt = scripts["NecroCrypt.cs"]
+data = scripts["NecroSaveData.cs"]
+for feature in ("OpenCrypt(", "StoreServant(", "WithdrawServant(",
+                "RitualVitality(", "RitualVault(", "RitualSpirit(",
+                "SaveProgress(", "RestoreProgress(", "RecordStage(",
+                "RestoreStage(", "OnApplicationPause(", "Autosave(",
+                "RecoverAfterDeath("):
+    assert feature in crypt, f"Missing Cripta 0.5 method: {feature}"
+for feature in ("NecroSaveData", "NecroSaveStore", "Application.persistentDataPath",
+                "SavePath", "BackupPath", "JsonUtility.FromJson",
+                "JsonUtility.ToJson", "vault", "stages"):
+    assert feature in data, f"Missing save component: {feature}"
+assert "RestoreProgress();" in scripts["NecroPrototype.cs"]
+assert "SaveProgress();" in scripts["NecroGameplay.cs"]
+assert "DrawCryptPanel(" in scripts["NecroUI.cs"]
+assert "SceneManager.LoadScene" not in scripts["NecroUI.cs"]
+assert "NecroSaveEditorCheck.Verify();" in (
+    unity / "Assets/Editor/NecromancerAndroidBuild.cs"
+).read_text()
+assert "JsonUtility.ToJson(snapshot)" in (
+    unity / "Assets/Editor/NecroSaveEditorCheck.cs"
+).read_text()
 assert "Backgrounds/" in scripts["NecroArt.cs"]
 assert "AddComponent<Necromancer.NecroPrototype>()" in (
     unity / "Assets/Editor/NecroSceneBootstrap.cs"
@@ -74,5 +101,5 @@ assert "AndroidArchitecture.ARM64" in builder
 assert "ScriptingImplementation.IL2CPP" in builder
 assert "BuildTarget.Android" in builder
 assert re.search(r'BuildReport\s+report\s*=', builder)
-print(f"Unity source and stage data verified: {len(levels)} regions; "
-      "ARM64 configuration found. Editor build must still be checked.")
+print(f"Unity source verified: {len(levels)} regions; ARM64; Cripta 0.5; "
+      "local save; Unity Editor compilation and phone tests remain necessary.")

@@ -1,38 +1,49 @@
-# Necromancer — Unity 2D / Android
+# Necromancer — Unity 2D / Android 0.5
 
 **Unity Editor:** 2022.3.62f2 LTS · **Build:** Android APK · **Scripting:** IL2CPP · **CPU:** ARMv7 + ARM64.
 
-O projeto Unity esta em `unity/`. O jogo Android anterior, feito em Java/Canvas, continua preservado em `app/` como referencia para testes de regressao.
+O projeto oficial Unity esta na pasta `unity/`. A implementação Java/Canvas permanece em `app/` como backup e referência de regressão.
 
-## Conteudo recuperado nesta migracao
+## Versão 0.5 — A Cripta
 
-O codigo foi dividido em quatro modulos:
+Após derrotar os monstros da Caverna Esquecida e ressuscitar a sentinela, aproxime-se do **Santuário das Almas** (selo central). O **altar espectral** marca a entrada da Cripta; toque em **ENTRAR NA CRIPTA**. No computador, também é possível apertar **C** ao lado do selo.
 
-- `NecroPrototype.cs`: ciclo de vida da partida, camera e estado persistente das regioes.
-- `NecroGameplay.cs`: movimento, colisao, esquiva de obstaculos, combate, necromancia, nivelamento, equipamentos, fragmentos e evolucao de servos.
-- `NecroUI.cs`: controles por toque, interface de status, menu pausado de evolucao e portais.
-- `NecroArt.cs`: sprites de substituicao originais, incluindo a silhueta da bruxa de cabelos prateados, chapeu amplo, manto e lanterna no cajado.
+- **Guardar servo:** seleciona o aliado mais próximo e o remove da equipe ativa, preservando a vida e os atributos, sem criar cadáver.
+- **Retirar servo:** escolha um dos servos armazenados. A retirada respeita os **4 pontos de comando** do exército; todos os atributos são restaurados.
+- **Nichos:** a Cripta começa com **8 espaços**. Ritual de expansão aumenta em +4 por nível, até 16 espaços.
+- **Ritual de vitalidade:** +15 de vida máxima e +5 de ânima máxima por nível, até 5 níveis. Custo inicial de 6 fragmentos.
+- **Ritual de fluxo espiritual:** aumenta regeneração de ânima em +0,65/s por nível, até 3 níveis.
+- **Fragmentos:** os rituais consomem fragmentos de alma conquistados em combate/exploração. Um ritual realizado é permanente em futuras sessões salvas.
+- **Salvar:** botão manual na Cripta. Também existem saves automáticos a cada ~15 segundos, ao subir de área e ao realizar ações importantes, e na pausa/saída do Android.
 
-Os dados das regioes ficam em `Assets/Resources/Data/levels.json`. Sao **quatro mapas**: Caverna Esquecida, Tuneis Inferiores, Necropole das Cinzas e Pantano dos Sussurros. Os tuneis foram mantidos para nao descartar o trabalho realizado anteriormente.
+## Persistência e recuperação
 
-Ao transitar, cada regiao apenas se desativa: **inimigos, corpos, itens e recursos coletados mantem seu estado**. A vida, os equipamentos, a experiencia e os servos permanecem com o jogador.
+Dados locais em `Application.persistentDataPath/necro-save-v1.json`, com cópia de recuperação `.bak`. O formato JSON guarda:
 
-O jogador recebe XP e fragmentos ao derrotar inimigos; itens aparecem a cada duas vitorias, com foco arcano e manto de graus ate 3. O menu EVOLUIR melhora cada especie ate grau 3. Os chefes devem ser derrotados e vinculados para concluir regioes marcadas por guardioes. Os monstros tem perseguição e ataque automatico, e as criaturas invocadas seguem o heroi.
+- mapa atual e visitados, inimigos restantes, corpos, equipamentos caídos e recursos ainda não coletados;
+- experiência, nível, habilidades, vida, ânima, equipamentos, fragmentos e melhorias;
+- composição do exército, HP e dano dos servos, lista da Cripta, rituais realizados;
+- conquista de chefes e acesso às regiões.
 
-## Como iniciar
+Quando o aplicativo é reaberto, **a última partida salva é restaurada automaticamente**. Se for derrotado, o necromante pode ressuscitar (restaura a vida e reduz até dois fragmentos), sem destruir a progressão.
 
-1. No Unity Hub, adicione como projeto a pasta **unity/**.
-2. Abra com o Editor **2022.3.62f2** (suporte **Android Build Support**, SDK/NDK e OpenJDK instalados).
-3. Ao abrir, `NecroSceneBootstrap` cria `Assets/Scenes/NecromancerPrototype.unity` automaticamente.
-4. Abra a cena e execute em **Play** para avaliar no editor.
-5. Para exportar, utilize o menu *File > Build Settings > Android* ou execute o workflow do GitHub `Unity Android APK`.
+O salvamento é **local, não em nuvem**. Desinstalar o aplicativo ou limpar seus dados apaga o progresso. A versão anterior 0.4 não tinha persistência, então o primeiro jogo na 0.5 começa uma partida nova.
 
-## Controles
+## Organização
 
-No celular, use a direcao virtual do lado esquerdo ou arraste o quadrante inferior esquerdo. À direita estao MAGIA/GOLPE, REVIVER, DEFESA/CAÇA e DISPENSAR. A evolucao das especies fica no botao EVOLUIR. Ao conquistar uma regiao, aproxime-se do selo para liberar a passagem; o retorno e acessado perto da entrada. No computador: WASD, Espaco, E, Q, Tab e Enter.
+- `NecroPrototype.cs`: cena, câmera, mundos e transições.
+- `NecroGameplay.cs`: IA, combate, necromancia, progressão e equipamentos.
+- `NecroCrypt.cs`: interface lógica da Cripta, rituais e captura/restauração de estados.
+- `NecroSaveData.cs`: classes serializáveis e arquivo de save com backup.
+- `NecroUI.cs`: controles, menu da Cripta e evolução.
+- `NecroArt.cs`: arte 2D procedural autoral, com bruxa, monstros e altar espectral.
+- `NecroSaveEditorCheck.cs`: teste de serialização Unity executado durante o build.
+- `Assets/Resources/Data/levels.json`: Caverna, Túneis, Necrópole e Pântano.
 
-## Arte e limitacoes atuais
+## Instalação / build
 
-O visual atual foi aproximado ao conceito da protagonista **por meio de um sprite procedural original**, nao pela conversao do sheet original. Ele e funcional, mas ainda nao equivale à arte final de producao. Fundos originais mais detalhados e sprites animados podem ser importados como PNGs transparentes, preservando exatamente os nomes `Sprites/<tipo>` e `Backgrounds/<nome-da-fase>` em `Assets/Resources/`.
+No Unity Hub, abra `unity/` com **Unity 2022.3.62f2** e suporte Android. A cena é montada automaticamente, caso ainda não exista. O workflow [Unity Android APK](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/unity-android.yml) compila o projeto com a licença configurada em secrets e publica o artefato `necromancer-unity-android-apk`.
 
-**Nao foi implementado salvamento persistente entre sessoes**, reservado para o proximo sistema da Cripta. O teste automatizado em `tests/check_unity_project.py` verifica estrutura e dados, mas nao substitui a compilacao real do Unity ou testes num aparelho fisico.
+Testes de estrutura em `tests/check_unity_project.py` e verificação de **round-trip JSON no próprio Unity Editor** durante a compilação. A compilação confirma integridade técnica, mas o comportamento visual e a restauração após reiniciar o aparelho ainda precisam de testes manuais no Android.
+
+Todos os gráficos são originais ou provisórios. O conceito da protagonista continua sendo referência para os sprites ilustrados finais.
