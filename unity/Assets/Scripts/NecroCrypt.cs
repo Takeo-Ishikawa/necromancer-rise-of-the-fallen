@@ -211,7 +211,7 @@ namespace Necromancer
         private bool RestoreProgress()
         {
             if(!NecroSaveStore.TryLoad(out NecroSaveData save))return false;
-            if(save.stage<0 || save.stage>=levels.Length || save.stages.Length!=levels.Length)return false;
+            if(save.stage<0 || save.stage>=levels.Length || save.stages.Length==0)return false;
             restoring=true;
             try
             {
@@ -246,7 +246,7 @@ namespace Necromancer
 
                 // Create only regions that were already visited. Unvisited areas
                 // remain fresh until the player discovers them.
-                for(int i=0;i<save.stages.Length;i++)
+                for(int i=0;i<Mathf.Min(save.stages.Length,levels.Length);i++)
                 {
                     NecroStageRecord savedStage=save.stages[i];
                     if(savedStage==null || !savedStage.visited)continue;
