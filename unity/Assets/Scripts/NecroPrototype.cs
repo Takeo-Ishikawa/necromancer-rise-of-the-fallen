@@ -205,7 +205,13 @@ namespace Necromancer
         {
             if(player==null || level==null || gameOver)return;
             float dt=Mathf.Min(.045f,Time.deltaTime);
-            if(!upgradeOpen && !cryptOpen)
+            if(upgradeOpen || cryptOpen || armyInspect || gearInspect)
+            {
+                touchMove=Vector2.zero;
+                heroineWalking=false;
+                joystickFingerId=-1;
+            }
+            else
             {
                 Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
                 // A finger must start on the visible joystick. Other UI taps

@@ -184,6 +184,11 @@ namespace Necromancer
                 current.claimed?"Região conquistada — explore as passagens.":level.objective;
             GUI.Label(new Rect(22,158,width-44,44),goal,hudSmall);
 
+            // Inspect panels are modal, and their buttons should not overlap
+            // underlying skill or navigation controls.
+            if(armyInspect){DrawArmyInspect(width,height);return;}
+            if(gearInspect){DrawGearInspect(width,height);return;}
+
             if(stage>0&&NearEntrance())
                 if(GUI.Button(new Rect(24,210,width-48,37),
                     "RETORNAR: "+levels[stage-1].title,buttonStyle))Retreat();
@@ -234,8 +239,6 @@ namespace Necromancer
                 }
             }
 
-            if(armyInspect)DrawArmyInspect(width,height);
-            if(gearInspect)DrawGearInspect(width,height);
         }
 
         void DrawArmyInspect(float width,float height)
