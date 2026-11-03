@@ -36,7 +36,7 @@ namespace Necromancer
                     clips[pose][direction]=new Sprite[ClipLengths[pose]];
                     for(int frame=0;frame<ClipLengths[pose];frame++)
                     {
-                        Rect rect=new Rect(frame*cell,(pose*4+direction)*cell,
+                        Rect rect=new Rect(frame*cell,(state*4+direction)*cell,
                             cell,cell);
                         clips[pose][direction][frame]=Sprite.Create(
                             atlas,rect,new Vector2(.5f,.42f),100f,0,
