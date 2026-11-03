@@ -160,6 +160,7 @@ namespace Necromancer
                     else if(self.cooldown<=0)
                     {
                         self.cooldown=IsBoss(self.kind)?1.55f:1.18f;
+                        if(self.view!=null)self.view.Strike();
                         Damage(target,self.attack);
                     }
                 }
@@ -179,6 +180,8 @@ namespace Necromancer
             if(victim==player)amount=Mathf.Max(1,amount-1.8f*mantleTier);
             victim.hp-=amount;
             victim.flash=.16f;
+            if(victim.view!=null)victim.view.Flash();
+            NecroCombatFx.Emit(victim.body.position,current.root.transform,0);
             if(victim==player)hitFlash=.24f;
             if(victim.hp>0)return;
             if(victim==player) {
@@ -219,7 +222,11 @@ namespace Necromancer
             {
                 spellUnlocked=true;Announce("A magia espiritual foi despertada!");
             }
-            if(IsBoss(victim.kind))Announce("Chefe derrotado. Ressuscite-o antes de prosseguir.");
+            if(IsBoss(victim.kind))
+            {
+                Announce("Chefe derrotado. Ressuscite-o antes de prosseguir.");
+                NecroCombatFx.Emit(victim.body.position,current.root.transform,2);
+            }
             Destroy(victim.body.gameObject);
             SaveProgress();
         }
@@ -321,6 +328,7 @@ namespace Necromancer
             Actor servant=Create(nearest.kind,nearest.body.position,true,persistentRoot.transform);
             servants.Add(servant);
             heroineRaisePulse=.85f;
+            NecroCombatFx.Emit(nearest.body.position,current.root.transform,1);
             if(IsBoss(nearest.kind))current.bossBound=true;
             Destroy(nearest.body.gameObject);
             current.corpses.Remove(nearest);

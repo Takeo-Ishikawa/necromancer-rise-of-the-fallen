@@ -39,7 +39,7 @@ namespace Necromancer
             else if(kind=="crypt_altar")DrawCryptAltar(t);
             else if(kind=="focus"||kind=="mantle"||kind=="cristal"||kind=="ossos"||kind=="fungo")
                 DrawItem(t,kind);
-            else DrawMonster(t,kind);
+            else if(!NecroCreatureArt.Draw(t,kind))DrawMonster(t,kind);
             t.Apply();
             return cache["sprite/"+kind]=Sprite.Create(t,new Rect(0,0,128,128),
                 new Vector2(.5f,.42f),100f);
@@ -306,6 +306,23 @@ namespace Necromancer
             t.Apply();
             return cache["ritual-circle"]=Sprite.Create(t,new Rect(0,0,128,128),
                 new Vector2(.5f,.5f),100f);
+        }
+
+        public static Sprite Shadow()
+        {
+            if(cache.TryGetValue("soft-shadow",out Sprite old))return old;
+            const int size=64;
+            Texture2D tex=Make(size);
+            for(int y=0;y<size;y++)for(int x=0;x<size;x++)
+            {
+                float dx=(x-31.5f)/32f,dy=(y-31.5f)/32f;
+                float distance=Mathf.Sqrt(dx*dx+dy*dy);
+                float alpha=Mathf.Pow(Mathf.Clamp01(1-distance),1.4f)*.9f;
+                tex.SetPixel(x,y,new Color(.08f,.09f,.12f,alpha));
+            }
+            tex.Apply();
+            return cache["soft-shadow"]=Sprite.Create(tex,
+                new Rect(0,0,size,size),new Vector2(.5f,.5f),100f);
         }
 
         public static Sprite Stone()

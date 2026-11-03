@@ -15,6 +15,7 @@ namespace Necromancer
             public Transform body;
             public float hp,maxHp,speed,attack,radius,reach,cooldown,flash;
             public bool ally;
+            public NecroCreatureView view;
         }
         class Corpse
         {
@@ -136,6 +137,8 @@ namespace Necromancer
             };
             a.hp=a.maxHp;
             if(ally && kind!="necromante")ApplySpeciesRank(a);
+            if(kind!="necromante")
+                a.view=NecroCreatureView.Attach(sprite,kind,ally);
             return a;
         }
 
@@ -154,6 +157,8 @@ namespace Necromancer
                 next.backdrop=Visual("Ground",new Vector2(level.width*.5f,level.height*.5f),
                     background,-50,next.root.transform);
                 Fit(next.backdrop,level.width,level.height);
+                // Cosmetic props share the biome but never block movement.
+                NecroScenery.Populate(level,next.root.transform);
                 foreach(Obstacle rock in level.obstacles) {
                     SpriteRenderer stone=Visual("Rock",NecroLevels.At(level,rock.x,rock.y),
                         NecroArt.Stone(),-3,next.root.transform);
