@@ -45,10 +45,10 @@ namespace Necromancer
             heroineRaisePulse=Mathf.Max(0,heroineRaisePulse-dt);
             float stride=heroineWalking ? Mathf.Sin(Time.time*12f)*.055f : 0f;
             float breathing=Mathf.Sin(Time.time*2.3f)*.018f;
-            float burst=heroineCastPulse>0?.045f:0f;
+            float burst=heroineCastPulse > 0f ? .045f : 0f;
             witchArtTransform.localPosition=new Vector3(0,stride+breathing+burst,0);
             witchArtTransform.localScale=new Vector3(1f+breathing,
-                1f+breathing*.32f+(heroineRaisePulse>0?.035f:0f),1);
+                1f+breathing*.32f+(heroineRaisePulse > 0f ? .035f : 0f),1);
             witchArtTransform.localRotation=Quaternion.Euler(0,0,
                 Mathf.Sin(Time.time*(heroineWalking?9f:2f))*(heroineWalking?2.5f:1.0f));
             if(Mathf.Abs(facing.x)>.10f)
@@ -61,11 +61,11 @@ namespace Necromancer
 
             if(ritualCircleRenderer!=null)
             {
-                float strength=heroineRaisePulse>0?.78f:
-                    heroineCastPulse>0?.42f:.15f;
+                float strength=heroineRaisePulse > 0f ? .78f :
+                    heroineCastPulse > 0f ? .42f :.15f;
                 ritualCircleRenderer.color=new Color(.58f,.88f,1f,strength);
                 ritualCircleTransform.localRotation=Quaternion.Euler(0,0,
-                    Time.time*(heroineRaisePulse>0?58f:18f));
+                    Time.time*(heroineRaisePulse > 0f ? 58f : 18f));
             }
         }
     }
