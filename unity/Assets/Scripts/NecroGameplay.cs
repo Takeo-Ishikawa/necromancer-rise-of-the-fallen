@@ -64,7 +64,16 @@ namespace Necromancer
                 servant.maxHp=newMax;
                 servant.attack*=(1+.18f*(before+1))/(1+.18f*before);
             }
+            foreach(NecroActorRecord stored in vault)
+            {
+                if(stored.kind!=kind)continue;
+                float max=stored.maxHp*(1+.24f*(before+1))/(1+.24f*before);
+                stored.hp=Mathf.Min(max,stored.hp+(max-stored.maxHp));
+                stored.maxHp=max;
+                stored.attack*=(1+.18f*(before+1))/(1+.18f*before);
+            }
             Announce(kind.ToUpperInvariant()+" evoluiu para grau "+(before+1)+".");
+            SaveProgress();
             return true;
         }
 
@@ -212,6 +221,7 @@ namespace Necromancer
             }
             if(IsBoss(victim.kind))Announce("Chefe derrotado. Ressuscite-o antes de prosseguir.");
             Destroy(victim.body.gameObject);
+            SaveProgress();
         }
         Actor Closest(float maxDistance)
         {
@@ -312,6 +322,7 @@ namespace Necromancer
             Destroy(nearest.body.gameObject);
             current.corpses.Remove(nearest);
             Announce("Alma vinculada: "+servant.kind+".");
+            SaveProgress();
         }
         void Dismiss()
         {
@@ -325,6 +336,7 @@ namespace Necromancer
             servants.Remove(target);
             Destroy(target.body.gameObject);
             Announce("Servo dispensado. Pontos de comando liberados.");
+            SaveProgress();
         }
         void SpawnDrop(Vector2 position,int slot,int tier)
         {
@@ -365,6 +377,7 @@ namespace Necromancer
                 }
                 Destroy(drop.body.gameObject);
                 current.drops.RemoveAt(i);
+                SaveProgress();
             }
             for(int i=current.resources.Count-1;i>=0;i--)
             {
@@ -376,6 +389,7 @@ namespace Necromancer
                 Announce("Recurso "+res.type+" coletado: +2 fragmentos.");
                 Destroy(res.body.gameObject);
                 current.resources.RemoveAt(i);
+                SaveProgress();
             }
         }
     }

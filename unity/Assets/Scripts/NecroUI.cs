@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Necromancer
 {
@@ -42,13 +41,18 @@ namespace Necromancer
             {
                 GUI.Box(new Rect(20,h*.31f,w-40,235),"O FIM DA EXPEDIÇÃO");
                 GUI.Label(new Rect(36,h*.31f+50,w-72,70),
-                    "O necromante foi derrotado. O progresso desta expedição foi perdido.",
+                    "Ressuscite no refúgio. Seu exército e sua progressão são preservados.",
                     smallStyle);
-                if(GUI.Button(new Rect(60,h*.31f+155,w-120,53),"RECOMEÇAR",buttonStyle))
-                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                if(GUI.Button(new Rect(60,h*.31f+155,w-120,53),"RESSUSCITAR",buttonStyle))
+                    RecoverAfterDeath();
                 return;
             }
 
+            if(cryptOpen)
+            {
+                DrawCryptPanel(w,h);
+                return;
+            }
             if(upgradeOpen)
             {
                 DrawUpgradePanel(w,h);
@@ -84,9 +88,11 @@ namespace Necromancer
             if(current.claimed && stage+1<levels.Length && NearSeal())
                 if(GUI.Button(new Rect(w*.18f,228,w*.64f,48),
                     "ENTRAR: "+levels[stage+1].title,buttonStyle))Advance();
+            if(CanAccessCrypt())
+                if(GUI.Button(new Rect(w*.19f,281,w*.62f,48),
+                    "ENTRAR NA CRIPTA",buttonStyle))OpenCrypt();
 
             float cy=h-205;
-            float joystickX=85, joystickY=cy+5;
             GUI.Box(new Rect(8,cy-61,166,176),"MOVIMENTO");
             Vector2 move=Vector2.zero;
             if(GUI.RepeatButton(new Rect(65,cy-31,44,45),"▲",buttonStyle))move.y++;
@@ -104,10 +110,91 @@ namespace Necromancer
                 huntOrder=!huntOrder;
             if(GUI.Button(new Rect(right,cy+73,122,38),"DISPENSAR",buttonStyle))
                 Dismiss();
-            if(GUI.Button(new Rect(173,cy+116,w-304,40),"EVOLUIR",buttonStyle))
+            if(GUI.Button(new Rect(174,cy+116,105,40),"EVOLUIR",buttonStyle))
                 {touchMove=Vector2.zero;upgradeOpen=true;}
         }
 
+
+        void DrawCryptPanel(float width,float height)
+        {
+            float top=Mathf.Max(10f,(height-660f)*.40f);
+            GUI.Box(new Rect(10,top,width-20,650),"CRIPTA DO NECROMANTE");
+            GUI.Label(new Rect(27,top+28,width-54,30),
+                "FRAGMENTOS "+shards+"   |   NICHOS "+vault.Count+"/"+VaultCapacity(),
+                smallStyle);
+            GUI.Label(new Rect(28,top+63,width-56,26),
+                "EXÉRCITO ATIVO  "+servants.Count+"   •   COMANDO "+CommandUsed()+"/"+CommandLimit,
+                smallStyle);
+            GUI.enabled=servants.Count>0 && vault.Count<VaultCapacity();
+            if(GUI.Button(new Rect(42,top+93,width-84,45),
+                "GUARDAR SERVO MAIS PRÓXIMO",buttonStyle))StoreServant();
+            GUI.enabled=true;
+
+            GUI.Label(new Rect(30,top+149,width-60,25),
+                "SERVOS ARMAZENADOS",titleStyle);
+            int first=vaultPage*3;
+            if(vaultPage>0 && first>=vault.Count){vaultPage=0;first=0;}
+            for(int n=0;n<3;n++)
+            {
+                int index=first+n;
+                float y=top+182+n*48;
+                if(index>=vault.Count) {
+                    GUI.Box(new Rect(25,y,width-50,42),"- nicho vazio -");
+                    continue;
+                }
+                NecroActorRecord actor=vault[index];
+                GUI.Box(new Rect(25,y,width-50,42),"");
+                GUI.Label(new Rect(33,y+4,width-172,32),
+                    actor.kind.ToUpperInvariant()+"  "+
+                    Mathf.CeilToInt(actor.hp)+"/"+Mathf.CeilToInt(actor.maxHp),
+                    labelStyle);
+                GUI.enabled=CommandUsed()+CommandCost(actor.kind)<=CommandLimit;
+                if(GUI.Button(new Rect(width-133,y+3,105,36),
+                    "RETIRAR",buttonStyle))WithdrawServant(index);
+                GUI.enabled=true;
+            }
+            if(GUI.Button(new Rect(42,top+330,90,34),"< ANTERIOR",buttonStyle))
+                vaultPage=Mathf.Max(0,vaultPage-1);
+            GUI.Label(new Rect(144,top+329,width-288,35),
+                (vaultPage+1)+"/"+Mathf.Max(1,Mathf.CeilToInt(vault.Count/3f)),smallStyle);
+            if(GUI.Button(new Rect(width-132,top+330,90,34),"PRÓXIMO >",buttonStyle))
+                vaultPage=Mathf.Min(Mathf.Max(0,Mathf.CeilToInt(vault.Count/3f)-1),vaultPage+1);
+
+            GUI.Label(new Rect(32,top+373,width-64,29),"RITUAIS PERMANENTES",titleStyle);
+            RitualButton(new Rect(26,top+407,width-52,43),
+                "VITALIDADE  "+lifeRitual+"/5   CUSTO "+VitalityCost(),
+                lifeRitual<5 && shards>=VitalityCost(),0);
+            RitualButton(new Rect(26,top+453,width-52,43),
+                "EXPANDIR NICHOS  "+vaultRitual+"/2   CUSTO "+VaultCost(),
+                vaultRitual<2 && shards>=VaultCost(),1);
+            RitualButton(new Rect(26,top+499,width-52,43),
+                "FLUXO DE ÂNIMA  "+spiritRitual+"/3   CUSTO "+SpiritCost(),
+                spiritRitual<3 && shards>=SpiritCost(),2);
+
+            if(GUI.Button(new Rect(28,top+557,width*.43f,43),
+                "SALVAR",buttonStyle))
+            {
+                if(SaveProgress())Announce("Progresso salvo no aparelho.");
+                else Announce("Erro ao salvar: verifique o armazenamento.");
+            }
+            if(GUI.Button(new Rect(width*.53f,top+557,width*.40f,43),
+                "VOLTAR",buttonStyle))CloseCrypt();
+            GUI.Label(new Rect(30,top+606,width-60,28),
+                Time.time<noticeUntil?notice:"Servos armazenados ficam protegidos.",
+                smallStyle);
+        }
+
+        void RitualButton(Rect area,string label,bool available,int ritual)
+        {
+            GUI.enabled=available;
+            if(GUI.Button(area,label,buttonStyle))
+            {
+                if(ritual==0)RitualVitality();
+                else if(ritual==1)RitualVault();
+                else RitualSpirit();
+            }
+            GUI.enabled=true;
+        }
         void DrawUpgradePanel(float width,float height)
         {
             float top=Mathf.Max(18,(height-620)*.5f);

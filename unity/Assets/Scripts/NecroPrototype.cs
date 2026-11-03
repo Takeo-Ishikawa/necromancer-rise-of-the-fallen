@@ -92,6 +92,7 @@ namespace Necromancer
             player=Create("necromante",start,true,persistentRoot.transform);
             player.maxHp=115;player.hp=115;player.speed=3.4f;
             LoadStage(0);
+            RestoreProgress();
         }
 
         SpriteRenderer Visual(string label,Vector2 at,Sprite sprite,int order,Transform parent)
@@ -179,6 +180,7 @@ namespace Necromancer
                 if(orb.body!=null)Destroy(orb.body.gameObject);
             projectiles.Clear();
             upgradeOpen=false;
+            cryptOpen=false;
             Announce(level.title+": explore e domine as criaturas.");
         }
 
@@ -186,19 +188,21 @@ namespace Necromancer
         {
             if(!current.claimed || stage+1>=levels.Length)return;
             LoadStage(stage+1);
+            SaveProgress();
         }
 
         void Retreat()
         {
             if(stage==0)return;
             LoadStage(stage-1);
+            SaveProgress();
         }
 
         void Update()
         {
             if(player==null || level==null || gameOver)return;
             float dt=Mathf.Min(.045f,Time.deltaTime);
-            if(!upgradeOpen)
+            if(!upgradeOpen && !cryptOpen)
             {
                 Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
                 Vector2 control=keyboard+touchMove;
@@ -220,6 +224,7 @@ namespace Necromancer
                 if(Input.GetKeyDown(KeyCode.E))Raise();
                 if(Input.GetKeyDown(KeyCode.Q))huntOrder=!huntOrder;
                 if(Input.GetKeyDown(KeyCode.Tab))upgradeOpen=true;
+                if(Input.GetKeyDown(KeyCode.C))OpenCrypt();
                 if(Input.GetKeyDown(KeyCode.Return))TryPortal();
                 if(player.hp>0)
                 {
@@ -235,6 +240,7 @@ namespace Necromancer
                 if(current.seal!=null)
                     current.seal.Rotate(0,0,dt*(current.claimed?18:5));
             }
+            Autosave(dt);
             Vector3 position=player.body.position;
             float hy=cam.orthographicSize,hx=hy*cam.aspect;
             cam.transform.position=new Vector3(
@@ -275,6 +281,7 @@ namespace Necromancer
             } else {
                 Announce("Regiao conquistada! Aproxime-se do selo central para prosseguir.");
             }
+            SaveProgress();
         }
 
         void Announce(string message)
@@ -285,7 +292,7 @@ namespace Necromancer
 
         void Regenerate(float dt)
         {
-            manaFraction+=dt*(3.5f+(playerLevel-1)*.4f);
+            manaFraction+=dt*(3.5f+(playerLevel-1)*.4f+spiritRitual*.65f);
             if(manaFraction>=1 && mana<maxMana)
             {
                 int regenerated=(int)manaFraction;
