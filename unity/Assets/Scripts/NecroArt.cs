@@ -285,6 +285,29 @@ namespace Necromancer
             t.Apply();
             return cache["effect"]=Sprite.Create(t,new Rect(0,0,64,64),new Vector2(.5f,.5f),100f);
         }
+        public static Sprite RitualCircle()
+        {
+            if(cache.TryGetValue("ritual-circle",out Sprite old))return old;
+            const int size=128;
+            Texture2D t=Make(size);
+            for(int y=0;y<size;y++)for(int x=0;x<size;x++)
+            {
+                float dx=(x-63.5f)/64f,dy=(y-63.5f)/64f;
+                float radius=Mathf.Sqrt(dx*dx+dy*dy);
+                float theta=Mathf.Atan2(dy,dx);
+                float spoke=Mathf.Abs(Mathf.Sin(theta*8f));
+                bool ring=Mathf.Abs(radius-.84f)<.018f ||
+                          Mathf.Abs(radius-.62f)<.013f ||
+                          (spoke<.065f && radius>.64f && radius<.81f);
+                if(ring)t.SetPixel(x,y,new Color(.60f,.95f,.92f,.80f));
+                if(radius<.37f && Mathf.Abs(dx)+Mathf.Abs(dy)<.08f)
+                    t.SetPixel(x,y,new Color(.60f,.95f,.92f,.5f));
+            }
+            t.Apply();
+            return cache["ritual-circle"]=Sprite.Create(t,new Rect(0,0,128,128),
+                new Vector2(.5f,.5f),100f);
+        }
+
         public static Sprite Stone()
         {
             if(cache.TryGetValue("rock",out Sprite rock))return rock;

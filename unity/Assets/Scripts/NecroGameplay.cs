@@ -243,12 +243,14 @@ namespace Necromancer
             if(target==null){Announce("Nenhum alvo ao alcance.");return;}
             if(!spellUnlocked)
             {
+                heroineCastPulse=.24f;
                 castCooldown=Time.time+.47f;
                 Damage(target,26+staffTier*5+(playerLevel-1)*2);
                 return;
             }
             if(mana<9){Announce("Anima insuficiente.");return;}
             mana-=9;
+            heroineCastPulse=.34f;
             castCooldown=Time.time+.72f;
             SpriteRenderer orb=Visual("Orbe espectral",player.body.position,
                 NecroArt.Effect(),20,current.root.transform);
@@ -318,6 +320,7 @@ namespace Necromancer
             mana-=cost;
             Actor servant=Create(nearest.kind,nearest.body.position,true,persistentRoot.transform);
             servants.Add(servant);
+            heroineRaisePulse=.85f;
             if(IsBoss(nearest.kind))current.bossBound=true;
             Destroy(nearest.body.gameObject);
             current.corpses.Remove(nearest);

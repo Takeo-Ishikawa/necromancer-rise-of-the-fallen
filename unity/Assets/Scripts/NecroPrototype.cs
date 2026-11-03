@@ -92,6 +92,7 @@ namespace Necromancer
             Vector2 start=NecroLevels.At(level,level.startX,level.startY);
             player=Create("necromante",start,true,persistentRoot.transform);
             player.maxHp=115;player.hp=115;player.speed=3.4f;
+            InitializeHeroAnimation();
             LoadStage(0);
             RestoreProgress();
         }
@@ -215,7 +216,8 @@ namespace Necromancer
                             Mathf.Max(75,Screen.width*.17f);
                 }
                 if(control.sqrMagnitude>1)control.Normalize();
-                if(control.sqrMagnitude>.01f)
+                heroineWalking=control.sqrMagnitude>.01f;
+                if(heroineWalking)
                 {
                     facing=control.normalized;
                     Move(player,control*player.speed*dt);
@@ -242,6 +244,7 @@ namespace Necromancer
                     current.seal.Rotate(0,0,dt*(current.claimed?18:5));
             }
             Autosave(dt);
+            AnimateHeroVisual(dt);
             Vector3 position=player.body.position;
             float hy=cam.orthographicSize,hx=hy*cam.aspect;
             cam.transform.position=new Vector3(
