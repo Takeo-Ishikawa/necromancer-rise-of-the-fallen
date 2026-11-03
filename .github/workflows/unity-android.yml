@@ -7,6 +7,10 @@ on:
       - 'unity/**'
       - '.github/workflows/unity-android.yml'
 
+concurrency:
+  group: unity-android-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

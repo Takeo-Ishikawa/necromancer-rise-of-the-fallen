@@ -1,34 +1,21 @@
-# Gerar APK Android com Unity
+# APK Unity Android
 
-Motor principal: Unity 2022.3.62f2, projeto na pasta `unity/`.
+Unity 2022.3.62f2 LTS; projeto na pasta `unity/`.
 
-## Situação verificada (2 de novembro de 2026)
-Executamos o workflow `Unity Android APK`. A validação da estrutura passou, mas a etapa do motor parou com:
+### Compilacao no GitHub
 
-> Missing Unity License File and no Serial was found.
+O workflow [Unity Android APK](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/unity-android.yml) executa verificacao estrutural, importa o projeto no Unity, compila com IL2CPP para ARMv7 + ARM64 e publica o artefato `necromancer-unity-android-apk`.
 
-Nenhum APK Unity foi produzido. O APK Android legado (`app/`, Java/Canvas) **não** corresponde a esta compilação.
+A compilacao exige uma **licenca Unity configurada nos secrets do GitHub** (`UNITY_LICENSE` ou `UNITY_SERIAL`). Nunca inclua licencas nem senhas no repositorio.
 
-## Método 1 — Compilar no seu computador (não exige secrets no GitHub)
+O sucesso do workflow significa que o APK foi produzido pelo Unity. **Nao equivale a teste de jogabilidade em telefone**. Antes de publicar, validar criacao de partida, combate por toque, necromancia, transicoes, upgrade, derrota e reinicio em aparelhos ARM64.
 
-1. Instale o Unity Hub e o editor **2022.3.62f2**, com **Android Build Support**, **Android SDK & NDK Tools** e **OpenJDK**.
-2. Em Unity Hub, abra a pasta `unity/` do repositório.
-3. Adicione as imagens do pacote `Necromancer_Unity_Arte_0_1.zip` em `unity/Assets/Resources/Backgrounds/`. Os PNGs têm os nomes exigidos pelo projeto.
-4. A montagem de cena no editor cria `Assets/Scenes/NecromancerPrototype.unity` automaticamente; abra-a.
-5. Em **File > Build Settings**, selecione **Android**, escolha **Switch Platform** e clique em **Build** para gerar o APK.
-6. Esse APK será um protótipo, e o resultado visual ainda depende de converter as folhas de personagem em sprites jogáveis separados.
+### Compilacao local
 
-## Método 2 — Compilar pelo GitHub Actions
+No Unity Hub, instale Unity 2022.3.62f2 com Android Build Support, SDK, NDK e OpenJDK. Abra `unity/`, aguarde o auto-bootstrap da cena `Assets/Scenes/NecromancerPrototype.unity`, clique Play para inspecionar e utilize **Build Settings > Android > Build**. A cena inicial e criada no editor se estiver ausente.
 
-1. No seu computador, ative uma licença gratuita no **Unity Hub > Preferences > Licenses** ou use sua licença profissional. Não compartilhe sua licença nem suas senhas no chat.
-2. Para Unity Personal, localize `C:\ProgramData\Unity\Unity_lic.ulf` no Windows (ou a localização equivalente no seu sistema).
-3. No repositório, acesse **Settings > Secrets and variables > Actions > New repository secret** e cadastre:
-   - `UNITY_LICENSE`: conteúdo completo do arquivo `.ulf`.
-   - `UNITY_EMAIL`: e-mail da conta Unity.
-   - `UNITY_PASSWORD`: senha da conta Unity.
-4. Para Unity Pro, em lugar do arquivo pessoal, configure `UNITY_SERIAL`, `UNITY_EMAIL` e `UNITY_PASSWORD`, seguindo os termos da sua licença.
-5. Vá até **Actions > Unity Android APK > Run workflow**. Quando a execução estiver marcada `success`, baixe o artefato `necromancer-unity-android-apk`.
+### Arte
 
-Regras: jamais faça commit de arquivos `.ulf`, senha ou serial no repositório; use GitHub Actions Secrets. A licença é requisito externo, não é possível gerar um build Unity sem a ativação do editor.
+Sprites e fundos procedurais originais sao usados quando `Assets/Resources/Sprites/<nome>.png` e `Assets/Resources/Backgrounds/<nome>.png` nao existem. A bruxa foi redesenhada como sprite legivel, mas a ilustracao definitiva precisara de sprites transparentes e animacoes em direcoes.
 
-Referências: https://game.ci/docs/github/activation/ e https://game.ci/docs/github/builder/
+A implementacao Java/Canvas em `app/` continua disponivel para comparacao.

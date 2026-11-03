@@ -1,27 +1,38 @@
-# Necromancer: Rise of the Fallen — Unity 2D (protótipo inicial)
+# Necromancer — Unity 2D / Android
 
-**Motor:** Unity 2022.3.62f2 (Editor 2D). Esta pasta substitui a plataforma de desenvolvimento para as próximas versões. A implementação anterior em Java/Canvas permanece no diretório `app/` como referência e backup.
+**Unity Editor:** 2022.3.62f2 LTS · **Build:** Android APK · **Scripting:** IL2CPP · **CPU:** ARMv7 + ARM64.
 
-## Abrir e jogar
+O projeto Unity esta em `unity/`. O jogo Android anterior, feito em Java/Canvas, continua preservado em `app/` como referencia para testes de regressao.
 
-1. No Unity Hub, escolha **Add project from disk** e selecione a pasta **unity/**.
-2. Abra com Unity 2022.3.62f2 (ou outra versão 2022.3 LTS compatível).
-3. Aguarde a compilação dos scripts: o gerador de cena cria automaticamente `Assets/Scenes/NecromancerPrototype.unity`.
-4. Abra a cena e clique **Play**. WASD ou setas movimentam; Espaço lança magia/golpe; E ressuscita; Q alterna ordens; Enter abre os túneis após a conquista. Há controles na tela para toque.
-5. Para Android, em Build Settings selecione Android e faça Build após instalar o suporte Android no Unity Hub.
+## Conteudo recuperado nesta migracao
 
-## Arte das primeiras fases
+O codigo foi dividido em quatro modulos:
 
-Copie as 3 imagens do pacote gráfico para a pasta `Assets/Resources/Backgrounds/`, renomeadas exatamente:
+- `NecroPrototype.cs`: ciclo de vida da partida, camera e estado persistente das regioes.
+- `NecroGameplay.cs`: movimento, colisao, esquiva de obstaculos, combate, necromancia, nivelamento, equipamentos, fragmentos e evolucao de servos.
+- `NecroUI.cs`: controles por toque, interface de status, menu pausado de evolucao e portais.
+- `NecroArt.cs`: sprites de substituicao originais, incluindo a silhueta da bruxa de cabelos prateados, chapeu amplo, manto e lanterna no cajado.
 
-- `entrada_da_caverna_bonehollow.png` (fase 1, área hostil)
-- `santuario_necromante_bonehollow.png` (fase 1 conquistada, base)
-- `tuneis_inferiores_enredados.png` (fase 2, túneis)
+Os dados das regioes ficam em `Assets/Resources/Data/levels.json`. Sao **quatro mapas**: Caverna Esquecida, Tuneis Inferiores, Necropole das Cinzas e Pantano dos Sussurros. Os tuneis foram mantidos para nao descartar o trabalho realizado anteriormente.
 
-As imagens ficam no chão da cena; inimigos e personagem são desenhados por sprites independentes (provisórios no código). Atenção: as ilustrações de conceito ainda possuem algumas criaturas desenhadas no próprio fundo; a arte definitiva exigirá fundos sem criaturas e sprite sheets originais.
+Ao transitar, cada regiao apenas se desativa: **inimigos, corpos, itens e recursos coletados mantem seu estado**. A vida, os equipamentos, a experiencia e os servos permanecem com o jogador.
 
-Para trocar os sprites provisórios, adicione PNGs transparentes em `Assets/Resources/Sprites/` com os nomes `necromante.png`, `rat.png`, `bat.png`, `slime.png`, `spider.png`, `snake.png`, `warden.png`.
+O jogador recebe XP e fragmentos ao derrotar inimigos; itens aparecem a cada duas vitorias, com foco arcano e manto de graus ate 3. O menu EVOLUIR melhora cada especie ate grau 3. Os chefes devem ser derrotados e vinculados para concluir regioes marcadas por guardioes. Os monstros tem perseguição e ataque automatico, e as criaturas invocadas seguem o heroi.
 
-## Estado
+## Como iniciar
 
-Protótipo inicial em Unity C#: navegação top-down, câmera, inimigos, servos com ataque automático, magia, cadáveres ressuscitáveis, pontuação de comando, mudança da primeira caverna para base e segunda área com cobras/aranhas. Os sistemas mais avançados do Android 0.4 (equipamentos e evolução) ainda NÃO estão migrados. Projeto Unity ainda NÃO compilado no Editor nesta execução; não há APK Unity validado.
+1. No Unity Hub, adicione como projeto a pasta **unity/**.
+2. Abra com o Editor **2022.3.62f2** (suporte **Android Build Support**, SDK/NDK e OpenJDK instalados).
+3. Ao abrir, `NecroSceneBootstrap` cria `Assets/Scenes/NecromancerPrototype.unity` automaticamente.
+4. Abra a cena e execute em **Play** para avaliar no editor.
+5. Para exportar, utilize o menu *File > Build Settings > Android* ou execute o workflow do GitHub `Unity Android APK`.
+
+## Controles
+
+No celular, use a direcao virtual do lado esquerdo ou arraste o quadrante inferior esquerdo. À direita estao MAGIA/GOLPE, REVIVER, DEFESA/CAÇA e DISPENSAR. A evolucao das especies fica no botao EVOLUIR. Ao conquistar uma regiao, aproxime-se do selo para liberar a passagem; o retorno e acessado perto da entrada. No computador: WASD, Espaco, E, Q, Tab e Enter.
+
+## Arte e limitacoes atuais
+
+O visual atual foi aproximado ao conceito da protagonista **por meio de um sprite procedural original**, nao pela conversao do sheet original. Ele e funcional, mas ainda nao equivale à arte final de producao. Fundos originais mais detalhados e sprites animados podem ser importados como PNGs transparentes, preservando exatamente os nomes `Sprites/<tipo>` e `Backgrounds/<nome-da-fase>` em `Assets/Resources/`.
+
+**Nao foi implementado salvamento persistente entre sessoes**, reservado para o proximo sistema da Cripta. O teste automatizado em `tests/check_unity_project.py` verifica estrutura e dados, mas nao substitui a compilacao real do Unity ou testes num aparelho fisico.

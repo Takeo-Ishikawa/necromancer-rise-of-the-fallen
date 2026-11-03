@@ -1,8 +1,8 @@
 # Necromancer: Rise of the Fallen — Unity 2D em migracao
 
-**Motor principal para novas implementacoes: Unity 2022.3 LTS.** O novo projeto esta em [`unity/`](unity/README.md), com prototipo C# de exploracao, IA de servos, magia, reanimacao e duas areas (caverna e tuneis). O Unity Hub cria automaticamente a cena inicial ao abrir o projeto. A arte ilustrada pode ser importada em `unity/Assets/Resources/Backgrounds/`.
+**Motor principal: Unity 2022.3 LTS.** O projeto fica em [`unity/`](unity/README.md), com quatro mapas conectados, exercito persistente, progressao de nivel, equipamento, melhorias de especies e shaders/sprites 2D de substituicao. O build Unity gera APK com suporte **ARM64 via IL2CPP**.
 
-**Status importante:** os scripts Unity foram integrados ao GitHub, mas ainda nao foram compilados/testados dentro do Unity Editor. **Nao ha APK Unity validado**. A versao abaixo e a compilacao Android legada em Java/Canvas, preservada para comparacao e regressao.
+**Status:** as regras sao implementadas em C# e o GitHub Actions verifica a estrutura e compila o APK Unity. A versao Android Java/Canvas abaixo esta preservada para referencia e comparacao; o Unity ainda exige testes visuais e jogabilidade em aparelho real.
 
 ---
 
