@@ -85,7 +85,7 @@ namespace Necromancer
                 if(GUI.Button(new Rect(w*.18f,228,w*.64f,48),
                     "ENTRAR: "+levels[stage+1].title,buttonStyle))Advance();
 
-            float cy=h-140;
+            float cy=h-205;
             float joystickX=85, joystickY=cy+5;
             GUI.Box(new Rect(8,cy-61,166,176),"MOVIMENTO");
             Vector2 move=Vector2.zero;
