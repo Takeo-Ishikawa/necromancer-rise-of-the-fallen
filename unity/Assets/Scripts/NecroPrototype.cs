@@ -4,16 +4,16 @@ using UnityEngine;
 namespace Necromancer
 {
     /// <summary>
-    /// Protótipo de jogo Unity 2D: exploracao, servos automaticos,
-    /// magia ativa, reanimacao e conquista da primeira base.
+    /// World lifecycle, stage persistence and camera.
+    /// The combat/progression and mobile interface live in separate partial files.
     /// </summary>
-    public class NecroPrototype : MonoBehaviour
+    public partial class NecroPrototype : MonoBehaviour
     {
         class Actor
         {
             public string kind;
             public Transform body;
-            public float hp,maxHp,speed,attack,radius,reach,cooldown;
+            public float hp,maxHp,speed,attack,radius,reach,cooldown,flash;
             public bool ally;
         }
         class Corpse
@@ -28,349 +28,270 @@ namespace Necromancer
             public Vector2 direction;
             public float time;
         }
+        class Drop
+        {
+            public Transform body;
+            public int slot,tier;
+        }
+        class ResourceNode
+        {
+            public Transform body;
+            public string type;
+        }
+        class StageInstance
+        {
+            public GameObject root;
+            public SpriteRenderer backdrop;
+            public Transform seal;
+            public readonly List<Actor> enemies = new List<Actor>();
+            public readonly List<Corpse> corpses = new List<Corpse>();
+            public readonly List<Drop> drops = new List<Drop>();
+            public readonly List<ResourceNode> resources = new List<ResourceNode>();
+            public bool claimed, bossDefeated, bossBound;
+        }
 
+        const int CommandLimit=4;
         LevelDefinition[] levels;
         LevelDefinition level;
-        readonly List<Transform> stageObjects=new List<Transform>();
-        readonly List<Actor> enemies=new List<Actor>(),servants=new List<Actor>();
-        readonly List<Corpse> corpses=new List<Corpse>();
-        readonly List<Projectile> projectiles=new List<Projectile>();
+        StageInstance[] stages;
+        StageInstance current;
+        readonly List<Actor> servants = new List<Actor>();
+        readonly List<Projectile> projectiles = new List<Projectile>();
+        GameObject persistentRoot;
         Actor player;
-        SpriteRenderer backdrop;
-        Transform seal;
         Camera cam;
-        int stage,commandLimit=4,mana=55,maxMana=55,souls,kills,playerLevel=1;
-        float manaFraction,noticeUntil;
-        bool spellUnlocked,guardianDefeated,claimed,huntOrder;
-        string notice="Derrote uma criatura e reanime seu corpo.";
-        Vector2 touchMove;
+        int stage, mana=55,maxMana=55, shards,kills,playerLevel=1,experience;
+        int staffTier,mantleTier, gathered;
+        readonly Dictionary<string,int> speciesRanks=new Dictionary<string,int>();
+        readonly string[] upgradeKinds={"rat","slime","bat","spider","snake","skeleton","wisp"};
+        float manaFraction,noticeUntil,hitFlash;
+        bool spellUnlocked,huntOrder,upgradeOpen,gameOver,completed;
+        string notice="Derrote uma criatura e ressuscite seu corpo.";
+        Vector2 touchMove, facing=Vector2.right;
 
         void Start()
         {
             levels=NecroLevels.Load();
-            if(levels.Length==0){enabled=false;return;}
+            if(levels.Length==0){Debug.LogError("No levels configured.");enabled=false;return;}
+            stages=new StageInstance[levels.Length];
             Application.targetFrameRate=60;
             cam=Camera.main;
             if(cam==null)
             {
-                GameObject root=new GameObject("Main Camera");
-                root.tag="MainCamera";
-                cam=root.AddComponent<Camera>();
+                GameObject camera=new GameObject("Main Camera");
+                camera.tag="MainCamera";
+                cam=camera.AddComponent<Camera>();
             }
-            cam.orthographic=true;cam.orthographicSize=5.6f;
+            cam.orthographic=true;
+            cam.orthographicSize=5.6f;
             cam.clearFlags=CameraClearFlags.SolidColor;
             cam.backgroundColor=new Color(.10f,.09f,.14f);
-            LoadStage(0,false);
+            persistentRoot=new GameObject("Persistent Army and Necromancer");
+            stage=0;level=levels[0];
+            Vector2 start=NecroLevels.At(level,level.startX,level.startY);
+            player=Create("necromante",start,true,persistentRoot.transform);
+            player.maxHp=115;player.hp=115;player.speed=3.4f;
+            LoadStage(0);
         }
 
-        void LoadStage(int index,bool keepMinions)
-        {
-            List<string> army=new List<string>();
-            if(keepMinions)foreach(Actor minion in servants)army.Add(minion.kind);
-            foreach(Transform t in stageObjects)if(t!=null)Destroy(t.gameObject);
-            stageObjects.Clear();enemies.Clear();servants.Clear();corpses.Clear();projectiles.Clear();
-            stage=index;level=levels[index];guardianDefeated=false;claimed=false;
-            Vector2 at=NecroLevels.At(level,level.startX,level.startY);
-            backdrop=Visual("Cenario - "+level.id,
-                new Vector2(level.width*.5f,level.height*.5f),
-                NecroArt.Environment(level.background),-50);
-            Fit(backdrop,level.width,level.height);
-            foreach(Obstacle rock in level.obstacles)
-            {
-                SpriteRenderer visual=Visual("Rochedo",NecroLevels.At(level,rock.x,rock.y),
-                    NecroArt.Stone(),-3);
-                Fit(visual,rock.r*2,rock.r*2);
-            }
-            seal=Visual("Nucleo Necromantico",NecroLevels.At(level,level.sealX,level.sealY),
-                NecroArt.Effect(),-1).transform;
-            seal.localScale=Vector3.one*1.5f;
-            player=Create("necromante",at,true);
-            player.maxHp=115+12*(playerLevel-1);player.hp=player.maxHp;
-            player.speed=3.4f;
-            foreach(Spawn spawn in level.enemies)
-                enemies.Add(Create(spawn.kind,NecroLevels.At(level,spawn.x,spawn.y),false));
-            foreach(string kind in army)
-            {
-                Actor minion=Create(kind,at+Random.insideUnitCircle*.55f,true);
-                minion.attack*=1.4f;servants.Add(minion);
-            }
-            Announce(index==0?"A Caverna Esquecida: purifique o local.":"Tuneis inferiores: novas criaturas.");
-        }
-
-        SpriteRenderer Visual(string label,Vector2 at,Sprite sprite,int order)
+        SpriteRenderer Visual(string label,Vector2 at,Sprite sprite,int order,Transform parent)
         {
             GameObject obj=new GameObject(label);
+            obj.transform.SetParent(parent,false);
             obj.transform.position=new Vector3(at.x,at.y,0);
-            SpriteRenderer render=obj.AddComponent<SpriteRenderer>();
-            render.sprite=sprite;render.sortingOrder=order;
-            stageObjects.Add(obj.transform);return render;
+            SpriteRenderer renderer=obj.AddComponent<SpriteRenderer>();
+            renderer.sprite=sprite;
+            renderer.sortingOrder=order;
+            return renderer;
         }
-        static void Fit(SpriteRenderer renderer,float w,float h)
+
+        static void Fit(SpriteRenderer renderer,float width,float height)
         {
-            Vector2 sz=renderer.sprite.bounds.size;
-            renderer.transform.localScale=new Vector3(w/sz.x,h/sz.y,1);
+            Vector2 size=renderer.sprite.bounds.size;
+            renderer.transform.localScale=new Vector3(width/size.x,height/size.y,1);
         }
-        Actor Create(string kind,Vector2 at,bool ally)
+
+        Actor Create(string kind,Vector2 at,bool ally,Transform parent)
         {
-            float diameter=kind=="warden"?1.20f:kind=="necromante"?.95f:
-                kind=="slime"?.68f:kind=="bat"?.72f:.65f;
-            SpriteRenderer r=Visual((ally?"Aliado ":"Inimigo ")+kind,at,NecroArt.Get(kind),ally?15:12);
-            Fit(r,diameter,diameter);
-            Actor a=new Actor{kind=kind,ally=ally,body=r.transform,radius=diameter*.32f,
-                maxHp=kind=="warden"?230:kind=="slime"?54:kind=="necromante"?115:34,
-                attack=kind=="warden"?15:kind=="slime"?10:kind=="necromante"?26:8,
-                speed=kind=="bat"?2.6f:kind=="warden"?1.4f:kind=="slime"?1.4f:1.9f,
-                reach=kind=="bat"?1.05f:.65f};
-            a.hp=a.maxHp;return a;
+            float diameter=kind=="warden"||kind=="grave_lord"||kind=="marsh_lord"?1.24f:
+                kind=="necromante"?1.28f:kind=="slime"?.76f:kind=="wisp"?.70f:.72f;
+            var sprite=Visual((ally?"Servo ":"Hostil ")+kind,at,NecroArt.Get(kind),ally?15:12,parent);
+            Fit(sprite,diameter,diameter);
+            Actor a=new Actor{
+                kind=kind,ally=ally,body=sprite.transform,radius=diameter*.30f,
+                maxHp=kind=="marsh_lord"?460:kind=="grave_lord"?320:
+                    kind=="warden"?230:kind=="skeleton"?75:kind=="wisp"?58:
+                    kind=="slime"?54:kind=="necromante"?115:34,
+                attack=kind=="marsh_lord"?27:kind=="grave_lord"?22:
+                    kind=="warden"?15:kind=="skeleton"?12:kind=="wisp"?9:
+                    kind=="slime"?10:kind=="necromante"?26:8,
+                speed=kind=="marsh_lord"?1.3f:kind=="grave_lord"?1.45f:
+                    kind=="warden"?1.4f:kind=="bat"||kind=="wisp"?2.7f:
+                    kind=="slime"?1.4f:1.9f,
+                reach=kind=="bat"||kind=="wisp"?1.10f:.66f
+            };
+            a.hp=a.maxHp;
+            if(ally && kind!="necromante")ApplySpeciesRank(a);
+            return a;
+        }
+
+        void LoadStage(int index)
+        {
+            if(index<0 || index>=levels.Length)return;
+            if(current!=null)current.root.SetActive(false);
+            stage=index;
+            level=levels[stage];
+            if(stages[stage]==null) {
+                StageInstance next=new StageInstance();
+                next.root=new GameObject("Region "+(stage+1)+": "+level.title);
+                stages[stage]=next;
+                current=next;
+                Sprite background=NecroArt.Environment(level.background);
+                next.backdrop=Visual("Ground",new Vector2(level.width*.5f,level.height*.5f),
+                    background,-50,next.root.transform);
+                Fit(next.backdrop,level.width,level.height);
+                foreach(Obstacle rock in level.obstacles) {
+                    SpriteRenderer stone=Visual("Rock",NecroLevels.At(level,rock.x,rock.y),
+                        NecroArt.Stone(),-3,next.root.transform);
+                    Fit(stone,rock.r*2f,rock.r*2f);
+                }
+                next.seal=Visual("Necromantic Gate",NecroLevels.At(level,level.sealX,level.sealY),
+                    NecroArt.Effect(),-1,next.root.transform).transform;
+                next.seal.localScale=Vector3.one*2.2f;
+                foreach(Spawn spawn in level.enemies)
+                    next.enemies.Add(Create(spawn.kind,NecroLevels.At(level,spawn.x,spawn.y),
+                        false,next.root.transform));
+                if(level.resources!=null)foreach(ResourceSpawn res in level.resources)
+                    SpawnResource(res.type,NecroLevels.At(level,res.x,res.y));
+            } else {
+                current=stages[stage];
+                current.root.SetActive(true);
+            }
+            // All servants survive transitions with their HP and level intact.
+            Vector2 start=NecroLevels.At(level,level.startX,level.startY);
+            player.body.position=start;
+            for(int i=0;i<servants.Count;i++) {
+                float angle=i*2.399963f;
+                servants[i].body.position=start+
+                    new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*.6f;
+            }
+            foreach(Projectile orb in projectiles)
+                if(orb.body!=null)Destroy(orb.body.gameObject);
+            projectiles.Clear();
+            upgradeOpen=false;
+            Announce(level.title+": explore e domine as criaturas.");
+        }
+
+        void Advance()
+        {
+            if(!current.claimed || stage+1>=levels.Length)return;
+            LoadStage(stage+1);
+        }
+
+        void Retreat()
+        {
+            if(stage==0)return;
+            LoadStage(stage-1);
         }
 
         void Update()
         {
-            if(player==null || level==null)return;
+            if(player==null || level==null || gameOver)return;
             float dt=Mathf.Min(.045f,Time.deltaTime);
-            Vector2 control=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"))+touchMove;
-            foreach(Touch touch in Input.touches)
+            if(!upgradeOpen)
             {
-                if(touch.position.x<Screen.width*.43f && touch.position.y<Screen.height*.42f)
-                    control+=(touch.position-new Vector2(Screen.width*.18f,Screen.height*.18f))
-                              /Mathf.Max(75,Screen.width*.17f);
-            }
-            if(control.sqrMagnitude>1)control.Normalize();
-            if(player.hp>0)Move(player,control*player.speed*dt);
-            manaFraction+=dt*3.5f;
-            if(manaFraction>=1 && mana<maxMana)
-            {
-                int regenerated=(int)manaFraction;manaFraction-=regenerated;
-                mana=Mathf.Min(maxMana,mana+regenerated);
-            }
-            if(Input.GetKeyDown(KeyCode.Space))Cast();
-            if(Input.GetKeyDown(KeyCode.E))Raise();
-            if(Input.GetKeyDown(KeyCode.Q))huntOrder=!huntOrder;
-            if(Input.GetKeyDown(KeyCode.Return) && claimed && stage+1<levels.Length)LoadStage(stage+1,true);
-            if(player.hp>0)
-            {
-                UpdateActors(enemies,dt,false);
-                UpdateActors(servants,dt,true);
-                UpdateProjectiles(dt);
-            }
-            for(int i=corpses.Count-1;i>=0;i--)
-            {
-                corpses[i].time-=dt;
-                if(corpses[i].time<=0)
+                Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
+                Vector2 control=keyboard+touchMove;
+                foreach(Touch touch in Input.touches)
                 {
-                    Destroy(corpses[i].body.gameObject);
-                    corpses.RemoveAt(i);
+                    // Left-lower quadrant is a virtual analog joystick.
+                    if(touch.position.x<Screen.width*.43f && touch.position.y<Screen.height*.42f)
+                        control+=(touch.position-new Vector2(Screen.width*.18f,Screen.height*.18f))/
+                            Mathf.Max(75,Screen.width*.17f);
                 }
+                if(control.sqrMagnitude>1)control.Normalize();
+                if(control.sqrMagnitude>.01f)
+                {
+                    facing=control.normalized;
+                    Move(player,control*player.speed*dt);
+                }
+                Regenerate(dt);
+                if(Input.GetKeyDown(KeyCode.Space))Cast();
+                if(Input.GetKeyDown(KeyCode.E))Raise();
+                if(Input.GetKeyDown(KeyCode.Q))huntOrder=!huntOrder;
+                if(Input.GetKeyDown(KeyCode.Tab))upgradeOpen=true;
+                if(Input.GetKeyDown(KeyCode.Return))TryPortal();
+                if(player.hp>0)
+                {
+                    UpdateActors(current.enemies,dt,false);
+                    UpdateActors(servants,dt,true);
+                    UpdateProjectiles(dt);
+                }
+                TickCorpses(dt);
+                CollectNearby();
+                if(!current.claimed && current.enemies.Count==0 &&
+                    (!level.requiresGuardian || (current.bossDefeated && current.bossBound)))
+                    Claim();
+                if(current.seal!=null)
+                    current.seal.Rotate(0,0,dt*(current.claimed?18:5));
             }
-            if(!claimed && enemies.Count==0 && (!level.requiresGuardian || guardianDefeated))
-                Claim();
-            if(seal!=null)seal.Rotate(0,0,dt*(claimed?18:5));
-            Vector3 at=player.body.position;
+            Vector3 position=player.body.position;
             float hy=cam.orthographicSize,hx=hy*cam.aspect;
             cam.transform.position=new Vector3(
-                Mathf.Clamp(at.x,hx,Mathf.Max(hx,level.width-hx)),
-                Mathf.Clamp(at.y,hy,Mathf.Max(hy,level.height-hy)),-10);
+                Mathf.Clamp(position.x,hx,Mathf.Max(hx,level.width-hx)),
+                Mathf.Clamp(position.y,hy,Mathf.Max(hy,level.height-hy)),-10);
         }
 
-        void UpdateActors(List<Actor> actors,float dt,bool friendly)
+        bool NearSeal()
         {
-            for(int i=actors.Count-1;i>=0;i--)
-            {
-                Actor self=actors[i];
-                if(self.hp<=0)continue;
-                self.cooldown=Mathf.Max(0,self.cooldown-dt);
-                Actor target=null;
-                float best=friendly?(huntOrder?4.7f:3.1f):3.9f;
-                if(friendly)
-                {
-                    foreach(Actor enemy in enemies)
-                    {
-                        float d=Vector2.Distance(self.body.position,enemy.body.position);
-                        if(d<best){best=d;target=enemy;}
-                    }
-                    if(Vector2.Distance(self.body.position,player.body.position)>5)target=null;
-                } else {
-                    float d=Vector2.Distance(self.body.position,player.body.position);
-                    if(d<best){best=d;target=player;}
-                    foreach(Actor ally in servants)
-                    {
-                        d=Vector2.Distance(self.body.position,ally.body.position);
-                        if(d<best){best=d;target=ally;}
-                    }
-                }
-                if(target!=null)
-                {
-                    float distance=Vector2.Distance(self.body.position,target.body.position);
-                    if(distance>self.reach+target.radius)
-                        Move(self,((Vector2)(target.body.position-self.body.position)).normalized*self.speed*dt);
-                    else if(self.cooldown<=0)
-                    {
-                        self.cooldown=self.kind=="warden"?1.5f:1.15f;
-                        Damage(target,self.attack);
-                    }
-                }
-                else if(friendly)
-                {
-                    float angle=i*2.399963f;
-                    Vector2 desired=(Vector2)player.body.position+new Vector2(
-                        Mathf.Cos(angle),Mathf.Sin(angle))*.9f;
-                    Vector2 delta=desired-(Vector2)self.body.position;
-                    if(delta.magnitude>.25f)Move(self,delta.normalized*self.speed*dt);
-                }
-            }
+            return current.seal!=null &&
+                Vector2.Distance(player.body.position,current.seal.position)<2.2f;
         }
-        bool Blocked(Vector2 p,float radius)
+
+        bool NearEntrance()
         {
-            if(p.x<radius || p.y<radius || p.x>level.width-radius || p.y>level.height-radius)
-                return true;
-            foreach(Obstacle rock in level.obstacles)
-                if(Vector2.Distance(p,NecroLevels.At(level,rock.x,rock.y))<radius+rock.r)
-                    return true;
-            return false;
+            Vector2 start=NecroLevels.At(level,level.startX,level.startY);
+            return Vector2.Distance(player.body.position,start)<2.1f;
         }
-        void Move(Actor actor,Vector2 displacement)
+
+        void TryPortal()
         {
-            Vector2 at=actor.body.position;
-            Vector2 next=at+new Vector2(displacement.x,0);
-            if(!Blocked(next,actor.radius))at=next;
-            next=at+new Vector2(0,displacement.y);
-            if(!Blocked(next,actor.radius))at=next;
-            actor.body.position=new Vector3(at.x,at.y,0);
+            if(stage>0 && NearEntrance()){Retreat();return;}
+            if(current.claimed && stage+1<levels.Length && NearSeal())Advance();
         }
-        void Damage(Actor victim,float amount)
-        {
-            if(victim.hp<=0)return;
-            victim.hp-=amount;
-            if(victim.hp>0)return;
-            if(victim==player){Announce("O ritual falhou. Reinicie a expedicao.");return;}
-            if(victim.ally)servants.Remove(victim);
-            else
-            {
-                enemies.Remove(victim);kills++;souls++;
-                if(victim.kind=="warden")guardianDefeated=true;
-                if(!spellUnlocked){spellUnlocked=true;Announce("Sua primeira magia foi despertada!");}
-                SpriteRenderer marker=Visual("Corpo: "+victim.kind,victim.body.position,
-                    NecroArt.Effect(),9);
-                Fit(marker,.42f,.42f);
-                marker.color=new Color(.78f,.70f,.91f,.7f);
-                corpses.Add(new Corpse{kind=victim.kind,body=marker.transform,
-                    time=victim.kind=="warden"?100:38});
-                if(kills%5==0){playerLevel++;maxMana+=7;Announce("Nivel "+playerLevel+" alcancado.");}
-            }
-            Destroy(victim.body.gameObject);
-        }
-        Actor Closest(float max)
-        {
-            Actor found=null;float best=max;
-            foreach(Actor a in enemies)
-            {
-                float d=Vector2.Distance(a.body.position,player.body.position);
-                if(d<best){best=d;found=a;}
-            }
-            return found;
-        }
-        void Cast()
-        {
-            if(player==null || player.hp<=0)return;
-            Actor enemy=Closest(spellUnlocked?3.6f:.96f);
-            if(enemy==null){Announce("Nenhum inimigo ao alcance.");return;}
-            if(!spellUnlocked){Damage(enemy,26);return;}
-            if(mana<9){Announce("Anima insuficiente.");return;}
-            mana-=9;
-            SpriteRenderer orb=Visual("Orbe espectral",player.body.position,NecroArt.Effect(),20);
-            Fit(orb,.34f,.34f);
-            Vector2 vector=((Vector2)enemy.body.position-(Vector2)player.body.position).normalized;
-            projectiles.Add(new Projectile{body=orb.transform,direction=vector,time=1});
-        }
-        void UpdateProjectiles(float dt)
-        {
-            for(int i=projectiles.Count-1;i>=0;i--)
-            {
-                Projectile p=projectiles[i];
-                p.body.position+=(Vector3)(p.direction*(dt*7));
-                p.time-=dt;
-                bool finished=p.time<=0 || Blocked(p.body.position,.05f);
-                if(!finished)
-                {
-                    // Iteracao indexada: Damage remove inimigos ao morrer.
-                    for(int j=enemies.Count-1;j>=0;j--)
-                        if(Vector2.Distance(p.body.position,enemies[j].body.position)<enemies[j].radius+.15f)
-                        {
-                            Damage(enemies[j],34+playerLevel*3);
-                            finished=true;break;
-                        }
-                }
-                if(finished){Destroy(p.body.gameObject);projectiles.RemoveAt(i);}
-            }
-        }
-        int Command()
-        {
-            int used=0;
-            foreach(Actor a in servants)
-                used+=a.kind=="warden"?3:a.kind=="slime"?2:1;
-            return used;
-        }
-        void Raise()
-        {
-            if(player==null || player.hp<=0)return;
-            Corpse closest=null;float best=1.1f;
-            foreach(Corpse corpse in corpses)
-            {
-                float d=Vector2.Distance(corpse.body.position,player.body.position);
-                if(d<best){best=d;closest=corpse;}
-            }
-            if(closest==null){Announce("Aproxime-se de um corpo.");return;}
-            int command=closest.kind=="warden"?3:closest.kind=="slime"?2:1;
-            int cost=closest.kind=="warden"?37:closest.kind=="slime"?22:16;
-            if(Command()+command>commandLimit){Announce("Limite de comando atingido.");return;}
-            if(mana<cost){Announce("Anima insuficiente.");return;}
-            mana-=cost;
-            Actor minion=Create(closest.kind,closest.body.position,true);
-            minion.attack*=1.4f;
-            servants.Add(minion);
-            Destroy(closest.body.gameObject);corpses.Remove(closest);
-            Announce("Servo recrutado: "+minion.kind+".");
-        }
+
         void Claim()
         {
-            claimed=true;
-            if(stage==0)
+            current.claimed=true;
+            if(!string.IsNullOrEmpty(level.baseBackground))
             {
-                backdrop.sprite=NecroArt.Environment(level.baseBackground);
-                Fit(backdrop,level.width,level.height);
+                current.backdrop.sprite=NecroArt.Environment(level.baseBackground);
+                Fit(current.backdrop,level.width,level.height);
             }
-            if(seal!=null)seal.localScale=Vector3.one*2.5f;
-            Announce(stage==0?"A caverna agora e sua primeira base!":"Tuneis purificados!");
+            current.seal.localScale=Vector3.one*3.2f;
+            if(stage==levels.Length-1) {
+                completed=true;
+                Announce("As regioes foram conquistadas. Seu exercito prevaleceu!");
+            } else {
+                Announce("Regiao conquistada! Aproxime-se do selo central para prosseguir.");
+            }
         }
-        void Announce(string message){notice=message;noticeUntil=Time.time+4f;}
-        void OnGUI()
+
+        void Announce(string message)
         {
-            if(player==null || level==null)return;
-            float scale=Mathf.Clamp(Screen.width/420f,.65f,1.6f);
-            GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
-            float w=Screen.width/scale,h=Screen.height/scale;
-            GUI.Box(new Rect(8,8,w-16,115),level.title);
-            GUI.Label(new Rect(17,32,w-32,21),"Vida "+Mathf.CeilToInt(player.hp)+"/"+player.maxHp+
-                " | Anima "+mana+"/"+maxMana);
-            GUI.Label(new Rect(17,54,w-32,21),"Nivel "+playerLevel+" | Servos "+servants.Count+
-                " | Comando "+Command()+"/4 | Almas "+souls);
-            GUI.Label(new Rect(17,79,w-32,32),Time.time<noticeUntil?notice:"Explore, derrote e ressuscite.");
-            float cy=h-128;
-            Vector2 direction=Vector2.zero;
-            if(GUI.RepeatButton(new Rect(70,cy-65,56,52),"▲"))direction.y++;
-            if(GUI.RepeatButton(new Rect(70,cy+49,56,52),"▼"))direction.y--;
-            if(GUI.RepeatButton(new Rect(14,cy-8,55,52),"◀"))direction.x--;
-            if(GUI.RepeatButton(new Rect(127,cy-8,55,52),"▶"))direction.x++;
-            touchMove=direction.normalized;
-            if(GUI.Button(new Rect(w-127,cy-64,114,53),spellUnlocked?"MAGIA":"GOLPE"))Cast();
-            if(GUI.Button(new Rect(w-127,cy-5,114,53),"REVIVER"))Raise();
-            if(GUI.Button(new Rect(w-127,cy+54,114,46),huntOrder?"CACAR":"DEFENDER"))
-                huntOrder=!huntOrder;
-            if(claimed && stage+1<levels.Length && GUI.Button(
-                new Rect(w*.26f,h*.25f,w*.48f,52),"ENTRAR NOS TUNEIS"))
-                LoadStage(stage+1,true);
-            if(player.hp<=0 && GUI.Button(new Rect(w*.26f,h*.46f,w*.48f,55),"REINICIAR"))
-                LoadStage(stage,false);
+            notice=message;
+            noticeUntil=Time.time+4f;
+        }
+
+        void Regenerate(float dt)
+        {
+            manaFraction+=dt*(3.5f+(playerLevel-1)*.4f);
+            if(manaFraction>=1 && mana<maxMana)
+            {
+                int regenerated=(int)manaFraction;
+                manaFraction-=regenerated;
+                mana=Mathf.Min(maxMana,mana+regenerated);
+            }
         }
     }
 }
