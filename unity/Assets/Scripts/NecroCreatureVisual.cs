@@ -74,18 +74,18 @@ namespace Necromancer
             bool moving=delta.sqrMagnitude>.0000015f;
             lastPosition=at;
 
-            float bob=(flying?.11f:slime?.025f:boss?.020f:.035f)*
+            float bob=(flying ? .11f : slime ? .025f : boss ? .020f : .035f)*
                 Mathf.Sin(t*(flying?5.2f:moving?12f:2.5f));
-            float swing=(spider?3.4f:boss?.55f:2.1f)*
+            float swing=(spider ? 3.4f : boss ? .55f : 2.1f)*
                 Mathf.Sin(t*(moving?9f:2f));
             float squash=slime ? .075f*Mathf.Sin(t*(moving?11f:3.4f)) : 0f;
             float flutter=flying && type=="bat" ? .09f*Mathf.Sin(t*16f):0f;
 
-            art.localPosition=new Vector3(attackTimer>0?.07f:0,bob,0);
+            art.localPosition=new Vector3(attackTimer > 0f ? .07f : 0f,bob,0);
             art.localRotation=Quaternion.Euler(0,0,
                 swing+(attackTimer>0?Mathf.Sin(attackTimer*30f)*8f:0f));
             art.localScale=new Vector3(bodyScale+squash+flutter,
-                bodyScale-squash+(attackTimer>0?.03f:0),1);
+                bodyScale-squash+(attackTimer > 0f ? .03f : 0f),1);
             if(delta.x>0.0001f)artRenderer.flipX=false;
             else if(delta.x<-0.0001f)artRenderer.flipX=true;
 
@@ -126,7 +126,7 @@ namespace Necromancer
             if(parent!=null)obj.transform.SetParent(parent,false);
             obj.transform.position=new Vector3(position.x,position.y,0);
             NecroCombatFx fx=obj.AddComponent<NecroCombatFx>();
-            fx.duration=type==1?.76f:type==2?1.1f:.30f;
+            fx.duration=type == 1 ? .76f : type == 2 ? 1.1f : .30f;
             fx.remaining=fx.duration;
             fx.rotationSpeed=type==0?90f:type==1?75f:-52f;
             fx.drift=type==0?new Vector2(.04f,.13f):
