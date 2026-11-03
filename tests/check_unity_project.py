@@ -172,7 +172,7 @@ assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
 assert "heroineStrikePulse=.38f;" in gameplay
 assert "heroineHitPulse=.20f;" in gameplay
 assert "VerifySet(\"necromante\",true);" in frame_editor
-assert "com.takeo.necromancer.unity.preview062" in builder
+assert "com.takeo.necromancer.unity.preview063" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
 creature_visual=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
