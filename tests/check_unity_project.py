@@ -20,7 +20,8 @@ required = [
     "Assets/Scripts/NecroUI.cs",
     "Assets/Scripts/NecroPolishedHUD.cs",
     "Assets/Scripts/NecroCreatureArt.cs",
-    "Assets/Scripts/NecroCreatureVisual.cs",
+    "Assets/Scripts/NecroCreatureView.cs",
+    "Assets/Scripts/NecroCombatFx.cs",
     "Assets/Scripts/NecroScenery.cs",
     "Assets/Editor/NecroVisualEditorCheck.cs",
     "Assets/Scripts/NecroCharacterAnimation.cs",
@@ -153,7 +154,8 @@ assert "PlayerSettings.bundleVersion = \"0.6.2\"" in builder
 assert "com.takeo.necromancer.unity.preview062" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
-creature_visual=(unity/"Assets/Scripts/NecroCreatureVisual.cs").read_text()
+creature_visual=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
+combat_fx=(unity/"Assets/Scripts/NecroCombatFx.cs").read_text()
 scenery=(unity/"Assets/Scripts/NecroScenery.cs").read_text()
 assert "NecroCreatureArt.Draw(t,kind)" in scripts["NecroArt.cs"]
 assert "NecroCreatureView.Attach(sprite,kind,ally)" in core
@@ -162,8 +164,10 @@ assert "NecroCombatFx.Emit(" in gameplay
 for creature in ("rat","bat","slime","spider","snake","skeleton","wisp",
                  "warden","grave_lord","marsh_lord"):
     assert f'case "{creature}"' in creature_art, creature
-for required in ("LateUpdate()", "Flash()", "Strike()", "Capacity=30"):
+for required in ("LateUpdate()", "Flash()", "Strike()"):
     assert required in creature_visual, required
+for required in ("Capacity=30", "void Update()", "void OnDestroy()"):
+    assert required in combat_fx, required
 for scene in ("headstone","broken_cross","lantern","bones","fungus","reeds",
               "pool","rune","crystal"):
     assert f'case "{scene}"' in scenery, scene
