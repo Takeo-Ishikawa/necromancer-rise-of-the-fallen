@@ -35,8 +35,8 @@ namespace Necromancer.EditorTools
                 "com.takeo.necromancer.unity");
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
-            PlayerSettings.bundleVersion = "0.5.0";
-            PlayerSettings.Android.bundleVersionCode = 5;
+            PlayerSettings.bundleVersion = "0.6.0";
+            PlayerSettings.Android.bundleVersionCode = 6;
             // Unity requires IL2CPP for ARM64 Android player builds.
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;

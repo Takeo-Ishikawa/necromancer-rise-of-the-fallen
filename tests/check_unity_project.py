@@ -2,6 +2,8 @@
 """Static regression checks for Unity 2022.3 project; NOT a runtime play test."""
 import json
 import re
+import struct
+import zlib
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
@@ -16,6 +18,9 @@ required = [
     "Assets/Scripts/NecroPrototype.cs",
     "Assets/Scripts/NecroGameplay.cs",
     "Assets/Scripts/NecroUI.cs",
+    "Assets/Scripts/NecroPolishedHUD.cs",
+    "Assets/Scripts/NecroCharacterAnimation.cs",
+    "Assets/Resources/Sprites/necromante.png",
     "Assets/Scripts/NecroCrypt.cs",
     "Assets/Scripts/NecroSaveData.cs",
     "Assets/Editor/NecroSaveEditorCheck.cs",
@@ -100,5 +105,48 @@ assert "AndroidArchitecture.ARM64" in builder
 assert "ScriptingImplementation.IL2CPP" in builder
 assert "BuildTarget.Android" in builder
 assert re.search(r'BuildReport\s+report\s*=', builder)
-print(f"Unity source verified: {len(levels)} regions; ARM64; Cripta 0.5; "
-      "local save; Unity Editor compilation and phone tests remain necessary.")
+
+# Validate the actual heroine sprite rather than trusting a placeholder mockup.
+hero_png = (unity / "Assets/Resources/Sprites/necromante.png").read_bytes()
+assert hero_png[:8] == bytes([137,80,78,71,13,10,26,10])
+offset=8
+idat=bytearray()
+width=height=0
+found_end=False
+while offset < len(hero_png):
+    assert offset+12 <= len(hero_png), "Truncated PNG chunk"
+    length=struct.unpack(">I",hero_png[offset:offset+4])[0]
+    tag=hero_png[offset+4:offset+8]
+    payload=hero_png[offset+8:offset+8+length]
+    checksum=struct.unpack(">I",hero_png[offset+8+length:offset+12+length])[0]
+    assert (zlib.crc32(tag+payload)&0xffffffff)==checksum, f"PNG CRC mismatch {tag}"
+    if tag==b"IHDR":
+        width,height=struct.unpack(">II",payload[:8])
+    if tag==b"IDAT":
+        idat.extend(payload)
+    offset+=12+length
+    if tag==b"IEND":
+        found_end=True
+        break
+assert found_end and width>=90 and height>=110
+assert len(zlib.decompress(idat))>width*height, "Invalid sprite scanlines"
+
+hud=(unity/"Assets/Scripts/NecroPolishedHUD.cs").read_text()
+for name in ("DrawPolishedHUD(", "DrawPortraitUi(", "DrawMiniMapUi(",
+             "DrawIconUi(", "DrawArmyInspect(", "DrawGearInspect("):
+    assert name in hud, "Missing interactive UI: "+name
+animation=(unity/"Assets/Scripts/NecroCharacterAnimation.cs").read_text()
+for name in ("InitializeHeroAnimation(", "AnimateHeroVisual(", "ritualCircleRenderer",
+             "witchArtRenderer.flipX"):
+    assert name in animation, "Missing character animation: "+name
+assert "InitializeHeroAnimation();" in core
+assert "AnimateHeroVisual(dt);" in core
+assert "joystickFingerId" in core and "TouchPhase.Began" in core
+assert "DrawPolishedHUD(w,h);" in ui
+assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
+assert "RitualCircle()" in scripts["NecroArt.cs"]
+assert "PlayerSettings.bundleVersion = \"0.6.0\"" in builder
+
+print(f"Unity source verified: {len(levels)} regions, 0.6 portrait PNG "
+      f"({width}x{height}), HUD, animator, save and ARM64. "
+      "Unity Editor build and device validation remain necessary.")
