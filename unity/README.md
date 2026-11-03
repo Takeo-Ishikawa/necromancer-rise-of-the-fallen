@@ -1,26 +1,35 @@
-# Necromancer — Unity 0.6.3: animação por quadros
+# Necromancer — Unity Android Preview 0.6.4
 
-**Implementado no motor Unity 2022.3 LTS**, para Android ARMv7/ARM64. A versão 0.6.3 substitui a animação por oscilação simples por **quadros distintos armazenados em atlases de sprites**.
+**Unity Editor:** 2022.3.62f2 LTS · Android IL2CPP · ARM64 + ARMv7.
 
-## Animação real integrada ao gameplay
+## Alterações de jogabilidade solicitadas
 
-A biblioteca `NecroFrameLibrary.cs` constrói atlases de frames a partir das ilustrações originais, mantendo o visual das criaturas e da necromante. Cada quadro é uma `Sprite` independente acessada pela `SpriteRenderer.sprite`, e o atlas é gerado apenas uma vez por espécie.
+### Inimigos reaparecem
 
-- **Protagonista:** quatro direções (frente, costas aproximadas, esquerda e direita); três quadros em repouso, seis na caminhada, quatro no ataque, quatro na magia, cinco na ressurreição e dois no dano.
-- **Oito categorias de monstros:** rato, morcego, limo, esqueleto, espírito, Sentinela, Cavaleiro das Cinzas e Colosso do Pântano, com estados de repouso, caminhada/voo, ataque e dano em quatro direções. A aranha e a cobra continuam usando animação leve de movimento da etapa 0.6.2.
-- **Gatilhos reais:** movimentação, golpes, projéteis, ressurreição, acerto sofrido e IA dos monstros trocam as sequências automaticamente. A aura dos servos e os efeitos visuais de batalha continuam.
-- **Sem alterações de regras:** IA, colisões, salvamento da Cripta, upgrades, portais e regiões funcionam sem novas estruturas nos arquivos JSON.
+Depois que uma região é conquistada, **monstros comuns reaparecem continuamente**. O primeiro respawn ocorre após aproximadamente 6 segundos, e os seguintes em intervalos entre 7,5 e 11,5 segundos. Eles surgem a uma distância aproximada de 5 a 8,5 unidades do necromante, sem atravessar obstáculos nem aparecer em cima dos servos. Existe limite de **10 a 16 inimigos simultâneos**, dependendo do mapa. Cada região usa apenas as espécies comuns definidas para ela. Os chefes especiais permanecem únicos; sua morte e conquista não são reiniciadas.
 
-**Limitação artística importante:** estes são *quadros derivados procedimentalmente das ilustrações existentes*, não dezenas de desenhos produzidos manualmente. A direção de costas e os perfis são adaptações da arte frontal; o sprite sheet desenhado à mão em quatro perspectivas ainda é uma melhoria possível. A estrutura já permite substituir os atlases por imagens de produção em `Assets/Resources/AnimationSheets/<especie>.png`, mantendo a convenção de 6 colunas e 4 linhas por estado.
+As regiões ainda não conquistadas seguem a progressão original: um mapa deve poder ser limpo para desbloquear o selo. Os novos monstros não impedem essa conquista porque o respawn começa somente **depois** da vitória. Mapas já concluídos em saves antigos voltam a ter monstros quando o jogador retorna ou continua a partida. O estado das criaturas vivas continua sendo salvo normalmente.
+
+### Exército maior
+
+Capacidade aumentada de **4 para 12 pontos de comando**. Isso permite até 12 criaturas de custo 1 simultaneamente ou combinações de unidades maiores: slimes/esqueletos custam 2, guardiões custam 3 e o chefe do pântano custa 4. A interface da Cripta, o salvamento e a retirada dos servos utilizam automaticamente esse novo limite. O menu do exército agora tem páginas para consultar mais aliados.
+
+### Ataque automático
+
+O botão GOLPE/MAGIA foi **removido** da HUD. O necromante ataca automaticamente o inimigo mais próximo dentro do alcance e com linha de visão. Antes do primeiro despertar mágico, usa golpe físico de curta distância. Depois, lança orbes de magia automaticamente quando tem ânima suficiente, respeitando o intervalo dos ataques. Sem ânima, pode golpear fisicamente os inimigos que se aproximarem. Não é necessário tocar na tela para atacar.
+
+A necromancia permanece **ativa**: REVIVER continua sendo um botão e exige aproximar-se de um cadáver. Os controles DEFESA/CAÇA e EVOLUIR também continuam. A parte direita da HUD exibe 'ATAQUE AUTOMÁTICO'.
+
+## Compatibilidade de instalação e salvamento
+
+Esta é outra **prévia independente** com o identificador `com.takeo.necromancer.unity.preview064`, para evitar conflito de assinatura com versões antigas. **Não desinstale a 0.5**, nem as outras prévias que você queira preservar. O progresso da 0.5 não é transferido automaticamente: a instalação usa diretório próprio.
+
+O **formato do JSON de save não mudou**, preservando o layout de níveis, criaturas, equipamentos, Cripta e rituais. A reprodução dos inimigos se recalcula a partir da região e não precisa alterar o formato salvo. O guia de assinatura permanente e migração está em [docs/ANDROID_SIGNING.md](../docs/ANDROID_SIGNING.md).
 
 ## Testes
 
-`NecroFrameEditorCheck.cs` gera atlases dentro do próprio Editor do Unity antes de compilar Android, inspeciona dimensões, direções e quadros. Ele também verifica cache e disponibilidade das sequências do protagonista, rato e morcego. O teste de estrutura em Python `tests/check_unity_project.py` valida os scripts e seus gatilhos.
+O workflow GitHub [Unity Android Preview APK](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/unity-android.yml) executa as verificações estáticas, o teste de quadros no Unity Editor e a compilação do APK.
 
-## Instalando sem perder a versão 0.5
+Ao instalar no celular, confira particularmente os inimigos surgindo novamente em áreas conquistadas, o funcionamento do ataque automático e se consegue invocar mais do que quatro pontos de comando. A validação em aparelho físico permanece necessária.
 
-**Preview 0.6.3** usa o identificador próprio `com.takeo.necromancer.unity.preview063`, que é diferente da 0.5, Preview 0.6.1 e Preview 0.6.2. Este aplicativo aparece como **Necromancer (Preview 0.6.3)** no celular e começa uma campanha independente. Não desinstale a 0.5: a chave antiga não permite uma atualização direta. Consulte [assinatura e backup](../docs/ANDROID_SIGNING.md) antes de migrar dados.
-
-## Próximas etapas
-
-Substituir os quadros derivados por ilustrações 2D definitivas (com direções e roupas consistentes), otimizar memória dos atlases e adicionar partículas/som mais refinados. Esta versão é um protótipo jogável, não os assets finais.
+Os sprites procedurais por quadros, cenários, UI ilustrada e animações da 0.6.3 continuam presentes.

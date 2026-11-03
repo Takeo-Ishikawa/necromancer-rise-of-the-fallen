@@ -32,3 +32,7 @@ Os dez tipos de criaturas agora têm sprites próprios, animações de combate e
 ### Animação por quadros 0.6.3
 
 Agora a necromante e oito tipos de monstros usam atlases de quadros reais no Unity, com direções e estados de gameplay. Os quadros foram derivados da arte original e ainda não representam ilustrações manuais finais. A prévia usa um identificador de aplicativo separado para preservar instalações anteriores. [Mais detalhes](unity/README.md).
+
+### Atualização de jogabilidade 0.6.4
+
+Inimigos comuns reaparecem em regiões conquistadas (sem reanimar chefes), o exército passou para 12 pontos de comando e o necromante ataca automaticamente. O botão de ataque foi removido; REVIVER, DEFESA/CAÇA e EVOLUIR permanecem. A prévia 0.6.4 tem instalação separada para proteger o salvamento da 0.5. Veja [o guia da versão](unity/README.md).

@@ -17,6 +17,7 @@ required = [
     "Assets/Scripts/NecroArt.cs",
     "Assets/Scripts/NecroPrototype.cs",
     "Assets/Scripts/NecroGameplay.cs",
+    "Assets/Scripts/NecroRespawn.cs",
     "Assets/Scripts/NecroUI.cs",
     "Assets/Scripts/NecroPolishedHUD.cs",
     "Assets/Scripts/NecroCreatureArt.cs",
@@ -78,6 +79,31 @@ for feature in ("LoadStage(", "StageInstance", "current.root.SetActive(false)",
 for feature in ("UpgradeSpecies(", "SpawnDrop(", "CollectNearby(", "Visible(",
                 "Raise(", "Dismiss(", "ManaCost(", "CommandCost("):
     assert feature in gameplay, f"Missing gameplay rule {feature}"
+# Respawning and auto combat must work in regions restored from older saves.
+respawn=(unity/"Assets/Scripts/NecroRespawn.cs").read_text()
+hud=(unity/"Assets/Scripts/NecroPolishedHUD.cs").read_text()
+assert "const int CommandLimit=12;" in core
+assert "TickRespawns(dt);" in core
+assert "TryAutomaticAttack();" in core
+assert "Input.GetKeyDown(KeyCode.Space)" not in core
+assert "respawnTimer=FirstRespawnSeconds" in core
+for feature in ("TickRespawns(float dt)", "current.claimed", "IsBoss(entry.kind)",
+                "MaxLivingEnemies=16", "SpawnMinDistance=5.0f",
+                "MinEnemySeparation=1.8f", "current.enemies.Add(spawned)",
+                "TryAutomaticAttack()", "Cast();", "mana>=9",
+                "heroineStrikePulse=.38f"):
+    assert feature in respawn, f"Missing loop/autoattack feature {feature}"
+assert 'spellUnlocked?"MAGIA":"GOLPE"' not in hud
+assert '"ATAQUE AUTOMÁTICO"' in hud
+assert '"REVIVER",Raise' in hud
+assert '"EVOLUIR"' in hud
+assert "int armyPage;" in hud
+boss_kinds={"warden","grave_lord","marsh_lord"}
+for area in levels:
+    normal=[enemy for enemy in area["enemies"] if enemy["kind"] not in boss_kinds]
+    assert normal, f"No respawnable regular enemies in {area['id']}"
+    assert all(0 < x["x"] < area["width"] and 0 < x["y"] < area["height"] for x in normal)
+    assert 10 <= min(16,max(10,len(normal)+4)) <= 16
 assert "Input.touches" in core
 assert "DrawWitch(" in scripts["NecroArt.cs"]
 assert "DrawCryptAltar(" in scripts["NecroArt.cs"]
@@ -152,8 +178,8 @@ assert "joystickFingerId" in core and "TouchPhase.Began" in core
 assert "DrawPolishedHUD(w,h);" in ui
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.6.3\"" in builder
-assert "com.takeo.necromancer.unity.preview063" in builder
+assert "PlayerSettings.bundleVersion = \"0.6.4\"" in builder
+assert "com.takeo.necromancer.unity.preview064" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 frame_library=(unity/"Assets/Scripts/NecroFrameLibrary.cs").read_text()
 hero_anim=(unity/"Assets/Scripts/NecroCharacterAnimation.cs").read_text()
@@ -172,7 +198,7 @@ assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
 assert "heroineStrikePulse=.38f;" in gameplay
 assert "heroineHitPulse=.20f;" in gameplay
 assert "VerifySet(\"necromante\",true);" in frame_editor
-assert "com.takeo.necromancer.unity.preview063" in builder
+assert "com.takeo.necromancer.unity.preview064" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
 creature_visual=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
@@ -205,6 +231,6 @@ assert "NECRO_ANDROID_MODE: release" in release_workflow
 assert "ANDROID_KEYSTORE_BASE64" in release_workflow
 assert ".android-release.keystore" in release_workflow
 
-print(f"Unity source verified: {len(levels)} regions, 0.6.3 directional animation, creatures, portrait PNG "
+print(f"Unity source verified: {len(levels)} regions, 0.6.4 automatic attacks, respawn, twelve-command army, directional animation, creatures, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")
