@@ -9,3 +9,8 @@
 .idea/
 *.csproj
 *.sln
+
+# NEVER commit a signing key or its passwords.
+.android-release.keystore
+*.keystore
+*.jks

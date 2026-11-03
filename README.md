@@ -1,47 +1,24 @@
-# Necromancer: Rise of the Fallen — Unity Android 0.5
+# APK Unity Android
 
-**Motor principal: Unity 2022.3 LTS (versão 0.6).** O projeto fica em [`unity/`](unity/README.md), com quatro mapas conectados, exército autônomo, progressão, equipamentos, Cripta, rituais e salvamento local entre sessões. O build Unity gera APK com suporte **ARM64 via IL2CPP**.
+Unity 2022.3.62f2 LTS; projeto na pasta `unity/`.
 
-**Versão 0.5:** a Cripta está acessível no santuário da caverna conquistada, com armazenamento de servos, expansão de nichos e rituais permanentes. O estado da exploração e do exército é salvo no Android com recuperação por backup. A versão Java/Canvas continua preservada; a migração Unity requer validação de jogabilidade e de salvamento em aparelho real.
+### Compilacao no GitHub
 
----
+O workflow [Unity Android APK](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/unity-android.yml) executa verificacao estrutural, importa o projeto no Unity, compila com IL2CPP para ARMv7 + ARM64 e publica o artefato `necromancer-unity-android-apk`.
 
-# Prototipo Android legado — 0.4
+A compilacao exige uma **licenca Unity configurada nos secrets do GitHub** (`UNITY_LICENSE` ou `UNITY_SERIAL`). Nunca inclua licencas nem senhas no repositorio.
 
-Jogo Android **nativo** (Java e Canvas), com controles por toque, combate automático do exército, progressão de níveis e equipamentos.
+O sucesso do workflow significa que o APK foi produzido pelo Unity. **Nao equivale a teste de jogabilidade em telefone**. Antes de publicar, validar criacao de partida, combate por toque, necromancia, transicoes, upgrade, derrota e reinicio em aparelhos ARM64.
 
-## Instalação
+### Compilacao local
 
-Baixe o artefato **necromancer-android-v0.4** na [execução mais recente do GitHub Actions](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/android.yml). Extraia o ZIP e instale **app-debug.apk** no Android 8.0+.
+No Unity Hub, instale Unity 2022.3.62f2 com Android Build Support, SDK, NDK e OpenJDK. Abra `unity/`, aguarde o auto-bootstrap da cena `Assets/Scenes/NecromancerPrototype.unity`, clique Play para inspecionar e utilize **Build Settings > Android > Build**. A cena inicial e criada no editor se estiver ausente.
 
-## Novidades — Exploração
+### Arte
 
-1. **Caverna Esquecida:** mantém o grande mapa e a conquista da base. Após derrotar todos os inimigos e vincular a sentinela, toque em *ENTRAR NA BASE* e aproxime-se do portal no Santuário das Almas (centro da caverna).
-2. **Necrópole das Cinzas:** mapa original com lápides, mausoléu, esqueletos e espíritos. Colete ossos rituais. Derrote e ressuscite o Cavaleiro das Cinzas para liberar o portal do pântano.
-3. **Pântano dos Sussurros:** novo mapa de lagoas sombrias, fungos espectrais e encontros mais difíceis. Derrote e ressuscite o Colosso para finalizar o capítulo.
-4. **Portais bidirecionais:** retornam às regiões já descobertas. Inimigos remanescentes, itens e recursos coletados são preservados entre visitas, assim como o exército e a progressão.
-5. **Recursos coletáveis:** cristais, ossos e fungos fornecem fragmentos de alma e restauram um pouco de vida e ânima quando o jogador se aproxima.
-6. **Novos servos:** esqueletos (combatentes resistentes, custo de comando 2), espíritos (ataques de alcance, custo 1), Cavaleiro das Cinzas (3) e Colosso (4). Esqueletos e espíritos também podem ser aprimorados no painel EVOLUIR.
-7. **Novo visual da protagonista:** arte vetorial original adaptada ao conceito compartilhado, com chapéu largo, cabelo claro, manto, cajado e lanterna. A arte final animada ainda será desenvolvida.
+Sprites e fundos procedurais originais sao usados quando `Assets/Resources/Sprites/<nome>.png` e `Assets/Resources/Backgrounds/<nome>.png` nao existem. A bruxa foi redesenhada como sprite legivel, mas a ilustracao definitiva precisara de sprites transparentes e animacoes em direcoes.
 
-Os controles permanecem: joystick à esquerda; GOLPE/MAGIA, REVIVER e DEFESA/CAÇA à direita; EVOLUIR abre o painel de melhorias. Segure REVIVER para dispensar um servo e liberar capacidade de comando.
+A implementacao Java/Canvas em `app/` continua disponivel para comparacao.
 
-### Observações
 
-O progresso continua restrito à expedição; sistema de salvamento e melhorias permanentes ficam previstos para a versão 0.5 (Cripta). A direção de arte usa elementos originais. Não foram copiados recursos do Wild Tamer ou de Necromancer/Prismathunder.
-
-### Verificação
-
-O GitHub Actions compila com JDK 17, Gradle 8.9 e SDK Android 35; roda os testes `WorldSmokeTest`, `WorldProgressionTest` e `WorldExplorationTest`, publicando o APK nativo como artefato.
-
-```sh
-gradle :app:assembleDebug
-```
-
-### Compatibilidade com a caverna ampliada
-
-A atualização paralela do layout de 3072 × 2048 e o arquivo `assets/caverna_inicial_map.json` foram preservados. O pipeline roda também o `CaveExpansionTest` e valida a conquista da base.
-
-## Atualização visual 0.6
-
-A primeira implantação da arte ilustrada no Unity adiciona sprite transparente da necromante, animação procedural de caminhada e magia, HUD gótica funcional, minimapa e joystick revisado. Consulte [o guia da versão 0.6](unity/README.md). A fase de animações desenhadas quadro a quadro, criaturas e cenários ilustrados ainda será desenvolvida.
+**Atenção às atualizações Android:** a 0.5 e a 0.6 usaram assinaturas de depuração distintas. Antes de instalar uma versão diferente, veja [assinatura, prévia e preservação do save](docs/ANDROID_SIGNING.md). A prévia é instalada ao lado da 0.5 e os releases exigem uma chave persistente.

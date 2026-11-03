@@ -1,4 +1,4 @@
-name: Unity Android APK
+name: Unity Android Preview APK
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   build-android:
-    name: Unity 2022.3 Android APK
+    name: Unity 2022.3 Safe Preview
     runs-on: ubuntu-latest
     timeout-minutes: 85
     steps:
@@ -48,6 +48,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          NECRO_ANDROID_MODE: preview
         with:
           projectPath: unity
           buildMethod: Necromancer.EditorTools.NecromancerAndroidBuild.BuildAndroid
@@ -56,9 +57,9 @@ jobs:
           buildName: necromancer-unity
           buildsPath: build
           versioning: Semantic
-      - name: Publish Unity APK
+      - name: Publish separately-installable preview
         uses: actions/upload-artifact@v4
         with:
-          name: necromancer-unity-android-apk
+          name: necromancer-unity-preview-apk
           path: build/**/*.apk
           if-no-files-found: error

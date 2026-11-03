@@ -1,0 +1,91 @@
+name: Unity Signed Android Release
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: unity-android-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-release:
+    name: Signed Unity APK (persistent key)
+    runs-on: ubuntu-latest
+    timeout-minutes: 85
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Unity project structure
+        run: python tests/check_unity_project.py
+
+      - name: Verify license and stable signing credentials
+        shell: bash
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "$UNITY_LICENSE" ] && [ -z "$UNITY_SERIAL" ]; then
+            echo "::error::Unity license missing."
+            exit 1
+          fi
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing required GitHub Actions secret: $name"
+              exit 1
+            fi
+          done
+          umask 077
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > unity/.android-release.keystore
+          test -s unity/.android-release.keystore
+          keytool -list -keystore unity/.android-release.keystore \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null
+          echo "Signing keystore is valid; private key will not be published."
+
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+
+      - name: Unity Builder - signed Android APK
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          NECRO_ANDROID_MODE: release
+          NECRO_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          NECRO_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          NECRO_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        with:
+          projectPath: unity
+          buildMethod: Necromancer.EditorTools.NecromancerAndroidBuild.BuildAndroid
+          targetPlatform: Android
+          androidExportType: androidPackage
+          buildName: necromancer-unity
+          buildsPath: build
+          versioning: Semantic
+
+      - name: Publish signed Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: necromancer-unity-signed-release-apk
+          path: build/**/*.apk
+          if-no-files-found: error
+
+      - name: Remove ephemeral signing file
+        if: always()
+        run: rm -f unity/.android-release.keystore

@@ -145,7 +145,17 @@ assert "joystickFingerId" in core and "TouchPhase.Began" in core
 assert "DrawPolishedHUD(w,h);" in ui
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.6.0\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.6.1\"" in builder
+assert 'NECRO_ANDROID_MODE' in builder
+assert "com.takeo.necromancer.unity.preview" in builder
+assert "useCustomKeystore=true" in builder
+assert "NECRO_KEYSTORE_PASSWORD" in builder
+preview_workflow=(root/".github/workflows/unity-android.yml").read_text()
+release_workflow=(root/".github/workflows/unity-release.yml").read_text()
+assert "NECRO_ANDROID_MODE: preview" in preview_workflow
+assert "NECRO_ANDROID_MODE: release" in release_workflow
+assert "ANDROID_KEYSTORE_BASE64" in release_workflow
+assert ".android-release.keystore" in release_workflow
 
 print(f"Unity source verified: {len(levels)} regions, 0.6 portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
