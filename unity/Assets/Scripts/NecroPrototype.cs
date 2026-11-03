@@ -69,6 +69,7 @@ namespace Necromancer
         bool spellUnlocked,huntOrder,upgradeOpen,gameOver,completed;
         string notice="Derrote uma criatura e ressuscite seu corpo.";
         Vector2 touchMove, facing=Vector2.right;
+        int joystickFingerId=-1;
 
         void Start()
         {
@@ -207,14 +208,31 @@ namespace Necromancer
             if(!upgradeOpen && !cryptOpen)
             {
                 Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
-                Vector2 control=keyboard+touchMove;
+                // A finger must start on the visible joystick. Other UI taps
+                // (skills, inventory or the bottom navigation) never steer.
+                float hudScale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
+                Vector2 stickCenter=new Vector2(82f,202f)*hudScale;
+                bool stickFound=false;
                 foreach(Touch touch in Input.touches)
                 {
-                    // Left-lower quadrant is a virtual analog joystick.
-                    if(touch.position.x<Screen.width*.43f && touch.position.y<Screen.height*.42f)
-                        control+=(touch.position-new Vector2(Screen.width*.18f,Screen.height*.18f))/
-                            Mathf.Max(75,Screen.width*.17f);
+                    if(touch.phase==TouchPhase.Ended || touch.phase==TouchPhase.Canceled)
+                    {
+                        if(touch.fingerId==joystickFingerId)joystickFingerId=-1;
+                        continue;
+                    }
+                    if(touch.fingerId==joystickFingerId ||
+                       (joystickFingerId==-1 && touch.phase==TouchPhase.Began &&
+                        Vector2.Distance(touch.position,stickCenter)<75f*hudScale))
+                    {
+                        joystickFingerId=touch.fingerId;
+                        touchMove=Vector2.ClampMagnitude(
+                            (touch.position-stickCenter)/(49f*hudScale),1f);
+                        stickFound=true;
+                        break;
+                    }
                 }
+                if(!stickFound){joystickFingerId=-1;touchMove=Vector2.zero;}
+                Vector2 control=keyboard+touchMove;
                 if(control.sqrMagnitude>1)control.Normalize();
                 heroineWalking=control.sqrMagnitude>.01f;
                 if(heroineWalking)
