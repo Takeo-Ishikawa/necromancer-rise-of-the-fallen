@@ -162,6 +162,7 @@ namespace Necromancer
         static Color32[] ReadablePixels(Texture2D source,out int width,out int height)
         {
             width=source.width;height=source.height;
+            if(source.isReadable)return source.GetPixels32();
             RenderTexture previous=RenderTexture.active;
             RenderTexture temporary=RenderTexture.GetTemporary(width,height,0,
                 RenderTextureFormat.ARGB32,RenderTextureReadWrite.Default);

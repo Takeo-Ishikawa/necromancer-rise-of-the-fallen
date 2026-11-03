@@ -182,7 +182,11 @@ namespace Necromancer
             victim.flash=.16f;
             if(victim.view!=null)victim.view.Flash();
             NecroCombatFx.Emit(victim.body.position,current.root.transform,0);
-            if(victim==player)hitFlash=.24f;
+            if(victim==player)
+            {
+                hitFlash=.24f;
+                heroineHitPulse=.20f;
+            }
             if(victim.hp>0)return;
             if(victim==player) {
                 gameOver=true;Announce("O necromante caiu. Reinicie sua expedicao.");
@@ -250,14 +254,14 @@ namespace Necromancer
             if(target==null){Announce("Nenhum alvo ao alcance.");return;}
             if(!spellUnlocked)
             {
-                heroineCastPulse=.24f;
+                heroineStrikePulse=.38f;
                 castCooldown=Time.time+.47f;
                 Damage(target,26+staffTier*5+(playerLevel-1)*2);
                 return;
             }
             if(mana<9){Announce("Anima insuficiente.");return;}
             mana-=9;
-            heroineCastPulse=.34f;
+            heroineCastPulse=.49f;
             castCooldown=Time.time+.72f;
             SpriteRenderer orb=Visual("Orbe espectral",player.body.position,
                 NecroArt.Effect(),20,current.root.transform);
@@ -327,7 +331,7 @@ namespace Necromancer
             mana-=cost;
             Actor servant=Create(nearest.kind,nearest.body.position,true,persistentRoot.transform);
             servants.Add(servant);
-            heroineRaisePulse=.85f;
+            heroineRaisePulse=.80f;
             NecroCombatFx.Emit(nearest.body.position,current.root.transform,1);
             if(IsBoss(nearest.kind))current.bossBound=true;
             Destroy(nearest.body.gameObject);

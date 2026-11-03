@@ -96,9 +96,9 @@ namespace Necromancer
             if(next!=currentPose){currentPose=next;frameClock=0f;}
             else frameClock+=dt;
 
-            float bob=(flying?.055f:slime?.020f:boss?.016f:.022f)*
+            float bob=(flying ? .055f : slime ? .020f : boss ? .016f : .022f)*
                 Mathf.Sin(t*(flying?5.2f:moving?12f:2.5f));
-            float squash=slime?.035f*Mathf.Sin(t*(moving?11f:3.4f)):0f;
+            float squash=slime ? .035f*Mathf.Sin(t*(moving?11f:3.4f)) : 0f;
             if(frames!=null)
             {
                 artRenderer.sprite=frames.Frame(currentPose,currentDirection,
@@ -112,16 +112,16 @@ namespace Necromancer
             {
                 // Species without frame atlases retain their lightweight
                 // movement animation and still respond to attack events.
-                float swing=(spider?3.4f:boss?.55f:2.1f)*
+                float swing=(spider ? 3.4f : boss ? .55f : 2.1f)*
                     Mathf.Sin(t*(moving?9f:2f));
                 art.localRotation=Quaternion.Euler(0,0,
                     swing+(attackTimer>0f?Mathf.Sin(attackTimer*30f)*8f:0f));
-                art.localPosition=new Vector3(attackTimer>0f?.07f:0,bob,0);
+                art.localPosition=new Vector3(attackTimer > 0f ? .07f : 0f,bob,0);
                 if(delta.x>.0001f)artRenderer.flipX=false;
                 else if(delta.x<-.0001f)artRenderer.flipX=true;
             }
 
-            float attackScale=attackTimer>0f?.02f:0f;
+            float attackScale=attackTimer > 0f ? .02f : 0f;
             art.localScale=new Vector3(animationScale.x*(bodyScale+squash),
                 animationScale.y*(bodyScale-squash+attackScale),1f);
 
