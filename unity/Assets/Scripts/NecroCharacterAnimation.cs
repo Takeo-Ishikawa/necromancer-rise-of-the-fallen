@@ -3,15 +3,19 @@ using UnityEngine;
 namespace Necromancer
 {
     /// <summary>
-    /// Lightweight Unity 2D animation on top of the illustrated PNG.
-    /// The actor transform remains the collision/AI anchor; only its child artwork
-    /// bobs, turns, casts and lights up during resurrection.
+    /// Frame-based state animation using the art of the necromante.
+    /// The renderer's root transform remains the authoritative position,
+    /// collision, camera target and persistent save anchor.
     /// </summary>
     public partial class NecroPrototype
     {
         Transform witchArtTransform,ritualCircleTransform;
         SpriteRenderer witchArtRenderer,ritualCircleRenderer;
-        float heroineCastPulse,heroineRaisePulse;
+        NecroFrameSet heroineFrames;
+        NecroPose heroinePose=NecroPose.Idle;
+        NecroDirection heroineDirection=NecroDirection.Down;
+        float heroineClock,heroineCastPulse,heroineRaisePulse;
+        float heroineStrikePulse,heroineHitPulse;
         bool heroineWalking;
 
         void InitializeHeroAnimation()
@@ -19,13 +23,26 @@ namespace Necromancer
             if(player==null || player.body==null)return;
             SpriteRenderer rootRenderer=player.body.GetComponent<SpriteRenderer>();
             if(rootRenderer==null)return;
-            GameObject image=new GameObject("Witch / illustrated sprite / animated");
+
+            GameObject image=new GameObject("Necromancer / directional frames");
             image.transform.SetParent(player.body,false);
             witchArtTransform=image.transform;
             witchArtRenderer=image.AddComponent<SpriteRenderer>();
             witchArtRenderer.sprite=rootRenderer.sprite;
             witchArtRenderer.sortingOrder=rootRenderer.sortingOrder;
             rootRenderer.enabled=false;
+
+            // The sprite set contains actual distinct sprites/frames. It is
+            // generated only once, then shared across future play sessions.
+            heroineFrames=NecroFrameLibrary.Get("necromante",rootRenderer.sprite);
+            if(heroineFrames!=null)
+            {
+                Vector2 original=rootRenderer.sprite.bounds.size;
+                Vector2 replacement=heroineFrames.Frame(
+                    NecroPose.Idle,NecroDirection.Down,0,true).bounds.size;
+                witchArtTransform.localScale=new Vector3(
+                    original.x/replacement.x,original.y/replacement.y,1);
+            }
 
             GameObject circle=new GameObject("Necromantic rune circle");
             circle.transform.SetParent(player.body,false);
@@ -38,34 +55,66 @@ namespace Necromancer
             ritualCircleRenderer.color=new Color(.54f,.90f,.87f,.20f);
         }
 
+        static NecroDirection DirectionFrom(Vector2 movement,NecroDirection previous)
+        {
+            if(movement.sqrMagnitude<.012f)return previous;
+            if(Mathf.Abs(movement.x)>Mathf.Abs(movement.y)*1.2f)
+                return movement.x<0f?NecroDirection.Left:NecroDirection.Right;
+            return movement.y<0f?NecroDirection.Down:NecroDirection.Up;
+        }
+
         void AnimateHeroVisual(float dt)
         {
             if(witchArtTransform==null)return;
             heroineCastPulse=Mathf.Max(0,heroineCastPulse-dt);
             heroineRaisePulse=Mathf.Max(0,heroineRaisePulse-dt);
-            float stride=heroineWalking ? Mathf.Sin(Time.time*12f)*.055f : 0f;
-            float breathing=Mathf.Sin(Time.time*2.3f)*.018f;
-            float burst=heroineCastPulse > 0f ? .045f : 0f;
-            witchArtTransform.localPosition=new Vector3(0,stride+breathing+burst,0);
-            witchArtTransform.localScale=new Vector3(1f+breathing,
-                1f+breathing*.32f+(heroineRaisePulse > 0f ? .035f : 0f),1);
-            witchArtTransform.localRotation=Quaternion.Euler(0,0,
-                Mathf.Sin(Time.time*(heroineWalking?9f:2f))*(heroineWalking?2.5f:1.0f));
-            if(Mathf.Abs(facing.x)>.10f)
-                witchArtRenderer.flipX=facing.x<0f;
-            if(heroineCastPulse>0)
-                witchArtRenderer.color=new Color(1f,.92f,1f,1);
-            else if(heroineRaisePulse>0)
-                witchArtRenderer.color=new Color(.88f,1f,.99f,1);
-            else witchArtRenderer.color=Color.white;
+            heroineStrikePulse=Mathf.Max(0,heroineStrikePulse-dt);
+            heroineHitPulse=Mathf.Max(0,heroineHitPulse-dt);
+
+            if(heroineWalking)
+                heroineDirection=DirectionFrom(facing,heroineDirection);
+
+            NecroPose next=heroineHitPulse>0f?NecroPose.Hurt:
+                heroineRaisePulse>0f?NecroPose.Raise:
+                heroineCastPulse>0f?NecroPose.Cast:
+                heroineStrikePulse>0f?NecroPose.Attack:
+                heroineWalking?NecroPose.Walk:NecroPose.Idle;
+            if(next!=heroinePose)
+            {
+                heroinePose=next;
+                heroineClock=0f;
+            }
+            else heroineClock+=dt;
+
+            if(heroineFrames!=null)
+            {
+                witchArtRenderer.sprite=heroineFrames.Frame(
+                    heroinePose,heroineDirection,heroineClock,
+                    heroinePose==NecroPose.Idle||heroinePose==NecroPose.Walk);
+                witchArtRenderer.flipX=false;
+                witchArtTransform.localRotation=Quaternion.identity;
+                witchArtTransform.localPosition=Vector3.zero;
+            }
+            else
+            {
+                // Fallback for older Unity projects missing an animation atlas.
+                float stride=heroineWalking?Mathf.Sin(Time.time*12f)*.055f:0f;
+                witchArtTransform.localPosition=new Vector3(0,stride,0);
+                witchArtRenderer.flipX=heroineDirection==NecroDirection.Left;
+            }
+
+            witchArtRenderer.color=heroineHitPulse>0f?
+                new Color(1f,.70f,.77f,1f):
+                heroineRaisePulse>0f?new Color(.90f,1f,.98f,1f):
+                Color.white;
 
             if(ritualCircleRenderer!=null)
             {
-                float strength=heroineRaisePulse > 0f ? .78f :
-                    heroineCastPulse > 0f ? .42f :.15f;
+                float strength=heroineRaisePulse>0f?.85f:
+                    heroineCastPulse>0f?.51f:.14f;
                 ritualCircleRenderer.color=new Color(.58f,.88f,1f,strength);
                 ritualCircleTransform.localRotation=Quaternion.Euler(0,0,
-                    Time.time*(heroineRaisePulse > 0f ? 58f : 18f));
+                    Time.time*(heroineRaisePulse>0f?58f:18f));
             }
         }
     }
