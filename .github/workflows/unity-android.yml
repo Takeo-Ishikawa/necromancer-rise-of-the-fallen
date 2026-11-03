@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'unity/**'
+      - 'tests/check_unity_project.py'
       - '.github/workflows/unity-android.yml'
 
 concurrency:
