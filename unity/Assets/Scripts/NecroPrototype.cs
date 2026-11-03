@@ -50,9 +50,11 @@ namespace Necromancer
             public readonly List<Drop> drops = new List<Drop>();
             public readonly List<ResourceNode> resources = new List<ResourceNode>();
             public bool claimed, bossDefeated, bossBound;
+            public float respawnTimer=FirstRespawnSeconds;
+            public int respawnIndex;
         }
 
-        const int CommandLimit=4;
+        const int CommandLimit=12;
         LevelDefinition[] levels;
         LevelDefinition level;
         StageInstance[] stages;
@@ -252,7 +254,7 @@ namespace Necromancer
                     Move(player,control*player.speed*dt);
                 }
                 Regenerate(dt);
-                if(Input.GetKeyDown(KeyCode.Space))Cast();
+                TryAutomaticAttack();
                 if(Input.GetKeyDown(KeyCode.E))Raise();
                 if(Input.GetKeyDown(KeyCode.Q))huntOrder=!huntOrder;
                 if(Input.GetKeyDown(KeyCode.Tab))upgradeOpen=true;
@@ -269,6 +271,7 @@ namespace Necromancer
                 if(!current.claimed && current.enemies.Count==0 &&
                     (!level.requiresGuardian || (current.bossDefeated && current.bossBound)))
                     Claim();
+                TickRespawns(dt);
                 if(current.seal!=null)
                     current.seal.Rotate(0,0,dt*(current.claimed?18:5));
             }

@@ -14,6 +14,7 @@ namespace Necromancer
         GUIStyle hudSmall,hudValue,hudTitle,hudAction,hudNumber;
         float hudNoticeFade;
         bool armyInspect,gearInspect;
+        int armyPage;
 
         static readonly Color UiGold=new Color(.80f,.69f,.57f);
         static readonly Color UiCream=new Color(.93f,.86f,.84f);
@@ -210,13 +211,13 @@ namespace Necromancer
 
             float right=width-173;
             float top=bottom-196;
-            DrawIconUi(new Rect(right,top,75,75),"✦",
-                spellUnlocked?"MAGIA":"GOLPE",Cast);
-            DrawIconUi(new Rect(right+89,top,75,75),"☠","REVIVER",Raise);
-            DrawIconUi(new Rect(right,top+94,75,75),
+            GUI.Label(new Rect(right-4,top-27,176,24),
+                "ATAQUE AUTOMÁTICO",hudAction);
+            DrawIconUi(new Rect(right,top,75,75),"☠","REVIVER",Raise);
+            DrawIconUi(new Rect(right+89,top,75,75),
                 huntOrder?"⚔":"◇",huntOrder?"CAÇA":"DEFESA",
                 ()=>huntOrder=!huntOrder);
-            DrawIconUi(new Rect(right+89,top+94,75,75),
+            DrawIconUi(new Rect(right+44,top+94,75,75),
                 "✧","EVOLUIR",()=>{touchMove=Vector2.zero;upgradeOpen=true;});
 
             // Functional quick-navigation buttons.
@@ -247,14 +248,26 @@ namespace Necromancer
             PanelUi(r);
             GUI.Label(new Rect(r.x+8,r.y+10,r.width-16,32),
                 "EXÉRCITO · "+servants.Count+" servos",hudTitle);
-            int max=Mathf.Min(servants.Count,5);
-            for(int i=0;i<max;i++)
+            int pages=Mathf.Max(1,Mathf.CeilToInt(servants.Count/5f));
+            armyPage=Mathf.Clamp(armyPage,0,pages-1);
+            int start=armyPage*5;
+            int max=Mathf.Min(servants.Count,start+5);
+            for(int i=start;i<max;i++)
             {
                 Actor a=servants[i];
-                GUI.Label(new Rect(r.x+22,r.y+48+i*34,r.width-44,30),
+                GUI.Label(new Rect(r.x+22,r.y+43+(i-start)*32,r.width-44,29),
                     a.kind.ToUpperInvariant()+"    "+
                     Mathf.CeilToInt(a.hp)+"/"+Mathf.CeilToInt(a.maxHp)+" VIDA",
                     hudSmall);
+            }
+            if(pages>1)
+            {
+                if(GUI.Button(new Rect(r.x+22,r.yMax-103,92,31),
+                    "<",buttonStyle))armyPage=Mathf.Max(0,armyPage-1);
+                GUI.Label(new Rect(r.center.x-52,r.yMax-102,104,29),
+                    (armyPage+1)+"/"+pages,hudSmall);
+                if(GUI.Button(new Rect(r.xMax-114,r.yMax-103,92,31),
+                    ">",buttonStyle))armyPage=Mathf.Min(pages-1,armyPage+1);
             }
             if(GUI.Button(new Rect(r.x+14,r.yMax-57,r.width*.5f-19,41),
                 "DISPENSAR",buttonStyle))Dismiss();
