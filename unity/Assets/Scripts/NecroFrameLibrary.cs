@@ -123,7 +123,7 @@ namespace Necromancer
                     for(int dir=0;dir<4;dir++)
                         for(int frame=0;frame<count;frame++)
                             DrawFrame(original,sourceWidth,sourceHeight,pixels,width,
-                                cell,action,dir,frame,count,hero,kind);
+                                cell,action,dir,frame,count,hero,kind,pose);
                 }
                 atlas=new Texture2D(width,height,TextureFormat.RGBA32,false);
                 atlas.name="Necromancer frame atlas - "+kind;
@@ -187,11 +187,11 @@ namespace Necromancer
 
         static void DrawFrame(Color32[] src,int sw,int sh,Color32[] dest,
             int atlasWidth,int cell,int pose,int direction,int frame,
-            int frameCount,bool hero,string kind)
+            int frameCount,bool hero,string kind,int atlasState)
         {
             float progress=frameCount<=1?0:frame/(float)frameCount;
             float cycle=progress*Mathf.PI*2f;
-            int ox=frame*cell, oy=(pose*4+direction)*cell;
+            int ox=frame*cell, oy=(atlasState*4+direction)*cell;
             bool walking=pose==(int)NecroPose.Walk;
             bool attack=pose==(int)NecroPose.Attack;
             bool casting=pose==(int)NecroPose.Cast;
