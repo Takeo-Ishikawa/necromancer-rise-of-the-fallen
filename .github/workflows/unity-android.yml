@@ -46,6 +46,7 @@ jobs:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
           projectPath: unity
+          buildMethod: Necromancer.EditorTools.NecromancerAndroidBuild.BuildAndroid
           targetPlatform: Android
           androidExportType: androidPackage
           buildName: necromancer-unity
