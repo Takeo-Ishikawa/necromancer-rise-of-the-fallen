@@ -17,14 +17,19 @@ namespace Necromancer
         public readonly Texture2D Atlas;
         public readonly int Cell;
         readonly Sprite[][][] clips;
-        static readonly int[] ClipLengths={3,6,4,4,5,2};
-        static readonly float[] ClipFps={3.5f,10f,12f,9f,8f,12f};
+        static readonly int[] MonsterLengths={3,6,4,4,5,2};
+        static readonly float[] MonsterFps={3.5f,10f,12f,9f,8f,12f};
+        static readonly float[] HeroFps={4f,11f,12f,10f,9f,12f};
+        readonly int[] clipLengths;
+        readonly float[] clipFps;
 
         internal NecroFrameSet(string kind,Texture2D atlas,int cell,bool hero)
         {
             Kind=kind;
             Atlas=atlas;
             Cell=cell;
+            clipLengths=hero?NecroHeroSheetBuilder.Counts:MonsterLengths;
+            clipFps=hero?HeroFps:MonsterFps;
             clips=new Sprite[6][][];
             int states=hero?6:4;
             for(int state=0;state<states;state++)
@@ -33,8 +38,8 @@ namespace Necromancer
                 clips[pose]=new Sprite[4][];
                 for(int direction=0;direction<4;direction++)
                 {
-                    clips[pose][direction]=new Sprite[ClipLengths[pose]];
-                    for(int frame=0;frame<ClipLengths[pose];frame++)
+                    clips[pose][direction]=new Sprite[clipLengths[pose]];
+                    for(int frame=0;frame<clipLengths[pose];frame++)
                     {
                         Rect rect=new Rect(frame*cell,(state*4+direction)*cell,
                             cell,cell);
@@ -51,12 +56,12 @@ namespace Necromancer
         public int FrameCount(NecroPose pose)
         {
             if(clips[(int)pose]==null)pose=NecroPose.Attack;
-            return ClipLengths[(int)pose];
+            return clipLengths[(int)pose];
         }
         public float Duration(NecroPose pose)
         {
             if(clips[(int)pose]==null)pose=NecroPose.Attack;
-            return ClipLengths[(int)pose]/ClipFps[(int)pose];
+            return clipLengths[(int)pose]/clipFps[(int)pose];
         }
         public Sprite Frame(NecroPose pose,NecroDirection direction,float seconds,bool loop)
         {
@@ -65,7 +70,7 @@ namespace Necromancer
             int d=(int)direction;
             Sprite[] sequence=clips[p][d];
             int n=sequence.Length;
-            int index=Mathf.FloorToInt(Mathf.Max(0,seconds)*ClipFps[p]);
+            int index=Mathf.FloorToInt(Mathf.Max(0,seconds)*clipFps[p]);
             index=loop?index%n:Mathf.Min(n-1,index);
             return sequence[index];
         }
@@ -105,11 +110,18 @@ namespace Necromancer
             bool hero=kind=="necromante";
             int cell=hero?96:80;
             int states=hero?6:4;
-            int width=6*cell,height=states*4*cell;
+            int columns=hero?NecroHeroSheetBuilder.Columns:6;
+            int width=columns*cell,height=states*4*cell;
 
-            // Future asset replacement: atlases with the same 6-column/
-            // four-direction layout can be imported without changing gameplay.
+            // Hand-illustrated, individual directional/pose source frames
+            // take precedence over the earlier distorted-front-view fallback.
             Texture2D atlas=Resources.Load<Texture2D>("AnimationSheets/"+kind);
+            if(hero && atlas==null)
+            {
+                Texture2D poses=Resources.Load<Texture2D>(
+                    "AnimationSheets/necromante_source");
+                if(poses!=null)atlas=NecroHeroSheetBuilder.Build(poses);
+            }
             bool generated=false;
             if(atlas==null)
             {
@@ -159,7 +171,7 @@ namespace Necromancer
             }
         }
 
-        static Color32[] ReadablePixels(Texture2D source,out int width,out int height)
+        internal static Color32[] ReadablePixels(Texture2D source,out int width,out int height)
         {
             width=source.width;height=source.height;
             if(source.isReadable)return source.GetPixels32();
