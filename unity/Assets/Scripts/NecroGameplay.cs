@@ -232,7 +232,8 @@ namespace Necromancer
             NecroCombatFx.Emit(victim.body.position,current.root.transform,0);
             if(victim.hp>0)return;
             current.enemies.Remove(victim);
-            Destroy(victim.body.gameObject);
+            if(victim.kind=="grave_pup")victim.view.Fall();
+            else Destroy(victim.body.gameObject);
         }
         Actor Closest(float maxDistance)
         {

@@ -21,19 +21,58 @@ namespace Necromancer
         Color baseTint;
         string type;
 
-        static Sprite[] pupFrames;
+        static Sprite[] pupFrames, fallenPupFrames;
+        const float FallenHold = 3f;
+        const float DissolveDuration = .8f;
         int pupAction;
+        bool fallen;
+        float fallenAt;
+
+        static Sprite[] LoadPupFrames(string path)
+        {
+            var sheet=Resources.Load<Texture2D>(path);
+            var sprites=new Sprite[4];
+            for(int i=0;i<sprites.Length;i++)
+                sprites[i]=Sprite.Create(sheet,new Rect(i*256,0,256,256),
+                    new Vector2(.5f,.31f),256f,0,SpriteMeshType.FullRect);
+            return sprites;
+        }
+
         public static Sprite PupIdle()
         {
-            if(pupFrames==null)
-            {
-                var sheet=Resources.Load<Texture2D>("Creatures/grave_pup");
-                pupFrames=new Sprite[4];
-                for(int i=0;i<4;i++)
-                    pupFrames[i]=Sprite.Create(sheet,new Rect(i*256,0,256,256),
-                        new Vector2(.5f,.31f),256f,0,SpriteMeshType.FullRect);
-            }
+            if(pupFrames==null)pupFrames=LoadPupFrames("Creatures/grave_pup");
             return pupFrames[0];
+        }
+
+        public void Fall()
+        {
+            if(fallenPupFrames==null)fallenPupFrames=LoadPupFrames("Creatures/grave_pup_fallen");
+            fallen=true;
+            fallenAt=Time.time;
+            art.localPosition=Vector3.zero;
+            artRenderer.sprite=fallenPupFrames[0];
+            artRenderer.color=Color.white;
+            // Draw the body beneath living actors and their shadows.
+            artRenderer.sortingOrder=2;
+            haloRenderer.sortingOrder=1;
+        }
+
+        void AnimateFallenPup()
+        {
+            float elapsed=Time.time-fallenAt-FallenHold;
+            if(elapsed<0f)return;
+            if(elapsed>=DissolveDuration)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            float progress=elapsed/DissolveDuration;
+            int frame=1+Mathf.Min(2,(int)(progress*3f));
+            artRenderer.sprite=fallenPupFrames[frame];
+            artRenderer.color=new Color(1f,1f,1f,Mathf.Clamp01((1f-progress)*3f));
+            Color shadow=haloRenderer.color;
+            shadow.a=.38f*(1f-progress);
+            haloRenderer.color=shadow;
         }
 
         public void SetPupAction(int pose,Vector2 heading)
@@ -101,6 +140,11 @@ namespace Necromancer
         void LateUpdate()
         {
             if(art==null)return;
+            if(fallen)
+            {
+                AnimateFallenPup();
+                return;
+            }
             float dt=Time.deltaTime;
             impactTimer=Mathf.Max(0,impactTimer-dt);
             attackTimer=Mathf.Max(0,attackTimer-dt);
