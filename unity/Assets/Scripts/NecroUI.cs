@@ -35,7 +35,7 @@ namespace Necromancer
         bool MovementArea(Vector2 point,float scale)
         {
             Vector2 gui=new Vector2(point.x,Screen.height-point.y)/scale;
-            return point.x<Screen.width*.65f &&
+            return !RosterButton.Contains(gui) && point.x<Screen.width*.65f &&
                 !AttackRect(scale).Contains(gui) && !BindRect(scale).Contains(gui);
         }
 
@@ -149,6 +149,7 @@ namespace Necromancer
             EnsureHudArt();
             float scale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
             GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
+            if(DrawRoster(Screen.width/scale,Screen.height/scale))return;
             Rect button=AttackRect(scale);
             DrawAction(button,false,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",
                 Time.time>=castCooldown);

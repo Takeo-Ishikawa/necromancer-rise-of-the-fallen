@@ -20,7 +20,7 @@ namespace Necromancer
             public float bindUntil;
             public float pupAttackTime;
             public Vector2 pupHeading;
-            public bool pupHit;
+            public bool pupHit,catchingUp;
             public bool ally;
             public NecroCreatureView view;
         }
@@ -108,6 +108,7 @@ namespace Necromancer
             InitializeHeroAnimation();
             LoadStage(0);
             spellUnlocked=true;
+            LoadCompanions();
         }
 
         SpriteRenderer Visual(string label,Vector2 at,Sprite sprite,int order,Transform parent)
@@ -239,7 +240,7 @@ namespace Necromancer
 
         void Update()
         {
-            if(player==null || level==null || gameOver)return;
+            if(player==null || level==null || gameOver || inventoryOpen)return;
             float dt=Mathf.Min(.045f,Time.deltaTime);
             Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
             float hudScale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);

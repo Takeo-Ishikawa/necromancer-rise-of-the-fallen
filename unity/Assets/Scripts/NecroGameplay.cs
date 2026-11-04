@@ -174,11 +174,7 @@ namespace Necromancer
                 }
                 if(self.kind=="grave_pup")
                 {
-                    Actor prey=friendly?servantOrder:player;
-                    if(!friendly && servants.Count>0 &&
-                        Vector2.Distance(self.body.position,servants[0].body.position)<
-                        Vector2.Distance(self.body.position,player.body.position))
-                        prey=servants[0];
+                    Actor prey=friendly?servantOrder:ClosestPartyMember(self);
                     if(prey!=null && prey.hp>0)
                         UpdatePup(self,prey,dt);
                     else if(friendly)
@@ -235,22 +231,35 @@ namespace Necromancer
             }
         }
         // The companion can linger until the player leaves its comfort range.
-        bool catchingUp;
-        void FollowNecromancer(Actor pup,float dt)
+        Actor ClosestPartyMember(Actor enemy)
         {
-            Vector2 hero=player.body.position;
-            Vector2 offset=(Vector2)pup.body.position-hero;
-            float distance=offset.magnitude;
-            if(distance>2.7f)catchingUp=true;
-            else if(distance<=1.7f)catchingUp=false;
-
-            if(catchingUp)
-                MoveToward(pup,hero,dt);
-            else if(distance<1.05f)
+            Actor nearest=player;
+            float best=(player.body.position-enemy.body.position).sqrMagnitude;
+            foreach(Actor ally in servants)
             {
-                Vector2 away=distance>.01f?offset/distance:-facing;
-                Move(pup,away*Mathf.Min(1.05f-distance,pup.speed*.65f*dt));
+                float distance=(ally.body.position-enemy.body.position).sqrMagnitude;
+                if(distance<best){best=distance;nearest=ally;}
             }
+            return nearest;
+        }
+
+        Vector2 PartyPosition(int slot)
+        {
+            int ring=1;
+            while(slot>=ring*6){slot-=ring*6;ring++;}
+            float angle=slot*Mathf.PI/(3f*ring);
+            return (Vector2)player.body.position+
+                new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*(1.65f*ring);
+        }
+
+        void FollowNecromancer(Actor ally,float dt)
+        {
+            Vector2 destination=PartyPosition(servants.IndexOf(ally));
+            if(Blocked(destination,ally.radius))destination=player.body.position;
+            float distance=Vector2.Distance(ally.body.position,destination);
+            if(distance>1.45f)ally.catchingUp=true;
+            if(distance<.40f)ally.catchingUp=false;
+            if(ally.catchingUp)MoveToward(ally,destination,dt);
         }
 
         void UpdatePup(Actor pup,Actor prey,float dt)
@@ -308,7 +317,7 @@ namespace Necromancer
             if(victim.ally)
             {
                 servants.Remove(victim);
-                servantOrder=null;
+                SaveCompanions();
             }
             else current.enemies.Remove(victim);
             if(victim.kind=="grave_pup")
@@ -333,7 +342,6 @@ namespace Necromancer
                     current.fallenPups.RemoveAt(i);
                     continue;
                 }
-                if(servants.Count>0)continue;
                 float distance=Vector2.Distance(player.body.position,pup.transform.position);
                 if(distance<best && Visible(player.body.position,pup.transform.position))
                 {
@@ -357,7 +365,7 @@ namespace Necromancer
                     continue;
                 }
                 float distance=Vector2.Distance(player.body.position,boar.body.position);
-                if(servants.Count==0 && distance<best && Visible(player.body.position,boar.body.position))
+                if(distance<best && Visible(player.body.position,boar.body.position))
                 {nearest=boar;best=distance;}
             }
             return nearest;
@@ -381,11 +389,11 @@ namespace Necromancer
             }
             Vector2 at=boar.body.position;
             servants.Add(CreateRotboar(at,persistentRoot.transform,true));
-            catchingUp=false;
             current.fallenBoars.Remove(boar);
             Destroy(boar.body.gameObject);
             NecroCombatFx.Emit(at,current.root.transform,1);
             heroineRaisePulse=.92f;
+            SaveCompanions();
         }
 
         void BindNearbyPup()
@@ -393,12 +401,12 @@ namespace Necromancer
             var pup=NearbyFallenPup();
             if(pup==null)return;
             Vector2 at=pup.transform.position;
-            catchingUp=false;
             servants.Add(Create("grave_pup",at,true,persistentRoot.transform));
             current.fallenPups.Remove(pup);
             Destroy(pup.gameObject);
             NecroCombatFx.Emit(at,current.root.transform,1);
             heroineRaisePulse=.92f;
+            SaveCompanions();
         }
 
         Actor Closest(float maxDistance)

@@ -194,7 +194,7 @@ for name in ("InitializeHeroAnimation(", "AnimateHeroVisual(", "ReleaseSkull()",
     assert name in animation, "Missing character animation: "+name
 assert "InitializeHeroAnimation();" in core
 assert "AnimateHeroVisual(dt);" in core
-assert "joystickFingerId" in core and "TouchPhase.Began" in core
+assert "joystickFingerId" in core and "TouchPhase.Began" in ui and "ReadMovement(hudScale)" in core
 onscreen=ui.split("void OnGUI()",1)[1].split("void DrawCryptPanel",1)[0]
 assert "RingUi(pad,stickDisc" in onscreen and '"ATACAR"' in onscreen
 assert "ReadManualAttack(hudScale);" in core and "frame=24+walkDirection" in animation

@@ -92,9 +92,7 @@ namespace Necromancer
                 return;
             }
             if(boar.cooldown>0)return;
-            Actor target=boar.ally?servantOrder:player;
-            if(!boar.ally && servants.Count>0 && Vector2.Distance(at,servants[0].body.position)<Vector2.Distance(at,player.body.position))
-                target=servants[0];
+            Actor target=boar.ally?servantOrder:ClosestPartyMember(boar);
             if(boar.ally && (target==null || target.hp<=0))
             {
                 servantOrder=null;
