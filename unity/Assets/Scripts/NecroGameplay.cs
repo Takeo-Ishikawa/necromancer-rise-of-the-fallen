@@ -208,10 +208,6 @@ namespace Necromancer
             if(player.hp<=0 || upgradeOpen || castCooldown>Time.time)return;
             Actor target=Closest(spellUnlocked?3.8f:1.02f);
             if(target==null){Announce("Nenhum alvo ao alcance.");return;}
-            // Casting/striking faces the enemy even while standing still.
-            heroineDirection=DirectionFrom(
-                (Vector2)target.body.position-(Vector2)player.body.position,
-                heroineDirection);
             if(!spellUnlocked)
             {
                 heroineStrikePulse=.53f;
@@ -219,15 +215,29 @@ namespace Necromancer
                 Damage(target,26+staffTier*5+(playerLevel-1)*2);
                 return;
             }
-            // Basic auto-attack orbs cost no anima. Reserve anima for
-            // resurrection and future explicitly activated powers.
-            heroineCastPulse=.62f;
+            castAim=((Vector2)(target.body.position-player.body.position)).normalized;
+            if(castAim.sqrMagnitude<.01f)castAim=facing;
+            castTarget=target;
+            releasePending=true;
+            heroineCastPulse=CastDuration;
             castCooldown=Time.time+.72f;
-            SpriteRenderer orb=Visual("Orbe espectral",player.body.position,
-                NecroArt.Effect(),20,current.root.transform);
-            Fit(orb,.36f,.36f);
-            Vector2 direction=((Vector2)target.body.position-(Vector2)player.body.position).normalized;
-            if(direction.sqrMagnitude<.01f)direction=facing;
+        }
+
+        void ReleaseSkull()
+        {
+            Vector2 center=player.body.position;
+            Vector2 hands=center+new Vector2(castAim.x<0?-.43f:.43f,.19f);
+            if(Blocked(hands,.05f) || !Visible(center,hands))hands=center;
+            Vector2 direction=castAim;
+            if(castTarget!=null && castTarget.body!=null && castTarget.hp>0)
+            {
+                Vector2 delta=(Vector2)castTarget.body.position-hands;
+                if(delta.sqrMagnitude>.0001f)direction=delta.normalized;
+            }
+            castTarget=null;
+            SpriteRenderer orb=Visual("Caveira espectral",hands,skullSprite,20,current.root.transform);
+            orb.flipY=direction.x<0;
+            orb.transform.rotation=Quaternion.Euler(0,0,Mathf.Atan2(direction.y,direction.x)*Mathf.Rad2Deg);
             projectiles.Add(new Projectile{body=orb.transform,direction=direction,time=.9f});
         }
         void UpdateProjectiles(float dt)
@@ -369,3 +379,4 @@ namespace Necromancer
         }
     }
 }
+
