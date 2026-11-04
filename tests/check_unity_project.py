@@ -197,6 +197,11 @@ assert "AnimateHeroVisual(dt);" in core
 assert "joystickFingerId" in core and "TouchPhase.Began" in ui and "ReadMovement(hudScale)" in core
 onscreen=ui.split("void OnGUI()",1)[1].split("void DrawCryptPanel",1)[0]
 assert "RingUi(pad,stickDisc" in onscreen and '"ATACAR"' in onscreen
+# The current preview needs the companion roster and its painted controls.
+assert (unity / "Assets/Scripts/NecroRoster.cs").is_file()
+for control in ("attack", "bind", "pearl"):
+    texture = unity / f"Assets/Resources/HUD/{control}.png"
+    assert texture.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"), texture
 assert "ReadManualAttack(hudScale);" in core and "frame=24+walkDirection" in animation
 idle=(unity/"Assets/Resources/Heroine/idle.png").read_bytes()
 assert struct.unpack(">II",idle[16:24])==(1024,512) and idle[24:26]==bytes([8,6])
