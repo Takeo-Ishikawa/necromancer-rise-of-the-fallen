@@ -203,9 +203,10 @@ sw,sh=struct.unpack(">II",hero_sheet[16:24])
 assert sw>=120 and sh>=180 and sw%4==0 and sh%4==0
 assert "NecroHeroSheetBuilder.Build(poses)" in (unity/"Assets/Scripts/NecroFrameLibrary.cs").read_text()
 hero_painter=(unity/"Assets/Scripts/NecroHeroSheetBuilder.cs").read_text()
-for token in ("Counts={4,8,6,6,8,3}", "direction!=0", "Texture2D Build(",
+for token in ("Counts={4,8,6,6,8,3}", "return variant*4+direction;", "Texture2D Build(",
               "PaintFrame(", "EllipseRing(", "Glow("):
     assert token in hero_painter, token
+frame_library=(unity/"Assets/Scripts/NecroFrameLibrary.cs").read_text()
 frame_test=(unity/"Assets/Editor/NecroFrameEditorCheck.cs").read_text()
 assert "NecroHeroPaintedSource.Build()" in frame_test
 assert "int columns=hero?8:6" in frame_test
