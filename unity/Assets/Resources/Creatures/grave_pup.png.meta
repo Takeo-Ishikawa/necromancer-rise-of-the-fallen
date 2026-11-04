@@ -1,0 +1,26 @@
+fileFormatVersion: 2
+guid: 2b4aa789861e4bc08c493ad4c3382f5b
+TextureImporter:
+  serializedVersion: 12
+  mipmaps:
+    enableMipMap: 0
+  isReadable: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  textureType: 0
+  textureShape: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: Android
+    maxTextureSize: 2048
+    textureFormat: 4
+    textureCompression: 0
+    overridden: 1
+    allowsAlphaSplitting: 0

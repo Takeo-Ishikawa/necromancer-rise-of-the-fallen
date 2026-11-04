@@ -21,6 +21,27 @@ namespace Necromancer
         Color baseTint;
         string type;
 
+        static Sprite[] pupFrames;
+        int pupAction;
+        public static Sprite PupIdle()
+        {
+            if(pupFrames==null)
+            {
+                var sheet=Resources.Load<Texture2D>("Creatures/grave_pup");
+                pupFrames=new Sprite[4];
+                for(int i=0;i<4;i++)
+                    pupFrames[i]=Sprite.Create(sheet,new Rect(i*256,0,256,256),
+                        new Vector2(.5f,.31f),256f,0,SpriteMeshType.FullRect);
+            }
+            return pupFrames[0];
+        }
+
+        public void SetPupAction(int pose,Vector2 heading)
+        {
+            pupAction=pose;
+            if(Mathf.Abs(heading.x)>.01f)artRenderer.flipX=heading.x<0;
+        }
+
         public static NecroCreatureView Attach(SpriteRenderer original,string kind,bool ally)
         {
             NecroCreatureView v=original.gameObject.AddComponent<NecroCreatureView>();
@@ -43,7 +64,7 @@ namespace Necromancer
             v.artRenderer.sortingOrder=original.sortingOrder;
             v.artRenderer.color=v.baseTint;
             original.enabled=false;
-            v.frames=NecroFrameLibrary.Get(kind,original.sprite);
+            if(kind!="grave_pup")v.frames=NecroFrameLibrary.Get(kind,original.sprite);
             if(v.frames!=null)
             {
                 Vector2 normalSize=original.sprite.bounds.size;
@@ -87,6 +108,16 @@ namespace Necromancer
             bool moving=delta.sqrMagnitude>.0000015f;
             lastPosition=at;
 
+            if(type=="grave_pup")
+            {
+                int pose=pupAction!=0?pupAction:moving && Mathf.Sin(t*13f)>0?1:0;
+                artRenderer.sprite=pupFrames[pose];
+                if(pupAction==0 && Mathf.Abs(delta.x)>.0001f)artRenderer.flipX=delta.x<0;
+                float lift=pupAction==3?.14f:moving && pupAction==0?.024f*Mathf.Abs(Mathf.Sin(t*13f)):0f;
+                art.localPosition=Vector3.up*lift;
+                artRenderer.color=impactTimer>0?new Color(1,.65f,.68f):baseTint;
+                return;
+            }
             if(moving)
                 currentDirection=Direction(delta,currentDirection);
 

@@ -130,6 +130,11 @@ namespace Necromancer
                 if(self.hp<=0)continue;
                 self.cooldown=Mathf.Max(0,self.cooldown-dt);
                 self.flash=Mathf.Max(0,self.flash-dt);
+                if(self.kind=="grave_pup" && !friendly)
+                {
+                    UpdatePup(self,dt);
+                    continue;
+                }
                 Actor target=null;
                 float closest=friendly?(huntOrder?5.6f:3.2f):4.1f;
                 if(friendly)
@@ -174,6 +179,45 @@ namespace Necromancer
                 }
             }
         }
+        void UpdatePup(Actor pup,float dt)
+        {
+            const float windup=.42f, leap=.24f;
+            Vector2 offset=player.body.position-pup.body.position;
+            if(pup.pupAttackTime<=0)
+            {
+                if(offset.magnitude>4.1f)return;
+                if(offset.magnitude>1.35f || !Visible(pup.body.position,player.body.position))
+                {
+                    MoveToward(pup,player.body.position,dt);
+                    return;
+                }
+                if(pup.cooldown>0)return;
+                pup.pupHeading=offset.sqrMagnitude>.0001f?offset.normalized:Vector2.right;
+                pup.pupAttackTime=windup+leap;
+                pup.pupHit=false;
+                pup.view.SetPupAction(2,pup.pupHeading);
+            }
+            float previous=pup.pupAttackTime;
+            pup.pupAttackTime=Mathf.Max(0,previous-dt);
+            float leapStep=Mathf.Min(previous,leap)-Mathf.Min(pup.pupAttackTime,leap);
+            if(leapStep>0)
+            {
+                pup.view.SetPupAction(3,pup.pupHeading);
+                Move(pup,pup.pupHeading*(5.8f*leapStep));
+                if(!pup.pupHit && Vector2.Distance(player.body.position,pup.body.position)<pup.radius+player.radius &&
+                    Visible(pup.body.position,player.body.position))
+                {
+                    Damage(player,pup.attack);
+                    pup.pupHit=true;
+                }
+            }
+            if(pup.pupAttackTime<=0)
+            {
+                pup.cooldown=.95f;
+                pup.view.SetPupAction(0,pup.pupHeading);
+            }
+        }
+
         void Damage(Actor victim,float amount)
         {
             if(victim.hp<=0)return;

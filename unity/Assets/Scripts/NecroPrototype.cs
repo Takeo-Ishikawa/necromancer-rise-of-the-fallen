@@ -14,6 +14,9 @@ namespace Necromancer
             public string kind;
             public Transform body;
             public float hp,maxHp,speed,attack,radius,reach,cooldown,flash;
+            public float pupAttackTime;
+            public Vector2 pupHeading;
+            public bool pupHit;
             public bool ally;
             public NecroCreatureView view;
         }
@@ -138,20 +141,20 @@ namespace Necromancer
         Actor Create(string kind,Vector2 at,bool ally,Transform parent)
         {
             float diameter=kind=="warden"||kind=="grave_lord"||kind=="marsh_lord"?1.24f:
-                kind=="necromante"?1.28f:kind=="slime"?.76f:kind=="wisp"?.70f:.72f;
-            var sprite=Visual((ally?"Servo ":"Hostil ")+kind,at,NecroArt.Get(kind),ally?15:12,parent);
+                kind=="grave_pup"?1.08f:kind=="necromante"?1.28f:kind=="slime"?.76f:kind=="wisp"?.70f:.72f;
+            var sprite=Visual((ally?"Servo ":"Hostil ")+kind,at,kind=="grave_pup"?NecroCreatureView.PupIdle():NecroArt.Get(kind),ally?15:12,parent);
             Fit(sprite,diameter,diameter);
             Actor a=new Actor{
                 kind=kind,ally=ally,body=sprite.transform,radius=diameter*.30f,
                 maxHp=kind=="marsh_lord"?460:kind=="grave_lord"?320:
                     kind=="warden"?230:kind=="skeleton"?75:kind=="wisp"?58:
-                    kind=="slime"?54:kind=="necromante"?115:34,
+                    kind=="grave_pup"?82:kind=="slime"?54:kind=="necromante"?115:34,
                 attack=kind=="marsh_lord"?27:kind=="grave_lord"?22:
                     kind=="warden"?15:kind=="skeleton"?12:kind=="wisp"?9:
                     kind=="slime"?10:kind=="necromante"?26:8,
                 speed=kind=="marsh_lord"?1.3f:kind=="grave_lord"?1.45f:
                     kind=="warden"?1.4f:kind=="bat"||kind=="wisp"?2.7f:
-                    kind=="slime"?1.4f:1.9f,
+                    kind=="grave_pup"?2.35f:kind=="slime"?1.4f:1.9f,
                 reach=kind=="bat"||kind=="wisp"?1.10f:.66f
             };
             a.hp=a.maxHp;

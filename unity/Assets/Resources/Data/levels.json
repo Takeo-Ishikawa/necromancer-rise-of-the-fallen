@@ -11,7 +11,7 @@
       "startY": 17.4,
       "sealX": 15.36,
       "sealY": 10.7,
-      "requiresGuardian": true,
+      "requiresGuardian": false,
       "obstacles": [
         {
           "x": 2.35,
@@ -86,64 +86,59 @@
       ],
       "enemies": [
         {
-          "kind": "rat",
+          "kind": "grave_pup",
           "x": 14.6,
           "y": 16
         },
         {
-          "kind": "slime",
+          "kind": "grave_pup",
           "x": 11.7,
           "y": 14.6
         },
         {
-          "kind": "rat",
+          "kind": "grave_pup",
           "x": 17.9,
           "y": 15.1
         },
         {
-          "kind": "bat",
+          "kind": "grave_pup",
           "x": 9.3,
           "y": 11.9
         },
         {
-          "kind": "slime",
+          "kind": "grave_pup",
           "x": 22,
           "y": 14
         },
         {
-          "kind": "rat",
+          "kind": "grave_pup",
           "x": 6.2,
           "y": 10.6
         },
         {
-          "kind": "bat",
+          "kind": "grave_pup",
           "x": 19.4,
           "y": 8.5
         },
         {
-          "kind": "rat",
+          "kind": "grave_pup",
           "x": 24.8,
           "y": 9.7
         },
         {
-          "kind": "slime",
+          "kind": "grave_pup",
           "x": 12.7,
           "y": 6.3
         },
         {
-          "kind": "bat",
+          "kind": "grave_pup",
           "x": 25.2,
           "y": 6.1
         },
         {
-          "kind": "rat",
+          "kind": "grave_pup",
           "x": 8.8,
           "y": 4.5
-        },
-        {
-          "kind": "warden",
-          "x": 15.4,
-          "y": 3.85
         }
       ],
       "objective": "Conquiste a caverna e vincule a Sentinela.",

@@ -66,7 +66,10 @@ for area in levels:
             for obstacle in area["obstacles"]
         ), f"Blocked start/spawn in {area['id']}: {entity}"
 assert {"rat", "bat", "slime", "spider", "snake", "skeleton",
-        "wisp", "warden", "grave_lord", "marsh_lord"} <= kinds
+        "wisp", "grave_pup", "grave_lord", "marsh_lord"} <= kinds
+assert {e["kind"] for e in levels[0]["enemies"]}=={"grave_pup"}
+pup_art=(unity/"Assets/Resources/Creatures/grave_pup.png").read_bytes()
+assert struct.unpack(">II",pup_art[16:24])==(1024,256) and pup_art[24:26]==bytes([8,6])
 
 scripts = {
     name: (unity / "Assets/Scripts" / name).read_text()
@@ -200,8 +203,8 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=2f;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.7.2\"" in builder
-assert "com.takeo.necromancer.unity.preview072" in builder
+assert "PlayerSettings.bundleVersion = \"0.7.3\"" in builder
+assert "com.takeo.necromancer.unity.preview073" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
 hero_sheet=(unity/"Assets/Resources/AnimationSheets/necromante_source.png").read_bytes()
@@ -242,7 +245,7 @@ assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
 assert "heroineStrikePulse=.53f;" in gameplay
 assert "heroineHitPulse=.27f;" in gameplay
 assert "VerifySet(\"necromante\",true);" in frame_editor
-assert "com.takeo.necromancer.unity.preview072" in builder
+assert "com.takeo.necromancer.unity.preview073" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
 creature_visual=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
@@ -317,7 +320,7 @@ assert spectral[24:26]==bytes([8,6]), "Heroine and projectile require explicit 8
 assert "Resources.Load<Texture2D>(" in hero_anim and "Heroine/spectral" in hero_anim
 assert "Staff spectral aura" not in hero_anim
 
-print(f"Unity source verified: {len(levels)} regions, 0.7.2 high resolution idle/walk heroine, eight-direction animation, automatic attacks, respawn, army, portrait PNG "
+print(f"Unity source verified: {len(levels)} regions, 0.7.3 high resolution idle/walk heroine, eight-direction animation, automatic attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")
 

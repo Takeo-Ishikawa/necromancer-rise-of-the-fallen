@@ -44,15 +44,15 @@ namespace Necromancer.EditorTools
 
             PlayerSettings.companyName = "NecromancerStudio";
             PlayerSettings.productName = preview
-                ? "Necromancer (Preview 0.7.2)"
+                ? "Necromancer (Preview 0.7.3)"
                 : "Necromancer: Rise of the Fallen";
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android,
-                preview ? "com.takeo.necromancer.unity.preview072" :
+                preview ? "com.takeo.necromancer.unity.preview073" :
                     "com.takeo.necromancer.unity");
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
-            PlayerSettings.bundleVersion = "0.7.2";
-            PlayerSettings.Android.bundleVersionCode = 16;
+            PlayerSettings.bundleVersion = "0.7.3";
+            PlayerSettings.Android.bundleVersionCode = 17;
 
             if(release)
             {
