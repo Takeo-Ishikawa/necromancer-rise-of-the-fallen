@@ -171,7 +171,7 @@ namespace Necromancer
             }
         }
 
-        internal static Color32[] ReadablePixels(Texture2D source,out int width,out int height)
+        public static Color32[] ReadablePixels(Texture2D source,out int width,out int height)
         {
             width=source.width;height=source.height;
             if(source.isReadable)return source.GetPixels32();
