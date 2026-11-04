@@ -261,6 +261,7 @@ namespace Necromancer
                 facing=control.normalized;
                 Move(player,control*player.speed*dt);
             }
+            ReadManualAttack(hudScale);
             TryAutomaticAttack();
             UpdateActors(current.enemies,dt,false);
             UpdateProjectiles(dt);

@@ -247,10 +247,19 @@ namespace Necromancer
             return found;
         }
         float castCooldown;
+        const float ManualRange=5.4f;
+        bool manualQueued;
+        float noTargetUntil;
+
         void Cast()
         {
+            CastAtRange(spellUnlocked?3.8f:1.02f);
+        }
+
+        void CastAtRange(float range)
+        {
             if(player.hp<=0 || upgradeOpen || castCooldown>Time.time)return;
-            Actor target=Closest(spellUnlocked?3.8f:1.02f);
+            Actor target=Closest(range);
             if(target==null){Announce("Nenhum alvo ao alcance.");return;}
             if(!spellUnlocked)
             {

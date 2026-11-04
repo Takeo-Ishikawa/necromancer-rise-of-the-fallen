@@ -29,12 +29,50 @@ namespace Necromancer
                 wordWrap=true
             };
         }
+        Rect AttackRect(float scale)
+        {
+            return new Rect(Screen.width/scale-108f,Screen.height/scale-214f,82f,72f);
+        }
+
+        void ReadManualAttack(float scale)
+        {
+            Rect button=AttackRect(scale);
+            bool pressed=false;
+            for(int i=0;i<Input.touchCount;i++)
+            {
+                Touch touch=Input.GetTouch(i);
+                Vector2 point=new Vector2(touch.position.x,Screen.height-touch.position.y)/scale;
+                if(touch.phase==TouchPhase.Began && button.Contains(point))pressed=true;
+            }
+            if(Input.touchCount==0 && Input.GetMouseButtonDown(0))
+            {
+                Vector3 pos=Input.mousePosition;
+                pressed=button.Contains(new Vector2(pos.x,Screen.height-pos.y)/scale);
+            }
+            if(pressed)manualQueued=true;
+            if(!manualQueued)return;
+            if(Closest(ManualRange)==null)
+            {
+                noTargetUntil=Time.time+.45f;
+                manualQueued=false;
+            }
+            else if(Time.time>=castCooldown && !releasePending)
+            {
+                manualQueued=false;
+                noTargetUntil=0;
+                CastAtRange(ManualRange);
+            }
+        }
+
         void OnGUI()
         {
             if(player==null || current==null)return;
             EnsureHudArt();
             float scale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
             GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
+            Rect button=AttackRect(scale);
+            RingUi(button,stickDisc,Time.time<castCooldown?new Color(.67f,.62f,.73f):Color.white);
+            GUI.Label(button,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",hudAction);
             Rect pad=new Rect(14f,Screen.height/scale-241f,126f,126f);
             RingUi(pad,stickDisc,Color.white);
             Vector2 stick=touchMove*23f;
