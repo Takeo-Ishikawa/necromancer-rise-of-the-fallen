@@ -12,22 +12,25 @@ namespace Necromancer.EditorTools
     {
         public static void Verify()
         {
-            Texture2D source=Resources.Load<Texture2D>(
-                "AnimationSheets/necromante_source");
-            if(source==null || source.width%4!=0 || source.height%4!=0)
+            Texture2D source=NecroHeroPaintedSource.Build();
+            if(source==null || source.width!=640 || source.height!=640)
                 throw new BuildFailedException(
-                    "Illustrated four-direction heroine source sheet is missing.");
+                    "High resolution heroine source must be 640x640.");
             int w,h;
-            Color32[] sourcePixels=NecroFrameLibrary.ReadablePixels(source,out w,out h);
+            Color32[] pixels=NecroFrameLibrary.ReadablePixels(source,out w,out h);
             int cellW=w/4,cellH=h/4;
+            // All 16 cells must contain a recognizable illustration, and
+            // the 4 directions must not be identical copies.
             int[] hashes=new int[4];
-            for(int d=0;d<4;d++)
+            for(int row=0;row<4;row++)
+            for(int direction=0;direction<4;direction++)
             {
                 int filled=0,hash=17;
-                for(int y=3*cellH;y<4*cellH;y++)
-                for(int x=d*cellW;x<(d+1)*cellW;x++)
+                int baseY=(3-row)*cellH;
+                for(int y=baseY;y<baseY+cellH;y++)
+                for(int x=direction*cellW;x<(direction+1)*cellW;x++)
                 {
-                    Color32 c=sourcePixels[y*w+x];
+                    Color32 c=pixels[y*w+x];
                     if(c.a>40)filled++;
                     unchecked
                     {
@@ -37,15 +40,17 @@ namespace Necromancer.EditorTools
                         hash=hash*31+c.a;
                     }
                 }
-                if(filled<45)
-                    throw new BuildFailedException("Empty hero direction "+d);
-                hashes[d]=hash;
+                if(filled<800)
+                    throw new BuildFailedException(
+                        "Unrendered hero tile "+row+"/"+direction);
+                if(row==0)hashes[direction]=hash;
             }
             for(int d=0;d<4;d++)
                 for(int j=d+1;j<4;j++)
                     if(hashes[d]==hashes[j])
                         throw new BuildFailedException(
-                            "Duplicated heroine facing illustration "+d+"/"+j);
+                            "Duplicate hero direction "+d+"/"+j);
+            Object.DestroyImmediate(source);
             VerifySet("necromante",true);
             VerifySet("rat",false);
             VerifySet("bat",false);
@@ -55,7 +60,7 @@ namespace Necromancer.EditorTools
                NecroFrameLibrary.Supports("spider"))
                 throw new BuildFailedException("Frame-supported creature list regressed.");
 
-            Debug.Log("[Necromancer 0.6.5a] Painted directional hero source, "+
+            Debug.Log("[Necromancer 0.6.5b] High-resolution hero source, "+
                 "(hero, rat, bat, four directions, frame clips).");
         }
 

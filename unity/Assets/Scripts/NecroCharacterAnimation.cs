@@ -40,8 +40,11 @@ namespace Necromancer
                 Vector2 original=rootRenderer.sprite.bounds.size;
                 Vector2 replacement=heroineFrames.Frame(
                     NecroPose.Idle,NecroDirection.Down,0,true).bounds.size;
+                // Slightly larger visual size, without changing collisions.
+                // The hair, eyes and skull stay readable on a small handset.
                 witchArtTransform.localScale=new Vector3(
-                    original.x/replacement.x,original.y/replacement.y,1);
+                    original.x/replacement.x*1.13f,
+                    original.y/replacement.y*1.13f,1);
             }
 
             GameObject circle=new GameObject("Necromantic rune circle");

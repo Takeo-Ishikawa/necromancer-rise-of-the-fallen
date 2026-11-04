@@ -107,13 +107,20 @@ namespace Necromancer
         void DrawPortraitUi(Rect rect)
         {
             RingUi(rect,hudRing,Color.white);
-            Sprite hero=NecroArt.Get("necromante");
-            if(hero!=null&&hero.texture!=null)
+            if(heroineFrames!=null && heroineFrames.Atlas!=null)
             {
-                // The source artwork is already transparent; crop to head and shoulders.
-                Rect image=new Rect(rect.x+12,rect.y+10,rect.width-24,rect.height-24);
-                GUI.DrawTextureWithTexCoords(image,hero.texture,
-                    new Rect(.15f,.40f,.72f,.58f),true);
+                // The HUD portrait shows the same clean artwork as gameplay.
+                Sprite frame=heroineFrames.Frame(
+                    NecroPose.Idle,NecroDirection.Down,0f,true);
+                Rect sub=frame.rect;
+                Rect uv=new Rect(
+                    (sub.x+sub.width*.16f)/heroineFrames.Atlas.width,
+                    (sub.y+sub.height*.38f)/heroineFrames.Atlas.height,
+                    sub.width*.68f/heroineFrames.Atlas.width,
+                    sub.height*.60f/heroineFrames.Atlas.height);
+                Rect image=new Rect(rect.x+12,rect.y+9,
+                    rect.width-24,rect.height-24);
+                GUI.DrawTextureWithTexCoords(image,heroineFrames.Atlas,uv,true);
             }
             RingUi(rect,hudRing,new Color(.88f,.78f,.64f,1));
         }

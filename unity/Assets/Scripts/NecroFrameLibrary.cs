@@ -118,9 +118,11 @@ namespace Necromancer
             Texture2D atlas=Resources.Load<Texture2D>("AnimationSheets/"+kind);
             if(hero && atlas==null)
             {
-                Texture2D poses=Resources.Load<Texture2D>(
-                    "AnimationSheets/necromante_source");
+                // New high-detail native drawing: no 31x46 px source tiles.
+                Texture2D poses=NecroHeroPaintedSource.Build();
                 if(poses!=null)atlas=NecroHeroSheetBuilder.Build(poses);
+                if(Application.isPlaying)UnityEngine.Object.Destroy(poses);
+                else UnityEngine.Object.DestroyImmediate(poses);
             }
             bool generated=false;
             if(atlas==null)
