@@ -1,29 +1,26 @@
-# Necromancer — 0.6.5b · Protagonista legível e repouso/caminhada em quatro direções
+# Necromancer Unity — Revisão visual 0.6.5c
 
-Esta entrega implementa um novo padrão de arte da protagonista no Unity, concentrado em **legibilidade no celular** e animações de repouso/caminhada.
+Este release inicia o **pipeline de assets raster separados do código**, mantendo o jogo na Unity 2022.3.62f2. É a primeira revisão da Caverna Esquecida em direção ao **2D ilustrado sombrio**, sem alterar a jogabilidade.
 
-## Correção observada na captura Android
+## Alterações implementadas
 
-A 0.6.5a utilizava uma folha PNG com apenas 124×184 pixels para **16 poses**, ou aproximadamente **31×46 pixels por personagem**. O aumento feito pelo Unity borrava o chapéu, o rosto e o cajado, fazendo a protagonista parecer menos definida que os monstros.
+- **Textura PNG de chão:** `Assets/Resources/Backgrounds/entrada_da_caverna_bonehollow.png` (512×512) substitui o antigo piso desenhado durante a execução. É repetida em escala nativa pelo SpriteRenderer Tiled, em vez de esticar um pequeno sprite por toda a caverna. Mantém o caminho amplo e cores frias suaves.
+- **Rochas e cristais PNG:** `Assets/Resources/Scenery/rock_cluster.png` e `crystal.png` (256×256, fundo transparente) substituem parte dos objetos procedurais. Os elementos usam imagens de recursos importáveis, com fallback para o artefato antigo se ausentes. Reduzimos o número de decorações espalhadas pela caverna de 25 para 14.
+- **HUD compactada:** topo com 89 unidades virtuais (anteriormente 116), retrato e minimapa menores, títulos discretos; a mensagem permanente de região conquistada foi substituída por avisos temporários. Joystick e botões redimensionados com seus pontos de toque atualizados. Não há botão de ataque.
+- **Presença no cenário:** sombra de contato suave sob a necromante e uma aura discreta no cajado, que reage a conjuração e ressurreição, sem exigir URP ou um material de renderização novo.
 
-A nova fonte de arte em `Assets/Scripts/NecroHeroPaintedSource.cs` é original, com cores e contornos definidos para a leitura durante a jogabilidade. Agora cada pose começa numa célula desenhada de **160×160 pixels**, mantendo o chapéu violeta e a caveira, o cabelo prateado, o manto escuro e o cajado com núcleo ciano.
+As ilustrações PNG foram preparadas como recursos estáticos independentes do runtime; **ainda não representam a arte final pintada manualmente em alta resolução do conceito**. Esta implementação estabelece a arquitetura e melhora o primeiro bioma. Não se deve dizer que a URP já está ativada: primeiro é necessário confirmar pipeline/renderers/shaders e desempenho no Android.
 
-São quatro vistas distintas e duas poses de repouso mais duas de caminhada **em cada direção**. A biblioteca usa essas 16 células, sem esticar uma visão frontal para representar costas ou laterais. `NecroHeroSheetBuilder.cs` mantém um atlas de 96×96 pixels por quadro, e organiza os seis estados originais; os intervalos de repouso e caminhada são construídos a partir dos novos desenhos com deslocamentos leves, sem distorção da face.
+## Pipeline dos próximos assets
 
-As animações continuam ligadas ao `NecroCharacterAnimation.cs`. O sprite da personagem ficou aproximadamente 13% maior, sem alterar a física nem as colisões. O retrato circular da HUD passou a usar a própria nova arte do jogo, no lugar da PNG anterior.
+- Fundo e cenário: importar PNG em `Resources/Backgrounds/` e `Resources/Scenery/`; usar transparência em objetos e pivô de contato em torno de 37% de altura.
+- Personagens: folhas de sprites ilustradas em `Resources/AnimationSheets/`, com poses compatíveis com `NecroFrameLibrary`. Os protótipos procedurais ficam como fallback.
+- UI: substituir progressivamente as molduras/imagens da HUD por PNGs com alta densidade de pixels; o layout compacto já separa esses elementos.
+- Iluminação: após a revisão do pipeline, avaliar Universal Render Pipeline 2D com `Sprite-Lit-Default` e `Light2D`, medindo FPS em aparelhos Android. Este release usa halo translúcido de baixo custo.
+- Antes de adicionar novos biomas, validar captura da primeira caverna e distância entre personagens, decoração e controles.
 
-## Estado da arte
+## Compatibilidade
 
-O novo desenho de origem é rasterizado uma única vez em uma textura transparente de 640×640 pixels pela classe C# instalada no Unity. Não é necessário importar a arte de um site ou anexar um screenshot como plano de fundo.
+A prévia usa `com.takeo.necromancer.unity.preview065c`; instala separada da 0.5 e das outras prévias por causa de suas assinaturas independentes. O salvamento começa isolado. **Não desinstale a 0.5.** Nenhum campo do save ou mecânica do jogo foi modificado.
 
-As sequências de ataque, magia, ressurreição e dano ainda reutilizam as poses de repouso com efeitos específicos; **esta fase cobre especialmente idle e walk**, conforme o escopo definido. A etapa seguinte poderá produzir poses exclusivas também para as outras ações e aprimorar a qualidade visual da caverna/HUD.
-
-## Segurança de instalação
-
-A prévia `com.takeo.necromancer.unity.preview065b` é uma **instalação separada** das versões 0.5, 0.6.4 e 0.6.5a para preservar seus dados. Ela não importa automaticamente o salvamento das versões anteriores. Não desinstale a versão cuja partida queira conservar.
-
-Nenhuma regra de combate, custo de ânima, comando de exército, Cripta ou formato de salvamento foi alterada.
-
-## Verificação
-
-O Editor Unity gera o atlas e verifica as quatro vistas e as 16 poses. O script `tests/check_unity_project.py` valida a presença do gerador e a integração. A compilação Android confirma a integridade técnica, mas a qualidade artística e o conforto de movimento devem ser julgados no telefone.
+Os testes verificam integridade dos PNGs, integração no Editor, dimensões e compilação. A aprovação do build não substitui avaliar a legibilidade visual no celular.

@@ -20,6 +20,7 @@ namespace Necromancer.EditorTools
             // Test serialization before exporting a player.
             NecroSaveEditorCheck.Verify();
             NecroVisualEditorCheck.Verify();
+            NecroIllustratedAssetEditorCheck.Verify();
             NecroFrameEditorCheck.Verify();
             NecroSceneBootstrap.Setup();
             if(!File.Exists(scenePath))
@@ -43,15 +44,15 @@ namespace Necromancer.EditorTools
 
             PlayerSettings.companyName = "NecromancerStudio";
             PlayerSettings.productName = preview
-                ? "Necromancer (Preview 0.6.5b)"
+                ? "Necromancer (Preview 0.6.5c)"
                 : "Necromancer: Rise of the Fallen";
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android,
-                preview ? "com.takeo.necromancer.unity.preview065b" :
+                preview ? "com.takeo.necromancer.unity.preview065c" :
                     "com.takeo.necromancer.unity");
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
-            PlayerSettings.bundleVersion = "0.6.5b";
-            PlayerSettings.Android.bundleVersionCode = 12;
+            PlayerSettings.bundleVersion = "0.6.5c";
+            PlayerSettings.Android.bundleVersionCode = 13;
 
             if(release)
             {

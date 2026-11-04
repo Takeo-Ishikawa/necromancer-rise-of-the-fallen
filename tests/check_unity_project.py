@@ -193,8 +193,8 @@ assert "joystickFingerId" in core and "TouchPhase.Began" in core
 assert "DrawPolishedHUD(w,h);" in ui
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.6.5b\"" in builder
-assert "com.takeo.necromancer.unity.preview065b" in builder
+assert "PlayerSettings.bundleVersion = \"0.6.5c\"" in builder
+assert "com.takeo.necromancer.unity.preview065c" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
 hero_sheet=(unity/"Assets/Resources/AnimationSheets/necromante_source.png").read_bytes()
@@ -235,7 +235,7 @@ assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
 assert "heroineStrikePulse=.53f;" in gameplay
 assert "heroineHitPulse=.27f;" in gameplay
 assert "VerifySet(\"necromante\",true);" in frame_editor
-assert "com.takeo.necromancer.unity.preview065b" in builder
+assert "com.takeo.necromancer.unity.preview065c" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
 creature_visual=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
@@ -268,6 +268,44 @@ assert "NECRO_ANDROID_MODE: release" in release_workflow
 assert "ANDROID_KEYSTORE_BASE64" in release_workflow
 assert ".android-release.keystore" in release_workflow
 
-print(f"Unity source verified: {len(levels)} regions, 0.6.5b high resolution idle/walk heroine, four-direction animation, automatic attacks, respawn, army, portrait PNG "
+# Production raster assets have PNG structure, dimensions and CRC checks.
+for png_name,minimum in [
+    ("Assets/Resources/Backgrounds/entrada_da_caverna_bonehollow.png",512),
+    ("Assets/Resources/Scenery/crystal.png",256),
+    ("Assets/Resources/Scenery/rock_cluster.png",256),
+]:
+    blob=(unity/png_name).read_bytes()
+    assert blob[:8]==bytes([137,80,78,71,13,10,26,10]), png_name
+    sw,sh=struct.unpack(">II",blob[16:24])
+    assert sw>=minimum and sh>=minimum, png_name
+    offset=8
+    seen_image=False
+    while offset+12<=len(blob):
+        n=struct.unpack(">I",blob[offset:offset+4])[0]
+        typ=blob[offset+4:offset+8]
+        data=blob[offset+8:offset+8+n]
+        expected=struct.unpack(">I",blob[offset+8+n:offset+12+n])[0]
+        assert (zlib.crc32(typ+data)&0xffffffff)==expected, png_name
+        if typ==b"IDAT":seen_image=True
+        offset+=n+12
+        if typ==b"IEND":break
+    assert seen_image and offset==len(blob), png_name
+
+asset_check=(unity/"Assets/Editor/NecroIllustratedAssetEditorCheck.cs").read_text()
+assert "NecroIllustratedAssetEditorCheck.Verify();" in builder
+assert "entrada_da_caverna_bonehollow" in asset_check
+assert "SpriteDrawMode.Tiled" in core
+assert "FitGround(next.backdrop,level);" in core
+assert "FitGround(current.backdrop,level);" in core
+assert 'new Vector2(77f,178f)' in core
+assert "Resources.Load<Texture2D>(\"Scenery/\"+kind)" in scenery
+assert "Resources.Load<Texture2D>(\"Scenery/rock_cluster\")" in scripts["NecroArt.cs"]
+assert "Time.time<noticeUntil" in hud
+assert "Região conquistada — explore as passagens." not in hud
+assert 'new Rect(0,0,width,89)' in hud
+assert "Soft contact shadow" in hero_anim
+assert "Staff spectral aura" in hero_anim
+
+print(f"Unity source verified: {len(levels)} regions, 0.6.5c high resolution idle/walk heroine, four-direction animation, automatic attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")

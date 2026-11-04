@@ -46,3 +46,8 @@ A protagonista tem uma nova folha PNG de 16 poses/vistas ilustradas (frente/cost
 ### 0.6.5b — personagem nítida e idle/walk aprimorados
 
 Corrigida a origem minúscula que borrava a necromante na versão anterior: agora são 16 poses de 160×160 pixels, com desenhos distintos para frente, costas, esquerda e direita e quadros de repouso/caminhada. O retrato da HUD também foi atualizado. [Detalhes](unity/README.md).
+
+
+### 0.6.5c — Caverna ilustrada e interface compacta
+
+A primeira etapa de recursos gráficos estáticos PNG foi adicionada ao Unity: chão em escala nativa, rochas e cristais, HUD mais enxuta e sombras/halo da necromante. A URP ainda não foi ativada. [Implementação e testes](unity/README.md).
