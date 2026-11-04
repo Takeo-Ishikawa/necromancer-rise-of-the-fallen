@@ -172,25 +172,32 @@ namespace Necromancer
         void DrawPolishedHUD(float width,float height)
         {
             EnsureHudArt();
-            float edge=9f;
-            PanelUi(new Rect(0,0,width,116));
-            DrawPortraitUi(new Rect(8,7,91,91));
-            DrawMeterUi(new Rect(105,12,199,22),player.hp/player.maxHp,UiPink,
-                Mathf.CeilToInt(player.hp)+" / "+Mathf.CeilToInt(player.maxHp));
-            DrawMeterUi(new Rect(105,39,199,20),(float)mana/maxMana,UiMana,
-                mana+" / "+maxMana);
-            GUI.Label(new Rect(109,62,170,22),"NÍVEL "+playerLevel+" · XP "+
-                experience+"/"+ExperienceThreshold(),hudValue);
-            GUI.Label(new Rect(108,85,201,23),"CRISTAIS "+shards+
-                "   ·   SERVOS "+CommandUsed()+"/"+CommandLimit,hudSmall);
-            DrawMiniMapUi(new Rect(width-107,4,103,103));
+            // Less UI obstruction: the first 89 virtual pixels hold all stats.
+            PanelUi(new Rect(0,0,width,89));
+            DrawPortraitUi(new Rect(8,5,69,69));
+            float meterX=82f, meterWidth=Mathf.Max(100f,width-172f);
+            DrawMeterUi(new Rect(meterX,8,meterWidth,17),
+                player.hp/player.maxHp,UiPink,
+                Mathf.CeilToInt(player.hp)+"/"+Mathf.CeilToInt(player.maxHp));
+            DrawMeterUi(new Rect(meterX,29,meterWidth,16),
+                (float)mana/maxMana,UiMana,mana+"/"+maxMana);
+            GUI.Label(new Rect(83,47,meterWidth+5,19),
+                "NÍVEL "+playerLevel+" · XP "+experience+
+                "/"+ExperienceThreshold(),hudValue);
+            GUI.Label(new Rect(80,65,meterWidth+10,18),
+                "CRISTAIS "+shards+" · SERVOS "+CommandUsed()+"/"+CommandLimit,
+                hudSmall);
+            DrawMiniMapUi(new Rect(width-86,4,81,81));
 
-            PanelUi(new Rect(76,119,width-152,31));
-            GUI.Label(new Rect(79,119,width-158,31),level.title,hudTitle);
-            PanelUi(new Rect(14,157,width-28,47));
-            string goal=Time.time<noticeUntil ? notice :
-                current.claimed?"Região conquistada — explore as passagens.":level.objective;
-            GUI.Label(new Rect(22,158,width-44,44),goal,hudSmall);
+            GUI.Label(new Rect(68,91,width-136,25),level.title,hudTitle);
+            // Never cover gameplay with the permanent "region conquered" panel.
+            if(Time.time<noticeUntil)
+            {
+                PanelUi(new Rect(22,118,width-44,30));
+                GUI.Label(new Rect(29,119,width-58,28),notice,hudSmall);
+            }
+            else if(!current.claimed)
+                GUI.Label(new Rect(20,118,width-40,24),level.objective,hudSmall);
 
             // Inspect panels are modal, and their buttons should not overlap
             // underlying skill or navigation controls.
@@ -198,33 +205,30 @@ namespace Necromancer
             if(gearInspect){DrawGearInspect(width,height);return;}
 
             if(stage>0&&NearEntrance())
-                if(GUI.Button(new Rect(24,210,width-48,37),
+                if(GUI.Button(new Rect(24,160,width-48,37),
                     "RETORNAR: "+levels[stage-1].title,buttonStyle))Retreat();
             if(current.claimed && stage+1<levels.Length && NearSeal())
-                if(GUI.Button(new Rect(24,210,width-48,37),
+                if(GUI.Button(new Rect(24,160,width-48,37),
                     "AVANÇAR: "+levels[stage+1].title,buttonStyle))Advance();
             if(CanAccessCrypt())
-                if(GUI.Button(new Rect(24,253,width-48,38),
+                if(GUI.Button(new Rect(24,205,width-48,38),
                     "ENTRAR NA CRIPTA",buttonStyle))OpenCrypt();
 
-            float bottom=height-78;
-            // Visual joystick, driven by real multi-touch data in Update.
-            Rect pad=new Rect(9,bottom-197,146,146);
+            float bottom=height-64;
+            Rect pad=new Rect(14,bottom-177,126,126);
             RingUi(pad,stickDisc,Color.white);
-            Vector2 stick=touchMove*24f;
-            RingUi(new Rect(pad.center.x-28+stick.x,pad.center.y-28-stick.y,56,56),
-                smallRing,UiGold);
-            GUI.Label(new Rect(15,bottom-47,137,25),"MOVIMENTO",hudAction);
+            Vector2 stick=touchMove*23f;
+            RingUi(new Rect(pad.center.x-26+stick.x,
+                pad.center.y-26-stick.y,52,52),smallRing,UiGold);
+            GUI.Label(new Rect(16,bottom-42,123,22),"MOVIMENTO",hudAction);
 
-            float right=width-173;
-            float top=bottom-196;
-            GUI.Label(new Rect(right-4,top-27,176,24),
-                "ATAQUE AUTOMÁTICO",hudAction);
-            DrawIconUi(new Rect(right,top,75,75),"☠","REVIVER",Raise);
-            DrawIconUi(new Rect(right+89,top,75,75),
+            float right=width-153;
+            float top=bottom-175;
+            DrawIconUi(new Rect(right,top,68,68),"☠","REVIVER",Raise);
+            DrawIconUi(new Rect(right+78,top,68,68),
                 huntOrder?"⚔":"◇",huntOrder?"CAÇA":"DEFESA",
                 ()=>huntOrder=!huntOrder);
-            DrawIconUi(new Rect(right+44,top+94,75,75),
+            DrawIconUi(new Rect(right+39,top+80,68,68),
                 "✧","EVOLUIR",()=>{touchMove=Vector2.zero;upgradeOpen=true;});
 
             // Functional quick-navigation buttons.
@@ -232,7 +236,7 @@ namespace Necromancer
             string[] labels={"SERVOS","CRIPTA","RITUAIS","EQUIP."};
             for(int i=0;i<4;i++)
             {
-                Rect slot=new Rect(8+i*slotWidth,height-59,slotWidth-3,48);
+                Rect slot=new Rect(8+i*slotWidth,height-48,slotWidth-3,39);
                 PanelUi(slot);
                 GUI.Label(slot,labels[i],hudAction);
                 int choice=i;

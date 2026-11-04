@@ -32,7 +32,7 @@ namespace Necromancer
             int seed=8161;
             foreach(char c in area.id)seed=unchecked(seed*31+c);
             System.Random random=new System.Random(seed&0x7fffffff);
-            int wanted=area.id=="necropolis"?32:area.id=="marsh"?27:25;
+            int wanted=area.id=="bonehollow"?14:area.id=="necropolis"?32:area.id=="marsh"?27:25;
             int created=0;
             for(int tries=0;tries<230 && created<wanted;tries++)
             {
@@ -81,6 +81,14 @@ namespace Necromancer
             if(sprites.TryGetValue(kind,out Sprite result))return result;
             Sprite imported=Resources.Load<Sprite>("Scenery/"+kind);
             if(imported!=null)return sprites[kind]=imported;
+            Texture2D painting=Resources.Load<Texture2D>("Scenery/"+kind);
+            if(painting!=null)
+            {
+                painting.filterMode=FilterMode.Bilinear;
+                return sprites[kind]=Sprite.Create(painting,
+                    new Rect(0,0,painting.width,painting.height),
+                    new Vector2(.5f,.37f),100f,0,SpriteMeshType.FullRect);
+            }
             Texture2D t=new Texture2D(128,128,TextureFormat.RGBA32,false);
             t.SetPixels(new Color[128*128]);t.filterMode=FilterMode.Bilinear;
             t.wrapMode=TextureWrapMode.Clamp;

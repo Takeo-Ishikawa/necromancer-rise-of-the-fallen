@@ -232,9 +232,19 @@ namespace Necromancer
 
         public static Sprite Environment(string path)
         {
-            Sprite imported=Resources.Load<Sprite>("Backgrounds/"+path);
-            if(imported!=null)return imported;
             if(cache.TryGetValue("floor/"+path,out Sprite cached))return cached;
+            string resource=path=="santuario_necromante_bonehollow"
+                ? "entrada_da_caverna_bonehollow" : path;
+            Sprite imported=Resources.Load<Sprite>("Backgrounds/"+resource);
+            if(imported!=null)return cache["floor/"+path]=imported;
+            Texture2D painting=Resources.Load<Texture2D>("Backgrounds/"+resource);
+            if(painting!=null)
+            {
+                painting.filterMode=FilterMode.Bilinear;
+                return cache["floor/"+path]=Sprite.Create(painting,
+                    new Rect(0,0,painting.width,painting.height),
+                    new Vector2(.5f,.5f),100f,0,SpriteMeshType.FullRect);
+            }
             bool swamp=path.Contains("pantano");
             bool grave=path.Contains("necropole");
             bool tunnel=path.Contains("tuneis");
@@ -328,6 +338,16 @@ namespace Necromancer
         public static Sprite Stone()
         {
             if(cache.TryGetValue("rock",out Sprite rock))return rock;
+            Sprite imported=Resources.Load<Sprite>("Scenery/rock_cluster");
+            if(imported!=null)return cache["rock"]=imported;
+            Texture2D painting=Resources.Load<Texture2D>("Scenery/rock_cluster");
+            if(painting!=null)
+            {
+                painting.filterMode=FilterMode.Bilinear;
+                return cache["rock"]=Sprite.Create(painting,
+                    new Rect(0,0,painting.width,painting.height),
+                    new Vector2(.5f,.37f),100f,0,SpriteMeshType.FullRect);
+            }
             Texture2D t=Make(64);
             Oval(t,32,25,30,22,new Color(.18f,.18f,.25f));
             Oval(t,30,29,26,21,new Color(.36f,.32f,.39f));

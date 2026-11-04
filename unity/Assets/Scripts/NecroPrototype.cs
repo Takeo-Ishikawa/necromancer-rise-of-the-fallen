@@ -118,6 +118,23 @@ namespace Necromancer
             renderer.transform.localScale=new Vector3(width/size.x,height/size.y,1);
         }
 
+        static void FitGround(SpriteRenderer renderer,LevelDefinition area)
+        {
+            if(area.id=="bonehollow")
+            {
+                // Tile the imported floor at its native pixel density.
+                // FullRect sprites allow SpriteRenderer tiled draw mode.
+                renderer.drawMode=SpriteDrawMode.Tiled;
+                renderer.transform.localScale=Vector3.one;
+                renderer.size=new Vector2(area.width,area.height);
+            }
+            else
+            {
+                renderer.drawMode=SpriteDrawMode.Simple;
+                Fit(renderer,area.width,area.height);
+            }
+        }
+
         Actor Create(string kind,Vector2 at,bool ally,Transform parent)
         {
             float diameter=kind=="warden"||kind=="grave_lord"||kind=="marsh_lord"?1.24f:
@@ -158,7 +175,7 @@ namespace Necromancer
                 Sprite background=NecroArt.Environment(level.background);
                 next.backdrop=Visual("Ground",new Vector2(level.width*.5f,level.height*.5f),
                     background,-50,next.root.transform);
-                Fit(next.backdrop,level.width,level.height);
+                FitGround(next.backdrop,level);
                 // Cosmetic props share the biome but never block movement.
                 NecroScenery.Populate(level,next.root.transform);
                 foreach(Obstacle rock in level.obstacles) {
@@ -224,7 +241,7 @@ namespace Necromancer
                 // A finger must start on the visible joystick. Other UI taps
                 // (skills, inventory or the bottom navigation) never steer.
                 float hudScale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
-                Vector2 stickCenter=new Vector2(82f,202f)*hudScale;
+                Vector2 stickCenter=new Vector2(77f,178f)*hudScale;
                 bool stickFound=false;
                 foreach(Touch touch in Input.touches)
                 {
@@ -235,11 +252,11 @@ namespace Necromancer
                     }
                     if(touch.fingerId==joystickFingerId ||
                        (joystickFingerId==-1 && touch.phase==TouchPhase.Began &&
-                        Vector2.Distance(touch.position,stickCenter)<75f*hudScale))
+                        Vector2.Distance(touch.position,stickCenter)<66f*hudScale))
                     {
                         joystickFingerId=touch.fingerId;
                         touchMove=Vector2.ClampMagnitude(
-                            (touch.position-stickCenter)/(49f*hudScale),1f);
+                            (touch.position-stickCenter)/(46f*hudScale),1f);
                         stickFound=true;
                         break;
                     }
@@ -308,7 +325,7 @@ namespace Necromancer
             if(!string.IsNullOrEmpty(level.baseBackground))
             {
                 current.backdrop.sprite=NecroArt.Environment(level.baseBackground);
-                Fit(current.backdrop,level.width,level.height);
+                FitGround(current.backdrop,level);
             }
             current.seal.localScale=Vector3.one*3.2f;
             if(stage==0)ShowCryptAltar();
