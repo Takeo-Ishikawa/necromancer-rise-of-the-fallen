@@ -6,6 +6,10 @@ namespace Necromancer.EditorTools
     {
         public static void Verify()
         {
+            var heroine=Resources.Load<Texture2D>("Heroine/spectral");
+            if(heroine==null || heroine.width!=1024 || heroine.height!=2048 ||
+               !UnityEngine.Experimental.Rendering.GraphicsFormatUtility.HasAlphaChannel(heroine.graphicsFormat))
+                throw new BuildFailedException("Imported heroine atlas must retain its alpha channel.");
             Texture2D floor=Resources.Load<Texture2D>(
                 "Backgrounds/entrada_da_caverna_bonehollow");
             Texture2D crystal=Resources.Load<Texture2D>("Scenery/crystal");

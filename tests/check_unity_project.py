@@ -200,8 +200,8 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=2f;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.7.1\"" in builder
-assert "com.takeo.necromancer.unity.preview071" in builder
+assert "PlayerSettings.bundleVersion = \"0.7.2\"" in builder
+assert "com.takeo.necromancer.unity.preview072" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
 hero_sheet=(unity/"Assets/Resources/AnimationSheets/necromante_source.png").read_bytes()
@@ -242,7 +242,7 @@ assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
 assert "heroineStrikePulse=.53f;" in gameplay
 assert "heroineHitPulse=.27f;" in gameplay
 assert "VerifySet(\"necromante\",true);" in frame_editor
-assert "com.takeo.necromancer.unity.preview071" in builder
+assert "com.takeo.necromancer.unity.preview072" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
 creature_visual=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
@@ -313,11 +313,11 @@ assert 'new Rect(0,0,width,89)' in hud
 assert "Soft contact shadow" in hero_anim
 spectral=(unity/"Assets/Resources/Heroine/spectral.png").read_bytes()
 assert struct.unpack(">II",spectral[16:24])==(1024,2048)
-assert b"tRNS" in spectral
+assert spectral[24:26]==bytes([8,6]), "Heroine and projectile require explicit 8-bit RGBA"
 assert "Resources.Load<Texture2D>(" in hero_anim and "Heroine/spectral" in hero_anim
 assert "Staff spectral aura" not in hero_anim
 
-print(f"Unity source verified: {len(levels)} regions, 0.7.1 high resolution idle/walk heroine, eight-direction animation, automatic attacks, respawn, army, portrait PNG "
+print(f"Unity source verified: {len(levels)} regions, 0.7.2 high resolution idle/walk heroine, eight-direction animation, automatic attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")
 
