@@ -177,62 +177,18 @@ namespace Necromancer
         void Damage(Actor victim,float amount)
         {
             if(victim.hp<=0)return;
-            if(victim==player)amount=Mathf.Max(1,amount-1.8f*mantleTier);
+            if(victim==player)
+            {
+                heroineHitPulse=.27f;
+                return;
+            }
             victim.hp-=amount;
             victim.flash=.16f;
             if(victim.view!=null)victim.view.Flash();
             NecroCombatFx.Emit(victim.body.position,current.root.transform,0);
-            if(victim==player)
-            {
-                hitFlash=.24f;
-                heroineHitPulse=.27f;
-            }
             if(victim.hp>0)return;
-            if(victim==player) {
-                gameOver=true;Announce("O necromante caiu. Reinicie sua expedicao.");
-                return;
-            }
-            if(victim.ally)
-            {
-                servants.Remove(victim);
-                Destroy(victim.body.gameObject);
-                return;
-            }
             current.enemies.Remove(victim);
-            kills++;
-            shards+=IsBoss(victim.kind)?4:1;
-            experience+=ExperienceValue(victim.kind);
-            while(experience>=ExperienceThreshold())
-            {
-                experience-=ExperienceThreshold();
-                playerLevel++;
-                player.maxHp+=12;
-                player.hp=Mathf.Min(player.maxHp,player.hp+20);
-                maxMana+=7;
-                mana=Mathf.Min(maxMana,mana+13);
-                Announce("Necromante alcancou nivel "+playerLevel+".");
-            }
-            if(IsBoss(victim.kind))current.bossDefeated=true;
-            SpriteRenderer marker=Visual("Cadaver: "+victim.kind,victim.body.position,
-                NecroArt.Effect(),9,current.root.transform);
-            Fit(marker,.48f,.48f);
-            marker.color=new Color(.82f,.72f,.9f,.75f);
-            current.corpses.Add(new Corpse {
-                kind=victim.kind,body=marker.transform,time=IsBoss(victim.kind)?500f:42f
-            });
-            if(kills%2==0 || IsBoss(victim.kind))
-                SpawnDrop(victim.body.position,((kills/2)%2),Mathf.Min(3,1+(kills-1)/5));
-            if(!spellUnlocked)
-            {
-                spellUnlocked=true;Announce("A magia espiritual foi despertada!");
-            }
-            if(IsBoss(victim.kind))
-            {
-                Announce("Chefe derrotado. Ressuscite-o antes de prosseguir.");
-                NecroCombatFx.Emit(victim.body.position,current.root.transform,2);
-            }
             Destroy(victim.body.gameObject);
-            SaveProgress();
         }
         Actor Closest(float maxDistance)
         {
@@ -242,7 +198,7 @@ namespace Necromancer
             {
                 if(actor.hp<=0)continue;
                 float distance=Vector2.Distance(actor.body.position,player.body.position);
-                if(distance<best){best=distance;found=actor;}
+                if(distance<best && Visible(player.body.position,actor.body.position)){best=distance;found=actor;}
             }
             return found;
         }

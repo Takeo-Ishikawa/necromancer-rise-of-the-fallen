@@ -98,7 +98,7 @@ namespace Necromancer
             player.maxHp=115;player.hp=115;player.speed=3.4f;
             InitializeHeroAnimation();
             LoadStage(0);
-            RestoreProgress();
+            spellUnlocked=true;
         }
 
         SpriteRenderer Visual(string label,Vector2 at,Sprite sprite,int order,Transform parent)
@@ -183,14 +183,12 @@ namespace Necromancer
                         NecroArt.Stone(),-3,next.root.transform);
                     Fit(stone,rock.r*2f,rock.r*2f);
                 }
-                next.seal=Visual("Necromantic Gate",NecroLevels.At(level,level.sealX,level.sealY),
-                    NecroArt.Effect(),-1,next.root.transform).transform;
-                next.seal.localScale=Vector3.one*2.2f;
                 foreach(Spawn spawn in level.enemies)
+                {
+                    if(IsBoss(spawn.kind))continue;
                     next.enemies.Add(Create(spawn.kind,NecroLevels.At(level,spawn.x,spawn.y),
                         false,next.root.transform));
-                if(level.resources!=null)foreach(ResourceSpawn res in level.resources)
-                    SpawnResource(res.type,NecroLevels.At(level,res.x,res.y));
+                }
             } else {
                 current=stages[stage];
                 current.root.SetActive(true);
@@ -208,7 +206,7 @@ namespace Necromancer
             projectiles.Clear();
             upgradeOpen=false;
             cryptOpen=false;
-            Announce(level.title+": explore e domine as criaturas.");
+
         }
 
         void Advance()
@@ -229,70 +227,41 @@ namespace Necromancer
         {
             if(player==null || level==null || gameOver)return;
             float dt=Mathf.Min(.045f,Time.deltaTime);
-            if(upgradeOpen || cryptOpen || armyInspect || gearInspect)
+            Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
+            float hudScale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
+            Vector2 stickCenter=new Vector2(77f,178f)*hudScale;
+            bool stickFound=false;
+            foreach(Touch touch in Input.touches)
             {
-                touchMove=Vector2.zero;
-                heroineWalking=false;
-                joystickFingerId=-1;
+                if(touch.phase==TouchPhase.Ended || touch.phase==TouchPhase.Canceled)
+                {
+                    if(touch.fingerId==joystickFingerId)joystickFingerId=-1;
+                    continue;
+                }
+                if(touch.fingerId==joystickFingerId ||
+                   (joystickFingerId==-1 && touch.phase==TouchPhase.Began &&
+                    Vector2.Distance(touch.position,stickCenter)<66f*hudScale))
+                {
+                    joystickFingerId=touch.fingerId;
+                    touchMove=Vector2.ClampMagnitude(
+                        (touch.position-stickCenter)/(46f*hudScale),1f);
+                    stickFound=true;
+                    break;
+                }
             }
-            else
+            if(!stickFound){joystickFingerId=-1;touchMove=Vector2.zero;}
+            Vector2 control=keyboard+touchMove;
+            if(control.sqrMagnitude>1)control.Normalize();
+            heroineWalking=control.sqrMagnitude>.01f;
+            if(heroineWalking)
             {
-                Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
-                // A finger must start on the visible joystick. Other UI taps
-                // (skills, inventory or the bottom navigation) never steer.
-                float hudScale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
-                Vector2 stickCenter=new Vector2(77f,178f)*hudScale;
-                bool stickFound=false;
-                foreach(Touch touch in Input.touches)
-                {
-                    if(touch.phase==TouchPhase.Ended || touch.phase==TouchPhase.Canceled)
-                    {
-                        if(touch.fingerId==joystickFingerId)joystickFingerId=-1;
-                        continue;
-                    }
-                    if(touch.fingerId==joystickFingerId ||
-                       (joystickFingerId==-1 && touch.phase==TouchPhase.Began &&
-                        Vector2.Distance(touch.position,stickCenter)<66f*hudScale))
-                    {
-                        joystickFingerId=touch.fingerId;
-                        touchMove=Vector2.ClampMagnitude(
-                            (touch.position-stickCenter)/(46f*hudScale),1f);
-                        stickFound=true;
-                        break;
-                    }
-                }
-                if(!stickFound){joystickFingerId=-1;touchMove=Vector2.zero;}
-                Vector2 control=keyboard+touchMove;
-                if(control.sqrMagnitude>1)control.Normalize();
-                heroineWalking=control.sqrMagnitude>.01f;
-                if(heroineWalking)
-                {
-                    facing=control.normalized;
-                    Move(player,control*player.speed*dt);
-                }
-                Regenerate(dt);
-                TryAutomaticAttack();
-                if(Input.GetKeyDown(KeyCode.E))Raise();
-                if(Input.GetKeyDown(KeyCode.Q))huntOrder=!huntOrder;
-                if(Input.GetKeyDown(KeyCode.Tab))upgradeOpen=true;
-                if(Input.GetKeyDown(KeyCode.C))OpenCrypt();
-                if(Input.GetKeyDown(KeyCode.Return))TryPortal();
-                if(player.hp>0)
-                {
-                    UpdateActors(current.enemies,dt,false);
-                    UpdateActors(servants,dt,true);
-                    UpdateProjectiles(dt);
-                }
-                TickCorpses(dt);
-                CollectNearby();
-                if(!current.claimed && current.enemies.Count==0 &&
-                    (!level.requiresGuardian || (current.bossDefeated && current.bossBound)))
-                    Claim();
-                TickRespawns(dt);
-                if(current.seal!=null)
-                    current.seal.Rotate(0,0,dt*(current.claimed?18:5));
+                facing=control.normalized;
+                Move(player,control*player.speed*dt);
             }
-            Autosave(dt);
+            TryAutomaticAttack();
+            UpdateActors(current.enemies,dt,false);
+            UpdateProjectiles(dt);
+            TickRespawns(dt);
             AnimateHeroVisual(dt);
             Vector3 position=player.body.position;
             float hy=cam.orthographicSize,hx=hy*cam.aspect;

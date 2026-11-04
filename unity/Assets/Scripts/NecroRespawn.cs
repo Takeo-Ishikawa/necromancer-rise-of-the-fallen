@@ -10,21 +10,21 @@ namespace Necromancer
     /// </summary>
     public partial class NecroPrototype
     {
-        const float FirstRespawnSeconds=6f;
-        const float SpawnMinDistance=5.0f;
-        const float SpawnMaxDistance=8.5f;
+        const float FirstRespawnSeconds=2f;
+        const float SpawnMinDistance=3.4f;
+        const float SpawnMaxDistance=4.1f;
         const float MinEnemySeparation=1.8f;
         const int MinLivingEnemies=10;
         const int MaxLivingEnemies=16;
 
         void TickRespawns(float dt)
         {
-            if(current==null || !current.claimed || !current.root.activeInHierarchy)
+            if(current==null || !current.root.activeInHierarchy)
                 return;
 
             current.respawnTimer-=dt;
             if(current.respawnTimer>0f)return;
-            current.respawnTimer=Random.Range(7.5f,11.5f);
+            current.respawnTimer=2f;
 
             int commonSpawnKinds=0;
             foreach(Spawn entry in level.enemies)
@@ -89,7 +89,7 @@ namespace Necromancer
 
             // If all candidate positions are blocked, retry without creating
             // enemies inside walls or overlapping the player.
-            current.respawnTimer=3.5f;
+            current.respawnTimer=.5f;
         }
 
         /// <summary>

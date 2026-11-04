@@ -103,8 +103,8 @@ assert "mana" not in respawn, "Autoattack must not depend on anima"
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "ManaCost(nearest.kind)" in raise_body
 assert "respawnTimer=FirstRespawnSeconds" in core
-for feature in ("TickRespawns(float dt)", "current.claimed", "IsBoss(entry.kind)",
-                "MaxLivingEnemies=16", "SpawnMinDistance=5.0f",
+for feature in ("TickRespawns(float dt)", "IsBoss(entry.kind)",
+                "MaxLivingEnemies=16", "SpawnMinDistance=3.4f",
                 "MinEnemySeparation=1.8f", "current.enemies.Add(spawned)",
                 "TryAutomaticAttack()", "Cast();"):
     assert feature in respawn, f"Missing loop/autoattack feature {feature}"
@@ -129,15 +129,15 @@ data = scripts["NecroSaveData.cs"]
 for feature in ("OpenCrypt(", "StoreServant(", "WithdrawServant(",
                 "RitualVitality(", "RitualVault(", "RitualSpirit(",
                 "SaveProgress(", "RestoreProgress(", "RecordStage(",
-                "RestoreStage(", "OnApplicationPause(", "Autosave(",
+                "RestoreStage(", "Autosave(",
                 "RecoverAfterDeath("):
     assert feature in crypt, f"Missing Cripta 0.5 method: {feature}"
 for feature in ("NecroSaveData", "NecroSaveStore", "Application.persistentDataPath",
                 "SavePath", "BackupPath", "JsonUtility.FromJson",
                 "JsonUtility.ToJson", "vault", "stages"):
     assert feature in data, f"Missing save component: {feature}"
-assert "RestoreProgress();" in scripts["NecroPrototype.cs"]
-assert "SaveProgress();" in scripts["NecroGameplay.cs"]
+assert "RestoreProgress();" not in scripts["NecroPrototype.cs"]
+assert "SaveProgress();" not in scripts["NecroGameplay.cs"]
 assert "DrawCryptPanel(" in scripts["NecroUI.cs"]
 assert "SceneManager.LoadScene" not in scripts["NecroUI.cs"]
 assert "NecroSaveEditorCheck.Verify();" in (
@@ -192,11 +192,16 @@ for name in ("InitializeHeroAnimation(", "AnimateHeroVisual(", "ritualCircleRend
 assert "InitializeHeroAnimation();" in core
 assert "AnimateHeroVisual(dt);" in core
 assert "joystickFingerId" in core and "TouchPhase.Began" in core
-assert "DrawPolishedHUD(w,h);" in ui
+onscreen=ui.split("void OnGUI()",1)[1].split("void DrawCryptPanel",1)[0]
+assert "RingUi(pad,stickDisc" in onscreen and "GUI.Button" not in onscreen
+loop=core.split("void Update()",1)[1].split("bool NearSeal",1)[0]
+for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave("):
+    assert removed not in loop
+assert "!current.claimed" not in respawn and "current.respawnTimer=2f;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.6.5c\"" in builder
-assert "com.takeo.necromancer.unity.preview065c" in builder
+assert "PlayerSettings.bundleVersion = \"0.7.0\"" in builder
+assert "com.takeo.necromancer.unity.preview070" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
 hero_sheet=(unity/"Assets/Resources/AnimationSheets/necromante_source.png").read_bytes()
@@ -237,7 +242,7 @@ assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
 assert "heroineStrikePulse=.53f;" in gameplay
 assert "heroineHitPulse=.27f;" in gameplay
 assert "VerifySet(\"necromante\",true);" in frame_editor
-assert "com.takeo.necromancer.unity.preview065c" in builder
+assert "com.takeo.necromancer.unity.preview070" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
 creature_visual=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
@@ -308,6 +313,6 @@ assert 'new Rect(0,0,width,89)' in hud
 assert "Soft contact shadow" in hero_anim
 assert "Staff spectral aura" in hero_anim
 
-print(f"Unity source verified: {len(levels)} regions, 0.6.5c high resolution idle/walk heroine, four-direction animation, automatic attacks, respawn, army, portrait PNG "
+print(f"Unity source verified: {len(levels)} regions, 0.7.0 high resolution idle/walk heroine, four-direction animation, automatic attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")

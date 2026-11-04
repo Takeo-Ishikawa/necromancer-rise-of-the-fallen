@@ -344,21 +344,6 @@ namespace Necromancer
             SaveProgress();
         }
 
-        void OnApplicationPause(bool paused)
-        {
-            if(paused)SaveProgress();
-        }
-        void OnApplicationQuit()
-        {
-            SaveProgress();
-        }
-
-        // Some Android builds report a focus loss before OnApplicationPause.
-        void OnApplicationFocus(bool hasFocus)
-        {
-            if(!hasFocus)SaveProgress();
-        }
-
         void RecoverAfterDeath()
         {
             gameOver=false;

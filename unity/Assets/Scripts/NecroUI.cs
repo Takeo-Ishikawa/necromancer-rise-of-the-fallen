@@ -32,34 +32,13 @@ namespace Necromancer
         void OnGUI()
         {
             if(player==null || current==null)return;
-            EnsureStyles();
-            float scale=Mathf.Clamp(Screen.width/420f,.50f,2.5f);
+            EnsureHudArt();
+            float scale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
             GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
-            float w=Screen.width/scale,h=Screen.height/scale;
-
-            if(gameOver)
-            {
-                GUI.Box(new Rect(20,h*.31f,w-40,235),"O FIM DA EXPEDIÇÃO");
-                GUI.Label(new Rect(36,h*.31f+50,w-72,70),
-                    "Ressuscite no refúgio. Seu exército e sua progressão são preservados.",
-                    smallStyle);
-                if(GUI.Button(new Rect(60,h*.31f+155,w-120,53),"RESSUSCITAR",buttonStyle))
-                    RecoverAfterDeath();
-                return;
-            }
-
-            if(cryptOpen)
-            {
-                DrawCryptPanel(w,h);
-                return;
-            }
-            if(upgradeOpen)
-            {
-                DrawUpgradePanel(w,h);
-                return;
-            }
-
-            DrawPolishedHUD(w,h);
+            Rect pad=new Rect(14f,Screen.height/scale-241f,126f,126f);
+            RingUi(pad,stickDisc,Color.white);
+            Vector2 stick=touchMove*23f;
+            RingUi(new Rect(pad.center.x-26f+stick.x,pad.center.y-26f-stick.y,52f,52f),smallRing,UiGold);
         }
 
 
