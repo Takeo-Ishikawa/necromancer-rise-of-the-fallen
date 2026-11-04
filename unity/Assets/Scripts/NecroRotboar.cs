@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Necromancer
@@ -7,15 +8,36 @@ namespace Necromancer
         enum BoarPose { Idle, Windup, Charge }
         readonly Sprite[] boarFrames=new Sprite[3];
 
+        readonly Sprite[] boarFallFrames=new Sprite[3];
+
+        static void LoadBoarFrames(string path,Sprite[] frames)
+        {
+            if(frames[0]!=null)return;
+            var sheet=Resources.Load<Texture2D>(path);
+            for(int i=0;i<frames.Length;i++)
+                frames[i]=Sprite.Create(sheet,new Rect(256*i,0,256,256),
+                    new Vector2(.5f,.26f),256f,0,SpriteMeshType.FullRect);
+        }
+
+        IEnumerator FallRotboar(Actor boar)
+        {
+            LoadBoarFrames("Creatures/rotboar_fallen",boarFallFrames);
+            var art=boar.boarArt;
+            art.sortingOrder=2;
+            art.sprite=boarFallFrames[0];
+            yield return new WaitForSeconds(.14f);
+            if(art==null)yield break;
+            art.sprite=boarFallFrames[1];
+            yield return new WaitForSeconds(.18f);
+            if(art==null)yield break;
+            art.sprite=boarFallFrames[2];
+            yield return new WaitForSeconds(3f);
+            if(art!=null)Destroy(art.gameObject);
+        }
+
         Actor CreateRotboar(Vector2 at,Transform parent)
         {
-            if(boarFrames[0]==null)
-            {
-                var sheet=Resources.Load<Texture2D>("Creatures/rotboar");
-                for(int i=0;i<boarFrames.Length;i++)
-                    boarFrames[i]=Sprite.Create(sheet,new Rect(256*i,0,256,256),
-                        new Vector2(.5f,.26f),256f,0,SpriteMeshType.FullRect);
-            }
+            LoadBoarFrames("Creatures/rotboar",boarFrames);
             var art=Visual("Rotboar",at,boarFrames[0],12,parent);
             Fit(art,2.8f,2.8f);
             art.flipX=true;

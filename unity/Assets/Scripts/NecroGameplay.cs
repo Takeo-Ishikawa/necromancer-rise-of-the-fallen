@@ -279,6 +279,7 @@ namespace Necromancer
                 victim.view.Fall();
                 if(!victim.ally)current.fallenPups.Add(victim.view);
             }
+            else if(victim.kind=="rotboar")StartCoroutine(FallRotboar(victim));
             else Destroy(victim.body.gameObject);
         }
         Actor servantOrder;
