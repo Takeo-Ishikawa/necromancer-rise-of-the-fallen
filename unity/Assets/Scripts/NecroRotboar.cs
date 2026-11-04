@@ -83,23 +83,12 @@ namespace Necromancer
                     SetBoarPose(boar,BoarPose.Idle,1.25f);
                     return;
                 }
-                boar.body.position=next;
-                Actor hit=null;
-                if(boar.ally)
-                {
-                    foreach(Actor enemy in current.enemies)
-                        if(enemy.hp>0 && Vector2.Distance(next,enemy.body.position)<=boar.radius+enemy.radius)
-                        {hit=enemy;break;}
-                }
-                else if(servants.Count>0 && Vector2.Distance(next,servants[0].body.position)<=boar.radius+servants[0].radius)
-                    hit=servants[0];
-                else if(!boar.ally && Vector2.Distance(next,player.body.position)<=boar.radius+player.radius)
-                    hit=player;
-                if(hit!=null)
-                {
+                Actor hit=Move(boar,next-at,false);
+                bool stopped=Vector2.Distance(boar.body.position,next)>.001f;
+                if(hit!=null && hit.ally!=boar.ally)
                     Damage(hit,boar.attack);
+                if(hit!=null || stopped)
                     SetBoarPose(boar,BoarPose.Idle,1.25f);
-                }
                 return;
             }
             if(boar.cooldown>0)return;

@@ -94,14 +94,51 @@ namespace Necromancer
                 if(Blocked(Vector2.Lerp(from,to,(float)i/samples),.04f))return false;
             return true;
         }
-        void Move(Actor actor,Vector2 displacement)
+        static bool OverlapsActor(Actor mover,Actor other,Vector2 from,Vector2 to)
+        {
+            if(other==mover || other==null || other.hp<=0 || other.body==null)return false;
+            Vector2 center=other.body.position;
+            float radius=mover.radius+other.radius;
+            float nextDistance=(to-center).sqrMagnitude;
+            // Allow actors created in contact to move apart.
+            return nextDistance<radius*radius &&
+                nextDistance<=(from-center).sqrMagnitude+.000001f;
+        }
+
+        Actor ActorAt(Actor mover,Vector2 from,Vector2 to)
+        {
+            if(OverlapsActor(mover,player,from,to))return player;
+            foreach(Actor servant in servants)
+                if(OverlapsActor(mover,servant,from,to))return servant;
+            foreach(Actor enemy in current.enemies)
+                if(OverlapsActor(mover,enemy,from,to))return enemy;
+            return null;
+        }
+
+        Actor Move(Actor actor,Vector2 displacement,bool slide=true)
         {
             Vector2 at=actor.body.position;
-            Vector2 x=at+new Vector2(displacement.x,0);
-            if(!Blocked(x,actor.radius))at=x;
-            Vector2 y=at+new Vector2(0,displacement.y);
-            if(!Blocked(y,actor.radius))at=y;
+            int steps=Mathf.Max(1,Mathf.CeilToInt(displacement.magnitude/.035f));
+            Vector2 step=displacement/steps;
+            Actor contact=null;
+            for(int i=0;i<steps;i++)
+            {
+                Vector2 next=at+step;
+                Actor hit=ActorAt(actor,at,next);
+                bool wall=Blocked(next,actor.radius);
+                if(hit==null && !wall)at=next;
+                else
+                {
+                    contact=hit;
+                    if(!slide)break;
+                    Vector2 x=at+new Vector2(step.x,0);
+                    if(!Blocked(x,actor.radius) && ActorAt(actor,at,x)==null)at=x;
+                    Vector2 y=at+new Vector2(0,step.y);
+                    if(!Blocked(y,actor.radius) && ActorAt(actor,at,y)==null)at=y;
+                }
+            }
             actor.body.position=new Vector3(at.x,at.y,0);
+            return contact;
         }
         void MoveToward(Actor actor,Vector2 destination,float dt)
         {
@@ -240,8 +277,8 @@ namespace Necromancer
             if(leapStep>0)
             {
                 pup.view.SetPupAction(3,pup.pupHeading);
-                Move(pup,pup.pupHeading*(5.8f*leapStep));
-                if(!pup.pupHit && Vector2.Distance(prey.body.position,pup.body.position)<pup.radius+prey.radius &&
+                Actor contact=Move(pup,pup.pupHeading*(5.8f*leapStep),false);
+                if(!pup.pupHit && (contact==prey || Vector2.Distance(prey.body.position,pup.body.position)<=pup.radius+prey.radius+.04f) &&
                     Visible(pup.body.position,prey.body.position))
                 {
                     Damage(prey,pup.attack);
