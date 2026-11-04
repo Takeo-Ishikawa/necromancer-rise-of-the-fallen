@@ -185,7 +185,7 @@ namespace Necromancer
             if(victim==player)
             {
                 hitFlash=.24f;
-                heroineHitPulse=.20f;
+                heroineHitPulse=.27f;
             }
             if(victim.hp>0)return;
             if(victim==player) {
@@ -252,16 +252,20 @@ namespace Necromancer
             if(player.hp<=0 || upgradeOpen || castCooldown>Time.time)return;
             Actor target=Closest(spellUnlocked?3.8f:1.02f);
             if(target==null){Announce("Nenhum alvo ao alcance.");return;}
+            // Casting/striking faces the enemy even while standing still.
+            heroineDirection=DirectionFrom(
+                (Vector2)target.body.position-(Vector2)player.body.position,
+                heroineDirection);
             if(!spellUnlocked)
             {
-                heroineStrikePulse=.38f;
+                heroineStrikePulse=.53f;
                 castCooldown=Time.time+.47f;
                 Damage(target,26+staffTier*5+(playerLevel-1)*2);
                 return;
             }
             // Basic auto-attack orbs cost no anima. Reserve anima for
             // resurrection and future explicitly activated powers.
-            heroineCastPulse=.49f;
+            heroineCastPulse=.62f;
             castCooldown=Time.time+.72f;
             SpriteRenderer orb=Visual("Orbe espectral",player.body.position,
                 NecroArt.Effect(),20,current.root.transform);
@@ -331,7 +335,7 @@ namespace Necromancer
             mana-=cost;
             Actor servant=Create(nearest.kind,nearest.body.position,true,persistentRoot.transform);
             servants.Add(servant);
-            heroineRaisePulse=.80f;
+            heroineRaisePulse=.92f;
             NecroCombatFx.Emit(nearest.body.position,current.root.transform,1);
             if(IsBoss(nearest.kind))current.bossBound=true;
             Destroy(nearest.body.gameObject);
