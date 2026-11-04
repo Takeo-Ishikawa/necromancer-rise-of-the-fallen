@@ -80,7 +80,9 @@ namespace Necromancer
             v.haloRenderer=circle.AddComponent<SpriteRenderer>();
             v.haloRenderer.sprite=ally?NecroArt.RitualCircle():NecroArt.Shadow();
             v.haloRenderer.sortingOrder=original.sortingOrder-1;
-            v.halo.localPosition=new Vector3(0,-.32f,0);
+            // Pup paws end 16 pixels above the atlas cell bottom, with a 31% pivot.
+            float shadowY=kind=="grave_pup" && !ally ? -.22f : -.32f;
+            v.halo.localPosition=new Vector3(0,shadowY,0);
             v.halo.localScale=new Vector3(v.boss ? 1.55f : 1.05f,.34f,1);
             v.haloRenderer.color=ally?new Color(.50f,.91f,.80f,.38f):
                 new Color(.05f,.07f,.09f,.38f);
