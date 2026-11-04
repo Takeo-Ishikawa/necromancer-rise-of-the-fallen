@@ -124,7 +124,7 @@ for area in levels:
     normal=[enemy for enemy in area["enemies"] if enemy["kind"] not in boss_kinds]
     assert normal, f"No respawnable regular enemies in {area['id']}"
     assert all(0 < x["x"] < area["width"] and 0 < x["y"] < area["height"] for x in normal)
-assert "Input.touches" in core
+assert "Input.touches" in ui
 assert "DrawWitch(" in scripts["NecroArt.cs"]
 assert "DrawCryptAltar(" in scripts["NecroArt.cs"]
 crypt = scripts["NecroCrypt.cs"]
@@ -315,7 +315,7 @@ assert "entrada_da_caverna_bonehollow" in asset_check
 assert "SpriteDrawMode.Tiled" in core
 assert "FitGround(next.backdrop,level);" in core
 assert "FitGround(current.backdrop,level);" in core
-assert 'new Vector2(77f,178f)' in core
+assert 'joystickAnchor=touch.position' in ui and 'ReadMovement(hudScale);' in core
 assert "Resources.Load<Texture2D>(\"Scenery/\"+kind)" in scenery
 assert "Resources.Load<Texture2D>(\"Scenery/rock_cluster\")" in scripts["NecroArt.cs"]
 assert "Time.time<noticeUntil" in hud
