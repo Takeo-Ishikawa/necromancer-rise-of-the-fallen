@@ -17,6 +17,7 @@ namespace Necromancer
             public BoarPose boarPose;
             public Vector2 chargeDirection;
             public SpriteRenderer boarArt;
+            public float bindUntil;
             public float pupAttackTime;
             public Vector2 pupHeading;
             public bool pupHit;
@@ -53,6 +54,7 @@ namespace Necromancer
             public Transform cryptAltar;
             public readonly List<Actor> enemies = new List<Actor>();
             public readonly List<NecroCreatureView> fallenPups=new List<NecroCreatureView>();
+            public readonly List<Actor> fallenBoars=new List<Actor>();
             public readonly List<Corpse> corpses = new List<Corpse>();
             public readonly List<Drop> drops = new List<Drop>();
             public readonly List<ResourceNode> resources = new List<ResourceNode>();

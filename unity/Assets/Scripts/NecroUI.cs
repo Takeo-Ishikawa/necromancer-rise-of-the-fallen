@@ -52,14 +52,14 @@ namespace Necromancer
                 Vector2 point=new Vector2(touch.position.x,Screen.height-touch.position.y)/scale;
                 if(touch.phase!=TouchPhase.Began)continue;
                 if(button.Contains(point))pressed=true;
-                else if(bind.Contains(point))BindNearbyPup();
+                else if(bind.Contains(point))BindNearbyCreature();
             }
             if(Input.touchCount==0 && Input.GetMouseButtonDown(0))
             {
                 Vector3 pos=Input.mousePosition;
                 Vector2 point=new Vector2(pos.x,Screen.height-pos.y)/scale;
                 pressed=button.Contains(point);
-                if(bind.Contains(point))BindNearbyPup();
+                if(bind.Contains(point))BindNearbyCreature();
             }
             if(pressed)manualQueued=true;
             if(!manualQueued)return;
@@ -85,7 +85,7 @@ namespace Necromancer
             Rect button=AttackRect(scale);
             RingUi(button,stickDisc,Time.time<castCooldown?new Color(.67f,.62f,.73f):Color.white);
             GUI.Label(button,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",hudAction);
-            if(NearbyFallenPup()!=null)
+            if(CanBindNearby())
             {
                 Rect bind=BindRect(scale);
                 RingUi(bind,stickDisc,new Color(.40f,.94f,.85f));

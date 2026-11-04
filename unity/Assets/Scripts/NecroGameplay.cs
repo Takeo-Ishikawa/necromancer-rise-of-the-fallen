@@ -307,6 +307,50 @@ namespace Necromancer
             return nearest;
         }
 
+        Actor NearbyFallenBoar()
+        {
+            Actor nearest=null;
+            float best=1.8f;
+            for(int i=current.fallenBoars.Count-1;i>=0;i--)
+            {
+                Actor boar=current.fallenBoars[i];
+                if(boar.body==null || Time.time>=boar.bindUntil)
+                {
+                    current.fallenBoars.RemoveAt(i);
+                    continue;
+                }
+                float distance=Vector2.Distance(player.body.position,boar.body.position);
+                if(servants.Count==0 && distance<best && Visible(player.body.position,boar.body.position))
+                {nearest=boar;best=distance;}
+            }
+            return nearest;
+        }
+
+        bool CanBindNearby()
+        {
+            return NearbyFallenPup()!=null || NearbyFallenBoar()!=null;
+        }
+
+        void BindNearbyCreature()
+        {
+            var boar=NearbyFallenBoar();
+            var pup=NearbyFallenPup();
+            if(boar==null || (pup!=null &&
+                Vector2.Distance(player.body.position,pup.transform.position)<
+                Vector2.Distance(player.body.position,boar.body.position)))
+            {
+                BindNearbyPup();
+                return;
+            }
+            Vector2 at=boar.body.position;
+            servants.Add(CreateRotboar(at,persistentRoot.transform,true));
+            catchingUp=false;
+            current.fallenBoars.Remove(boar);
+            Destroy(boar.body.gameObject);
+            NecroCombatFx.Emit(at,current.root.transform,1);
+            heroineRaisePulse=.92f;
+        }
+
         void BindNearbyPup()
         {
             var pup=NearbyFallenPup();
