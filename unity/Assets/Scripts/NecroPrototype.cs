@@ -14,6 +14,9 @@ namespace Necromancer
             public string kind;
             public Transform body;
             public float hp,maxHp,speed,attack,radius,reach,cooldown,flash;
+            public BoarPose boarPose;
+            public Vector2 chargeDirection;
+            public SpriteRenderer boarArt;
             public float pupAttackTime;
             public Vector2 pupHeading;
             public bool pupHit;
@@ -190,6 +193,8 @@ namespace Necromancer
                         Fit(stone,rock.r*2f,rock.r*2f);
                     }
                 }
+                if(level.id=="bonehollow")
+                    next.enemies.Add(CreateRotboar(NecroLevels.At(level,12.8f,6.3f),next.root.transform));
                 foreach(Spawn spawn in level.enemies)
                 {
                     if(IsBoss(spawn.kind))continue;

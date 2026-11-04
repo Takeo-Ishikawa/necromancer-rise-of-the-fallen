@@ -130,6 +130,11 @@ namespace Necromancer
                 if(self.hp<=0)continue;
                 self.cooldown=Mathf.Max(0,self.cooldown-dt);
                 self.flash=Mathf.Max(0,self.flash-dt);
+                if(self.kind=="rotboar")
+                {
+                    UpdateRotboar(self,dt);
+                    continue;
+                }
                 if(self.kind=="grave_pup")
                 {
                     Actor prey=friendly?servantOrder:player;
