@@ -1,37 +1,43 @@
-# Necromancer — Unity Android Preview 0.6.4
+# Necromancer — 0.6.5a · Protagonista animada
 
-**Unity Editor:** 2022.3.62f2 LTS · Android IL2CPP · ARM64 + ARMv7.
+A versão 0.6.5a inclui arte de poses ilustradas integrada ao Unity, um novo atlas de quatro direções e seis conjuntos de animação. A base de combate, a Cripta, o respawn, os 12 pontos de comando e o formato do save permanecem inalterados.
 
-## Alterações de jogabilidade solicitadas
+## Direção de arte aplicada
 
-### Inimigos reaparecem
+A necromante mantém chapéu violeta com caveira, cabelos prateados, traje escuro, botas e cajado com brilho espectral. A arte-base foi extraída e tratada a partir de nossas próprias ilustrações aprovadas.
 
-Depois que uma região é conquistada, **monstros comuns reaparecem continuamente**. O primeiro respawn ocorre após aproximadamente 6 segundos, e os seguintes em intervalos entre 7,5 e 11,5 segundos. Eles surgem a uma distância aproximada de 5 a 8,5 unidades do necromante, sem atravessar obstáculos nem aparecer em cima dos servos. Existe limite de **10 a 16 inimigos simultâneos**, dependendo do mapa. Cada região usa apenas as espécies comuns definidas para ela. Os chefes especiais permanecem únicos; sua morte e conquista não são reiniciadas.
+O arquivo integrado `Assets/Resources/AnimationSheets/necromante_source.png` contém **16 poses/vistas em PNG transparente**. São quatro vistas realmente diferentes (frente, costas, esquerda e direita) e 12 estudos de poses: repouso, caminhada, ataque, conjuração, ressuscitar e dano, duas variantes de cada. Este arquivo é usado no build e não é apenas imagem de referência.
 
-As regiões ainda não conquistadas seguem a progressão original: um mapa deve poder ser limpo para desbloquear o selo. Os novos monstros não impedem essa conquista porque o respawn começa somente **depois** da vitória. Mapas já concluídos em saves antigos voltam a ter monstros quando o jogador retorna ou continua a partida. O estado das criaturas vivas continua sendo salvo normalmente.
+## Quadro a quadro dentro do Unity
 
-### Exército maior
+O `NecroHeroSheetBuilder` compõe os quadros a partir dessas artes, com deslocamentos rígidos por região do corpo e efeitos desenhados sobre o frame — em vez de esticar a mesma figura frontal em todas as direções.
 
-Capacidade aumentada de **4 para 12 pontos de comando**. Isso permite até 12 criaturas de custo 1 simultaneamente ou combinações de unidades maiores: slimes/esqueletos custam 2, guardiões custam 3 e o chefe do pântano custa 4. A interface da Cripta, o salvamento e a retirada dos servos utilizam automaticamente esse novo limite. O menu do exército agora tem páginas para consultar mais aliados.
+| Ação | Quadros por direção | FPS | Estado |
+| --- | ---: | ---: | --- |
+| Repouso | 4 | 4 | Parado |
+| Caminhada | 8 | 11 | Movimento |
+| Ataque físico | 6 | 12 | Golpe básico |
+| Conjuração | 6 | 10 | Ataque automático mágico |
+| Ressurreição | 8 | 9 | Botão Reviver |
+| Reação a dano | 3 | 12 | Quando atingida |
 
-### Ataque automático
+Total: **140 sprites utilizados em 24 clipes** (6 ações × 4 direções), criados e armazenados em cache uma única vez na primeira execução. Os quadros são sprites distintos, embora **nem todos tenham sido desenhados manualmente**; os intermediários são composições da arte-base. A forma frontal já possui variantes próprias de cada ação; costas e perfis mantêm os desenhos próprios com poses/effects derivados.
 
-O botão GOLPE/MAGIA foi **removido** da HUD. O necromante ataca automaticamente o inimigo mais próximo dentro do alcance e com linha de visão. Antes do primeiro despertar mágico, usa golpe físico de curta distância. Depois, lança orbes espectrais automaticamente. **Ambos os ataques básicos são gratuitos e não consomem ânima**, inclusive quando a reserva está zerada. Os ataques respeitam seus respectivos intervalos. Não é necessário tocar na tela para atacar.
+A biblioteca `NecroFrameLibrary.cs` continua responsável por todas as sequências e aceita arquivos de atlas completos importados de artistas no futuro. `NecroCharacterAnimation.cs` mantém a máquina de estados e as prioridades de animação: dano, ressurreição, conjuração, ataque, caminhada e repouso.
 
-**Economia de ânima:** a ânima fica reservada para **REVIVER**, que continua consumindo o custo de cada criatura, e para futuros poderes ativos. A regeneração, o limite de ânima, o formato de salvamento e o custo de ressurreição não foram alterados.
+## Efeitos visuais sincronizados
 
-A necromancia permanece **ativa**: REVIVER continua sendo um botão e exige aproximar-se de um cadáver. Os controles DEFESA/CAÇA e EVOLUIR também continuam. A parte direita da HUD exibe 'ATAQUE AUTOMÁTICO'.
+- Círculo necromântico sob os pés durante a ressurreição, com partículas esverdeadas ascendentes
+- Esfera espectral durante a conjuração do ataque básico gratuito
+- Arco violeta nas animações de ataque físico, sem mudar o dano, hitbox ou custo
+- Brilho do corpo ao sofrer dano, com duração alinhada aos três quadros
 
-## Compatibilidade de instalação e salvamento
+A direção do personagem muda para o alvo ao atacar parado. A animação não mexe nos componentes de movimentação, colisão, inteligência artificial, salvamento ou condições de vitória.
 
-Esta é outra **prévia independente** com o identificador `com.takeo.necromancer.unity.preview064`, para evitar conflito de assinatura com versões antigas. **Não desinstale a 0.5**, nem as outras prévias que você queira preservar. O progresso da 0.5 não é transferido automaticamente: a instalação usa diretório próprio.
+## Performance, qualidade e limitações
 
-O **formato do JSON de save não mudou**, preservando o layout de níveis, criaturas, equipamentos, Cripta e rituais. A reprodução dos inimigos se recalcula a partir da região e não precisa alterar o formato salvo. O guia de assinatura permanente e migração está em [docs/ANDROID_SIGNING.md](../docs/ANDROID_SIGNING.md).
+A folha de origem é compacta, em estilo pixel art ilustrado, e os quadros de 96×96 são construídos durante a inicialização e reutilizados. Nenhuma rasterização acontece a cada quadro do jogo. O atlas ocupa aproximadamente 7 MB de textura RGBA32 em memória gráfica, além de sobrecarga de sprites; o processamento inicial pode variar conforme o Android. O próximo refinamento seria desenhar cada um dos 140 quadros individualmente, melhorando a fluidez e reduzindo os intermediários compostos. **Não se trata ainda de animação manual final de estúdio.**
 
-## Testes
+## Instalação Android
 
-O workflow GitHub [Unity Android Preview APK](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/unity-android.yml) executa as verificações estáticas, o teste de quadros no Unity Editor e a compilação do APK.
-
-Ao instalar no celular, confira particularmente os inimigos surgindo novamente em áreas conquistadas, o funcionamento do ataque automático e se consegue invocar mais do que quatro pontos de comando. A validação em aparelho físico permanece necessária.
-
-Os sprites procedurais por quadros, cenários, UI ilustrada e animações da 0.6.3 continuam presentes.
+Esta prévia usa `com.takeo.necromancer.unity.preview065` (nome *Necromancer Preview 0.6.5a*) e armazenamento próprio, sem sobrescrever as instalações anteriores. Não desinstale a versão 0.5 nem outras prévias que queira manter. Uma compilação de produção com assinatura permanente só será possível após cadastrar a chave privada conforme [ANDROID_SIGNING.md](../docs/ANDROID_SIGNING.md).

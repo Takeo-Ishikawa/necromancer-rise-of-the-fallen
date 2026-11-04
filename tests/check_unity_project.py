@@ -23,6 +23,8 @@ required = [
     "Assets/Scripts/NecroCreatureArt.cs",
     "Assets/Scripts/NecroCreatureView.cs",
     "Assets/Scripts/NecroFrameLibrary.cs",
+    "Assets/Scripts/NecroHeroSheetBuilder.cs",
+    "Assets/Resources/AnimationSheets/necromante_source.png",
     "Assets/Editor/NecroFrameEditorCheck.cs",
     "Assets/Scripts/NecroCombatFx.cs",
     "Assets/Scripts/NecroScenery.cs",
@@ -190,9 +192,21 @@ assert "joystickFingerId" in core and "TouchPhase.Began" in core
 assert "DrawPolishedHUD(w,h);" in ui
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.6.4\"" in builder
-assert "com.takeo.necromancer.unity.preview064" in builder
+assert "PlayerSettings.bundleVersion = \"0.6.5\"" in builder
+assert "com.takeo.necromancer.unity.preview065" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
+assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
+hero_sheet=(unity/"Assets/Resources/AnimationSheets/necromante_source.png").read_bytes()
+assert hero_sheet.startswith(bytes([137,80,78,71,13,10,26,10]))
+sw,sh=struct.unpack(">II",hero_sheet[16:24])
+assert sw>=120 and sh>=180 and sw%4==0 and sh%4==0
+assert "NecroHeroSheetBuilder.Build(poses)" in (unity/"Assets/Scripts/NecroFrameLibrary.cs").read_text()
+hero_painter=(unity/"Assets/Scripts/NecroHeroSheetBuilder.cs").read_text()
+for token in ("Counts={4,8,6,6,8,3}", "direction!=0", "Texture2D Build(",
+              "PaintFrame(", "EllipseRing(", "Glow("):
+    assert token in hero_painter, token
+frame_test=(unity/"Assets/Editor/NecroFrameEditorCheck.cs").read_text()
+assert "sourcePixels" in frame_test and "int columns=hero?8:6" in frame_test
 frame_library=(unity/"Assets/Scripts/NecroFrameLibrary.cs").read_text()
 hero_anim=(unity/"Assets/Scripts/NecroCharacterAnimation.cs").read_text()
 creature_anim=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
@@ -207,10 +221,10 @@ for required in ("heroineFrames.Frame(", "heroineStrikePulse",
 for required in ("frames.Frame(", "currentPose", "currentDirection", "FrameCount"):
     assert required in (creature_anim+frame_library), required
 assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
-assert "heroineStrikePulse=.38f;" in gameplay
-assert "heroineHitPulse=.20f;" in gameplay
+assert "heroineStrikePulse=.53f;" in gameplay
+assert "heroineHitPulse=.27f;" in gameplay
 assert "VerifySet(\"necromante\",true);" in frame_editor
-assert "com.takeo.necromancer.unity.preview064" in builder
+assert "com.takeo.necromancer.unity.preview065" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
 creature_visual=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
@@ -243,6 +257,6 @@ assert "NECRO_ANDROID_MODE: release" in release_workflow
 assert "ANDROID_KEYSTORE_BASE64" in release_workflow
 assert ".android-release.keystore" in release_workflow
 
-print(f"Unity source verified: {len(levels)} regions, 0.6.4 automatic attacks, respawn, twelve-command army, directional animation, creatures, portrait PNG "
+print(f"Unity source verified: {len(levels)} regions, 0.6.5 illustrated heroine, four-direction animation, automatic attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")

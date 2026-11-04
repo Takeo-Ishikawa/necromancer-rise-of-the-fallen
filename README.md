@@ -36,3 +36,8 @@ Agora a necromante e oito tipos de monstros usam atlases de quadros reais no Uni
 ### Atualização de jogabilidade 0.6.4
 
 Inimigos comuns reaparecem em regiões conquistadas (sem reanimar chefes), o exército passou para 12 pontos de comando e o necromante ataca automaticamente. O botão de ataque foi removido; REVIVER, DEFESA/CAÇA e EVOLUIR permanecem. A prévia 0.6.4 tem instalação separada para proteger o salvamento da 0.5. Veja [o guia da versão](unity/README.md).
+
+
+### Prévia 0.6.5a — Protagonista animada
+
+A protagonista tem uma nova folha PNG de 16 poses/vistas ilustradas (frente/costas/perfis e estados de ação). O Unity gera e utiliza 140 sprites animados em 24 sequências, sem deformar a mesma vista frontal para simular costas. A nova versão preserva as regras e saves e usa identificador separado para teste Android. Consulte [o guia visual 0.6.5a](unity/README.md).
