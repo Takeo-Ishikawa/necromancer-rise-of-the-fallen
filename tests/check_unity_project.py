@@ -109,7 +109,9 @@ for feature in ("TickRespawns(float dt)", "current.claimed", "IsBoss(entry.kind)
                 "TryAutomaticAttack()", "Cast();"):
     assert feature in respawn, f"Missing loop/autoattack feature {feature}"
 assert 'spellUnlocked?"MAGIA":"GOLPE"' not in hud
-assert '"ATAQUE AUTOMÁTICO"' in hud
+# Automatic attack has no button or oversized permanent caption.
+assert '"ATAQUE AUTOMÁTICO"' not in hud
+assert 'TryAutomaticAttack();' in core
 assert '"REVIVER",Raise' in hud
 assert '"EVOLUIR"' in hud
 assert "int armyPage;" in hud
