@@ -30,8 +30,7 @@ namespace Necromancer
             };
         }
         Vector2 joystickAnchor;
-        Texture2D attackDisc,bindDisc;
-        GUIStyle actionCaption;
+        Texture2D attackDisc,bindDisc,pearl;
 
         bool MovementArea(Vector2 point,float scale)
         {
@@ -79,61 +78,19 @@ namespace Necromancer
             if(!active){joystickFingerId=-1;touchMove=Vector2.zero;}
         }
 
-        static Texture2D ActionDisc(bool binding)
-        {
-            const int size=192;
-            var texture=new Texture2D(size,size,TextureFormat.RGBA32,false);
-            var pixels=new Color[size*size];
-            Color accent=binding?new Color(.36f,.94f,.79f):new Color(.66f,.78f,1f);
-            for(int y=0;y<size;y++)for(int x=0;x<size;x++)
-            {
-                Vector2 p=new Vector2((x+.5f)/size*2f-1f,(y+.5f)/size*2f-1f);
-                float radius=p.magnitude;
-                if(radius>=1f)continue;
-                Color color=Color.Lerp(new Color(.055f,.065f,.105f,.96f),accent,
-                    .08f+.12f*Mathf.Max(0,p.y));
-                if(radius>.90f)color=Color.Lerp(accent*.55f,accent,(p.y+1f)*.5f);
-                else if(radius>.83f && radius<.85f)color=accent*.65f;
-                // White diamond for binding, a carved skull for the spell.
-                float symbolY=p.y-.12f;
-                bool ink;
-                if(binding)
-                {
-                    float diamond=Mathf.Abs(p.x)/.28f+Mathf.Abs(symbolY)/.38f;
-                    ink=diamond>.78f && diamond<1.05f;
-                }
-                else
-                {
-                    ink=(p.x*p.x/(.31f*.31f)+symbolY*symbolY/(.32f*.32f)<1f) ||
-                        (Mathf.Abs(p.x)<.19f && symbolY<-.13f && symbolY>-.37f);
-                    bool eyes=(Mathf.Abs(p.x-.12f)<.065f || Mathf.Abs(p.x+.12f)<.065f) &&
-                        Mathf.Abs(symbolY-.015f)<.07f;
-                    bool teeth=symbolY<-.25f && (Mathf.Abs(p.x)<.018f || Mathf.Abs(Mathf.Abs(p.x)-.10f)<.016f);
-                    if(eyes || teeth)ink=false;
-                }
-                if(ink)color=Color.Lerp(accent,Color.white,.4f);
-                color.a*=Mathf.Clamp01((1f-radius)*96f);
-                pixels[y*size+x]=color;
-            }
-            texture.SetPixels(pixels);
-            texture.Apply();
-            texture.filterMode=FilterMode.Bilinear;
-            return texture;
-        }
-
         void DrawAction(Rect rect,bool binding,string caption,bool ready)
         {
             if(attackDisc==null)
             {
-                attackDisc=ActionDisc(false);
-                bindDisc=ActionDisc(true);
-                actionCaption=new GUIStyle(hudAction){fontSize=10};
+                attackDisc=Resources.Load<Texture2D>("HUD/attack");
+                bindDisc=Resources.Load<Texture2D>("HUD/bind");
+                pearl=Resources.Load<Texture2D>("HUD/pearl");
             }
-            RingUi(new Rect(rect.x,rect.y+3f,rect.width,rect.height),attackDisc,
-                new Color(0,0,0,.35f));
-            RingUi(rect,binding?bindDisc:attackDisc,ready?Color.white:new Color(.62f,.65f,.74f,.9f));
-            GUI.Label(new Rect(rect.x,rect.y+rect.height*.66f,rect.width,rect.height*.23f),
-                caption,actionCaption);
+            var art=binding?bindDisc:attackDisc;
+            RingUi(new Rect(rect.x,rect.y+2f,rect.width,rect.height),art,new Color(0,0,0,.22f));
+            RingUi(rect,art,ready?Color.white:new Color(.72f,.70f,.76f,.92f));
+            if(!binding && caption!="ATACAR")
+                GUI.Label(new Rect(rect.x-7f,rect.y-19f,rect.width+14f,18f),caption,hudAction);
         }
 
         Rect AttackRect(float scale)
@@ -144,7 +101,10 @@ namespace Necromancer
         Rect BindRect(float scale)
         {
             Rect rect=AttackRect(scale);
-            rect.y-=94f;
+            rect.x+=6f;
+            rect.y+=96f;
+            rect.width=70f;
+            rect.height=70f;
             return rect;
         }
 
@@ -197,10 +157,10 @@ namespace Necromancer
             {
                 Vector2 center=new Vector2(joystickAnchor.x,Screen.height-joystickAnchor.y)/scale;
                 Rect pad=new Rect(center.x-55f,center.y-55f,110f,110f);
-                RingUi(pad,stickDisc,new Color(.65f,.83f,.87f,.38f));
+                RingUi(pad,stickDisc,new Color(.92f,.87f,.82f,.22f));
                 Vector2 stick=touchMove*38f;
                 RingUi(new Rect(center.x-19f+stick.x,center.y-19f-stick.y,38f,38f),
-                    smallRing,new Color(.65f,.95f,.92f,.78f));
+                    pearl,new Color(1f,.98f,.94f,.92f));
             }
         }
 
