@@ -144,10 +144,7 @@ namespace Necromancer
                         servantOrder=null;
                         self.pupAttackTime=0;
                         self.view.SetPupAction(0,Vector2.zero);
-                        Vector2 home=(Vector2)player.body.position+Vector2.right*.8f;
-                        if(Blocked(home,self.radius))home=player.body.position;
-                        if(Vector2.Distance(self.body.position,home)>.25f)
-                            MoveToward(self,home,dt);
+                        FollowNecromancer(self,dt);
                     }
                     continue;
                 }
@@ -195,6 +192,25 @@ namespace Necromancer
                 }
             }
         }
+        // The companion can linger until the player leaves its comfort range.
+        bool catchingUp;
+        void FollowNecromancer(Actor pup,float dt)
+        {
+            Vector2 hero=player.body.position;
+            Vector2 offset=(Vector2)pup.body.position-hero;
+            float distance=offset.magnitude;
+            if(distance>2.7f)catchingUp=true;
+            else if(distance<=1.7f)catchingUp=false;
+
+            if(catchingUp)
+                MoveToward(pup,hero,dt);
+            else if(distance<1.05f)
+            {
+                Vector2 away=distance>.01f?offset/distance:-facing;
+                Move(pup,away*Mathf.Min(1.05f-distance,pup.speed*.65f*dt));
+            }
+        }
+
         void UpdatePup(Actor pup,Actor prey,float dt)
         {
             const float windup=.42f, leap=.24f;
@@ -290,6 +306,7 @@ namespace Necromancer
             var pup=NearbyFallenPup();
             if(pup==null)return;
             Vector2 at=pup.transform.position;
+            catchingUp=false;
             servants.Add(Create("grave_pup",at,true,persistentRoot.transform));
             current.fallenPups.Remove(pup);
             Destroy(pup.gameObject);
