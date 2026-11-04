@@ -86,12 +86,24 @@ assert "const int CommandLimit=12;" in core
 assert "TickRespawns(dt);" in core
 assert "TryAutomaticAttack();" in core
 assert "Input.GetKeyDown(KeyCode.Space)" not in core
+# Both melee and spectral projectile are free. Only Raise() spends anima.
+cast_body = gameplay.split("        void Cast()", 1)[1].split(
+    "        void UpdateProjectiles(", 1
+)[0]
+raise_body = gameplay.split("        void Raise()", 1)[1].split(
+    "        void Dismiss()", 1
+)[0]
+assert "mana-=9" not in gameplay
+assert "mana<9" not in gameplay
+assert "mana" not in cast_body, "Basic attack must be independent of anima"
+assert "mana" not in respawn, "Autoattack must not depend on anima"
+assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
+assert "ManaCost(nearest.kind)" in raise_body
 assert "respawnTimer=FirstRespawnSeconds" in core
 for feature in ("TickRespawns(float dt)", "current.claimed", "IsBoss(entry.kind)",
                 "MaxLivingEnemies=16", "SpawnMinDistance=5.0f",
                 "MinEnemySeparation=1.8f", "current.enemies.Add(spawned)",
-                "TryAutomaticAttack()", "Cast();", "mana>=9",
-                "heroineStrikePulse=.38f"):
+                "TryAutomaticAttack()", "Cast();"):
     assert feature in respawn, f"Missing loop/autoattack feature {feature}"
 assert 'spellUnlocked?"MAGIA":"GOLPE"' not in hud
 assert '"ATAQUE AUTOMÁTICO"' in hud

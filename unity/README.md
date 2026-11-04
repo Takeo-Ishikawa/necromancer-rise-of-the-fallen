@@ -16,7 +16,9 @@ Capacidade aumentada de **4 para 12 pontos de comando**. Isso permite até 12 cr
 
 ### Ataque automático
 
-O botão GOLPE/MAGIA foi **removido** da HUD. O necromante ataca automaticamente o inimigo mais próximo dentro do alcance e com linha de visão. Antes do primeiro despertar mágico, usa golpe físico de curta distância. Depois, lança orbes de magia automaticamente quando tem ânima suficiente, respeitando o intervalo dos ataques. Sem ânima, pode golpear fisicamente os inimigos que se aproximarem. Não é necessário tocar na tela para atacar.
+O botão GOLPE/MAGIA foi **removido** da HUD. O necromante ataca automaticamente o inimigo mais próximo dentro do alcance e com linha de visão. Antes do primeiro despertar mágico, usa golpe físico de curta distância. Depois, lança orbes espectrais automaticamente. **Ambos os ataques básicos são gratuitos e não consomem ânima**, inclusive quando a reserva está zerada. Os ataques respeitam seus respectivos intervalos. Não é necessário tocar na tela para atacar.
+
+**Economia de ânima:** a ânima fica reservada para **REVIVER**, que continua consumindo o custo de cada criatura, e para futuros poderes ativos. A regeneração, o limite de ânima, o formato de salvamento e o custo de ressurreição não foram alterados.
 
 A necromancia permanece **ativa**: REVIVER continua sendo um botão e exige aproximar-se de um cadáver. Os controles DEFESA/CAÇA e EVOLUIR também continuam. A parte direita da HUD exibe 'ATAQUE AUTOMÁTICO'.
 

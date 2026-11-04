@@ -93,9 +93,8 @@ namespace Necromancer
         }
 
         /// <summary>
-        /// Hero targets and attacks automatically. On low mana, nearby foes
-        /// receive a short-range physical strike rather than no attack at all.
-        /// The Raise command remains a deliberate player action.
+        /// Hero targets and attacks automatically at no anima cost.
+        /// Resurrection remains the player's deliberate, resource-consuming action.
         /// </summary>
         void TryAutomaticAttack()
         {
@@ -107,19 +106,9 @@ namespace Necromancer
             if(enemy==null)return;
             if(!Visible(player.body.position,enemy.body.position))return;
 
-            if(!spellUnlocked || mana>=9)
-            {
-                Cast();
-                return;
-            }
-
-            // Empty mana does not turn off combat. Melee requires proximity.
-            Actor melee=Closest(1.02f);
-            if(melee==null ||
-               !Visible(player.body.position,melee.body.position))return;
-            castCooldown=Time.time+.63f;
-            heroineStrikePulse=.38f;
-            Damage(melee,24+staffTier*4+(playerLevel-1)*2);
+            // Both the initial melee strike and the unlocked spectral
+            // projectile are basic attacks and never spend anima.
+            Cast();
         }
     }
 }

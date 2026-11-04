@@ -259,8 +259,8 @@ namespace Necromancer
                 Damage(target,26+staffTier*5+(playerLevel-1)*2);
                 return;
             }
-            if(mana<9){Announce("Anima insuficiente.");return;}
-            mana-=9;
+            // Basic auto-attack orbs cost no anima. Reserve anima for
+            // resurrection and future explicitly activated powers.
             heroineCastPulse=.49f;
             castCooldown=Time.time+.72f;
             SpriteRenderer orb=Visual("Orbe espectral",player.body.position,
