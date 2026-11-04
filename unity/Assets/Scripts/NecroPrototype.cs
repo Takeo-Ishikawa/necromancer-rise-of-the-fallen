@@ -123,7 +123,7 @@ namespace Necromancer
 
         static void FitGround(SpriteRenderer renderer,LevelDefinition area)
         {
-            if(area.id=="bonehollow")
+            if(area.background=="entrada_da_caverna_bonehollow")
             {
                 // Tile the imported floor at its native pixel density.
                 // FullRect sprites allow SpriteRenderer tiled draw mode.
@@ -179,12 +179,15 @@ namespace Necromancer
                 next.backdrop=Visual("Ground",new Vector2(level.width*.5f,level.height*.5f),
                     background,-50,next.root.transform);
                 FitGround(next.backdrop,level);
-                // Cosmetic props share the biome but never block movement.
-                NecroScenery.Populate(level,next.root.transform);
-                foreach(Obstacle rock in level.obstacles) {
-                    SpriteRenderer stone=Visual("Rock",NecroLevels.At(level,rock.x,rock.y),
-                        NecroArt.Stone(),-3,next.root.transform);
-                    Fit(stone,rock.r*2f,rock.r*2f);
+                // The painted cave already includes its walls and scenery.
+                if(level.background!="forgotten_cave")
+                {
+                    NecroScenery.Populate(level,next.root.transform);
+                    foreach(Obstacle rock in level.obstacles) {
+                        SpriteRenderer stone=Visual("Rock",NecroLevels.At(level,rock.x,rock.y),
+                            NecroArt.Stone(),-3,next.root.transform);
+                        Fit(stone,rock.r*2f,rock.r*2f);
+                    }
                 }
                 foreach(Spawn spawn in level.enemies)
                 {
