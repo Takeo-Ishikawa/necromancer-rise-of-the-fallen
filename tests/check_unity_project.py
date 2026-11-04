@@ -218,7 +218,7 @@ frame_test=(unity/"Assets/Editor/NecroFrameEditorCheck.cs").read_text()
 assert "NecroHeroPaintedSource.Build()" in frame_test
 assert "int columns=hero?8:6" in frame_test
 assert "NecroHeroPaintedSource.Build()" in frame_library
-assert "NecroPose.Idle,NecroDirection.Down" in (unity/"Assets/Scripts/NecroPolishedHUD.cs").read_text()
+assert "Sprite frame=heroSprites[0]" in hud
 painted=(unity/"Assets/Scripts/NecroHeroPaintedSource.cs").read_text()
 for required in ("const int Tile=160", "PaintBody(", "Paint(", "Color32[]",
                  "Polygon(", "HatLight", "HairShade", "Mana", "texture.Apply("):
