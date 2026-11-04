@@ -251,11 +251,6 @@ namespace Necromancer
         bool manualQueued;
         float noTargetUntil;
 
-        void Cast()
-        {
-            CastAtRange(spellUnlocked?3.8f:1.02f);
-        }
-
         void CastAtRange(float range)
         {
             if(player.hp<=0 || upgradeOpen || castCooldown>Time.time)return;

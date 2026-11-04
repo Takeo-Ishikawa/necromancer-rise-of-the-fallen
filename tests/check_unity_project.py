@@ -50,7 +50,7 @@ assert [area["id"] for area in levels] == [
 kinds = set()
 for area in levels:
     assert area["width"] > 20 and area["height"] > 15
-    assert area["objective"] and len(area["enemies"]) >= 6
+    assert area["objective"] and len(area["enemies"]) >= (3 if area["id"]=="bonehollow" else 6)
     assert len(area["resources"]) >= 3
     kinds.update(entity["kind"] for entity in area["enemies"])
     assert area["startX"] > 0 and area["startY"] > 0
@@ -67,6 +67,7 @@ for area in levels:
         ), f"Blocked start/spawn in {area['id']}: {entity}"
 assert {"rat", "bat", "slime", "spider", "snake", "skeleton",
         "wisp", "grave_pup", "grave_lord", "marsh_lord"} <= kinds
+assert len(levels[0]["enemies"])==3
 assert {e["kind"] for e in levels[0]["enemies"]}=={"grave_pup"}
 pup_art=(unity/"Assets/Resources/Creatures/grave_pup.png").read_bytes()
 assert struct.unpack(">II",pup_art[16:24])==(1024,256) and pup_art[24:26]==bytes([8,6])
@@ -90,10 +91,10 @@ respawn=(unity/"Assets/Scripts/NecroRespawn.cs").read_text()
 hud=(unity/"Assets/Scripts/NecroPolishedHUD.cs").read_text()
 assert "const int CommandLimit=12;" in core
 assert "TickRespawns(dt);" in core
-assert "TryAutomaticAttack();" in core
+assert "TryAutomaticAttack" not in core+respawn
 assert "Input.GetKeyDown(KeyCode.Space)" not in core
 # Both melee and spectral projectile are free. Only Raise() spends anima.
-cast_body = gameplay.split("        void Cast()", 1)[1].split(
+cast_body = gameplay.split("        void CastAtRange(float range)", 1)[1].split(
     "        void UpdateProjectiles(", 1
 )[0]
 raise_body = gameplay.split("        void Raise()", 1)[1].split(
@@ -105,16 +106,16 @@ assert "mana" not in cast_body, "Basic attack must be independent of anima"
 assert "mana" not in respawn, "Autoattack must not depend on anima"
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "ManaCost(nearest.kind)" in raise_body
-assert "respawnTimer=FirstRespawnSeconds" in core
+assert "respawnTimer=RespawnInterval" in core
 for feature in ("TickRespawns(float dt)", "IsBoss(entry.kind)",
-                "MaxLivingEnemies=16", "SpawnMinDistance=3.4f",
+                "MaxLivingEnemies=4", "SpawnMinDistance=3.4f",
                 "MinEnemySeparation=1.8f", "current.enemies.Add(spawned)",
-                "TryAutomaticAttack()", "Cast();"):
+                "RespawnInterval=12f", "if(alive>=MaxLivingEnemies)"):
     assert feature in respawn, f"Missing loop/autoattack feature {feature}"
 assert 'spellUnlocked?"MAGIA":"GOLPE"' not in hud
 # Automatic attack has no button or oversized permanent caption.
 assert '"ATAQUE AUTOMÁTICO"' not in hud
-assert 'TryAutomaticAttack();' in core
+assert 'CastAtRange(ManualRange);' in ui
 assert '"REVIVER",Raise' in hud
 assert '"EVOLUIR"' in hud
 assert "int armyPage;" in hud
@@ -123,7 +124,6 @@ for area in levels:
     normal=[enemy for enemy in area["enemies"] if enemy["kind"] not in boss_kinds]
     assert normal, f"No respawnable regular enemies in {area['id']}"
     assert all(0 < x["x"] < area["width"] and 0 < x["y"] < area["height"] for x in normal)
-    assert 10 <= min(16,max(10,len(normal)+4)) <= 16
 assert "Input.touches" in core
 assert "DrawWitch(" in scripts["NecroArt.cs"]
 assert "DrawCryptAltar(" in scripts["NecroArt.cs"]
@@ -203,11 +203,11 @@ assert struct.unpack(">II",idle[16:24])==(1024,512) and idle[24:26]==bytes([8,6]
 loop=core.split("void Update()",1)[1].split("bool NearSeal",1)[0]
 for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave("):
     assert removed not in loop
-assert "!current.claimed" not in respawn and "current.respawnTimer=2f;" in respawn
+assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.7.4\"" in builder
-assert "com.takeo.necromancer.unity.preview074" in builder
+assert "PlayerSettings.bundleVersion = \"0.7.5\"" in builder
+assert "com.takeo.necromancer.unity.preview075" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
 hero_sheet=(unity/"Assets/Resources/AnimationSheets/necromante_source.png").read_bytes()
@@ -248,7 +248,7 @@ assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
 assert "heroineStrikePulse=.53f;" in gameplay
 assert "heroineHitPulse=.27f;" in gameplay
 assert "VerifySet(\"necromante\",true);" in frame_editor
-assert "com.takeo.necromancer.unity.preview074" in builder
+assert "com.takeo.necromancer.unity.preview075" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
 creature_visual=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
@@ -323,7 +323,7 @@ assert spectral[24:26]==bytes([8,6]), "Heroine and projectile require explicit 8
 assert "Resources.Load<Texture2D>(" in hero_anim and "Heroine/spectral" in hero_anim
 assert "Staff spectral aura" not in hero_anim
 
-print(f"Unity source verified: {len(levels)} regions, 0.7.4 high resolution idle/walk heroine, eight-direction animation, automatic attacks, respawn, army, portrait PNG "
+print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")
 

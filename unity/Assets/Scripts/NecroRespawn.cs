@@ -10,12 +10,11 @@ namespace Necromancer
     /// </summary>
     public partial class NecroPrototype
     {
-        const float FirstRespawnSeconds=2f;
+        const float RespawnInterval=12f;
         const float SpawnMinDistance=3.4f;
         const float SpawnMaxDistance=4.1f;
         const float MinEnemySeparation=1.8f;
-        const int MinLivingEnemies=10;
-        const int MaxLivingEnemies=16;
+        const int MaxLivingEnemies=4;
 
         void TickRespawns(float dt)
         {
@@ -24,7 +23,7 @@ namespace Necromancer
 
             current.respawnTimer-=dt;
             if(current.respawnTimer>0f)return;
-            current.respawnTimer=2f;
+            current.respawnTimer=RespawnInterval;
 
             int commonSpawnKinds=0;
             foreach(Spawn entry in level.enemies)
@@ -36,8 +35,7 @@ namespace Necromancer
             foreach(Actor enemy in current.enemies)
                 if(enemy!=null && enemy.hp>0)alive++;
 
-            int limit=Mathf.Clamp(commonSpawnKinds+4,MinLivingEnemies,MaxLivingEnemies);
-            if(alive>=limit)return;
+            if(alive>=MaxLivingEnemies)return;
 
             // Rotate through the authored spawn roster, avoiding a permanent
             // bias toward whichever monster appears first in levels.json.
@@ -86,29 +84,6 @@ namespace Necromancer
                 current.enemies.Add(spawned);
                 return;
             }
-
-            // If all candidate positions are blocked, retry without creating
-            // enemies inside walls or overlapping the player.
-            current.respawnTimer=.5f;
-        }
-
-        /// <summary>
-        /// Hero targets and attacks automatically at no anima cost.
-        /// Resurrection remains the player's deliberate, resource-consuming action.
-        /// </summary>
-        void TryAutomaticAttack()
-        {
-            if(gameOver || player==null || player.hp<=0 || Time.time<castCooldown)
-                return;
-
-            float range=spellUnlocked?3.8f:1.02f;
-            Actor enemy=Closest(range);
-            if(enemy==null)return;
-            if(!Visible(player.body.position,enemy.body.position))return;
-
-            // Both the initial melee strike and the unlocked spectral
-            // projectile are basic attacks and never spend anima.
-            Cast();
         }
     }
 }

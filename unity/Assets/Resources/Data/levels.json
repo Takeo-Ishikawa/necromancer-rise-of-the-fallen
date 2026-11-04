@@ -87,53 +87,13 @@
       "enemies": [
         {
           "kind": "grave_pup",
-          "x": 14.6,
-          "y": 16
-        },
-        {
-          "kind": "grave_pup",
           "x": 11.7,
           "y": 14.6
         },
         {
           "kind": "grave_pup",
-          "x": 17.9,
-          "y": 15.1
-        },
-        {
-          "kind": "grave_pup",
-          "x": 9.3,
-          "y": 11.9
-        },
-        {
-          "kind": "grave_pup",
-          "x": 22,
-          "y": 14
-        },
-        {
-          "kind": "grave_pup",
-          "x": 6.2,
-          "y": 10.6
-        },
-        {
-          "kind": "grave_pup",
           "x": 19.4,
           "y": 8.5
-        },
-        {
-          "kind": "grave_pup",
-          "x": 24.8,
-          "y": 9.7
-        },
-        {
-          "kind": "grave_pup",
-          "x": 12.7,
-          "y": 6.3
-        },
-        {
-          "kind": "grave_pup",
-          "x": 25.2,
-          "y": 6.1
         },
         {
           "kind": "grave_pup",

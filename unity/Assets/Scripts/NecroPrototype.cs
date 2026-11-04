@@ -53,7 +53,7 @@ namespace Necromancer
             public readonly List<Drop> drops = new List<Drop>();
             public readonly List<ResourceNode> resources = new List<ResourceNode>();
             public bool claimed, bossDefeated, bossBound;
-            public float respawnTimer=FirstRespawnSeconds;
+            public float respawnTimer=RespawnInterval;
             public int respawnIndex;
         }
 
@@ -262,7 +262,6 @@ namespace Necromancer
                 Move(player,control*player.speed*dt);
             }
             ReadManualAttack(hudScale);
-            TryAutomaticAttack();
             UpdateActors(current.enemies,dt,false);
             UpdateProjectiles(dt);
             TickRespawns(dt);
