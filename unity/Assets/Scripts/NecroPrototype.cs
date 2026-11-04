@@ -49,6 +49,7 @@ namespace Necromancer
             public Transform seal;
             public Transform cryptAltar;
             public readonly List<Actor> enemies = new List<Actor>();
+            public readonly List<NecroCreatureView> fallenPups=new List<NecroCreatureView>();
             public readonly List<Corpse> corpses = new List<Corpse>();
             public readonly List<Drop> drops = new List<Drop>();
             public readonly List<ResourceNode> resources = new List<ResourceNode>();
@@ -142,7 +143,7 @@ namespace Necromancer
         {
             float diameter=kind=="warden"||kind=="grave_lord"||kind=="marsh_lord"?1.24f:
                 kind=="grave_pup"?1.08f:kind=="necromante"?1.28f:kind=="slime"?.76f:kind=="wisp"?.70f:.72f;
-            var sprite=Visual((ally?"Servo ":"Hostil ")+kind,at,kind=="grave_pup"?NecroCreatureView.PupIdle():NecroArt.Get(kind),ally?15:12,parent);
+            var sprite=Visual((ally?"Servo ":"Hostil ")+kind,at,kind=="grave_pup"?NecroCreatureView.PupIdle(ally):NecroArt.Get(kind),ally?15:12,parent);
             Fit(sprite,diameter,diameter);
             Actor a=new Actor{
                 kind=kind,ally=ally,body=sprite.transform,radius=diameter*.30f,
@@ -154,7 +155,7 @@ namespace Necromancer
                     kind=="slime"?10:kind=="necromante"?26:8,
                 speed=kind=="marsh_lord"?1.3f:kind=="grave_lord"?1.45f:
                     kind=="warden"?1.4f:kind=="bat"||kind=="wisp"?2.7f:
-                    kind=="grave_pup"?2.35f:kind=="slime"?1.4f:1.9f,
+                    kind=="grave_pup"?(ally?3.8f:2.35f):kind=="slime"?1.4f:1.9f,
                 reach=kind=="bat"||kind=="wisp"?1.10f:.66f
             };
             a.hp=a.maxHp;
@@ -266,6 +267,7 @@ namespace Necromancer
             }
             ReadManualAttack(hudScale);
             UpdateActors(current.enemies,dt,false);
+            UpdateActors(servants,dt,true);
             UpdateProjectiles(dt);
             TickRespawns(dt);
             AnimateHeroVisual(dt);

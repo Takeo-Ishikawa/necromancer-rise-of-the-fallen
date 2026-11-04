@@ -21,7 +21,7 @@ namespace Necromancer
         Color baseTint;
         string type;
 
-        static Sprite[] pupFrames, fallenPupFrames;
+        static Sprite[] pupFrames, alliedPupFrames, fallenPupFrames;
         const float FallenHold = 3f;
         const float DissolveDuration = .8f;
         int pupAction;
@@ -38,11 +38,18 @@ namespace Necromancer
             return sprites;
         }
 
-        public static Sprite PupIdle()
+        public static Sprite PupIdle(bool ally=false)
         {
+            if(ally)
+            {
+                if(alliedPupFrames==null)alliedPupFrames=LoadPupFrames("Creatures/grave_pup_ally");
+                return alliedPupFrames[0];
+            }
             if(pupFrames==null)pupFrames=LoadPupFrames("Creatures/grave_pup");
             return pupFrames[0];
         }
+
+        public bool CanBind => fallen && !friendly && Time.time-fallenAt<FallenHold;
 
         public void Fall()
         {
@@ -157,7 +164,7 @@ namespace Necromancer
             if(type=="grave_pup")
             {
                 int pose=pupAction!=0?pupAction:moving && Mathf.Sin(t*13f)>0?1:0;
-                artRenderer.sprite=pupFrames[pose];
+                artRenderer.sprite=friendly?alliedPupFrames[pose]:pupFrames[pose];
                 if(pupAction==0 && Mathf.Abs(delta.x)>.0001f)artRenderer.flipX=delta.x<0;
                 float lift=pupAction==3?.14f:moving && pupAction==0?.024f*Mathf.Abs(Mathf.Sin(t*13f)):0f;
                 art.localPosition=Vector3.up*lift;

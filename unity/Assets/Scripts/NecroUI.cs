@@ -34,20 +34,32 @@ namespace Necromancer
             return new Rect(Screen.width/scale-108f,Screen.height/scale-214f,82f,72f);
         }
 
+        Rect BindRect(float scale)
+        {
+            Rect rect=AttackRect(scale);
+            rect.y-=78f;
+            return rect;
+        }
+
         void ReadManualAttack(float scale)
         {
             Rect button=AttackRect(scale);
+            Rect bind=BindRect(scale);
             bool pressed=false;
             for(int i=0;i<Input.touchCount;i++)
             {
                 Touch touch=Input.GetTouch(i);
                 Vector2 point=new Vector2(touch.position.x,Screen.height-touch.position.y)/scale;
-                if(touch.phase==TouchPhase.Began && button.Contains(point))pressed=true;
+                if(touch.phase!=TouchPhase.Began)continue;
+                if(button.Contains(point))pressed=true;
+                else if(bind.Contains(point))BindNearbyPup();
             }
             if(Input.touchCount==0 && Input.GetMouseButtonDown(0))
             {
                 Vector3 pos=Input.mousePosition;
-                pressed=button.Contains(new Vector2(pos.x,Screen.height-pos.y)/scale);
+                Vector2 point=new Vector2(pos.x,Screen.height-pos.y)/scale;
+                pressed=button.Contains(point);
+                if(bind.Contains(point))BindNearbyPup();
             }
             if(pressed)manualQueued=true;
             if(!manualQueued)return;
@@ -73,6 +85,12 @@ namespace Necromancer
             Rect button=AttackRect(scale);
             RingUi(button,stickDisc,Time.time<castCooldown?new Color(.67f,.62f,.73f):Color.white);
             GUI.Label(button,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",hudAction);
+            if(NearbyFallenPup()!=null)
+            {
+                Rect bind=BindRect(scale);
+                RingUi(bind,stickDisc,new Color(.40f,.94f,.85f));
+                GUI.Label(bind,"ERGUER",hudAction);
+            }
             Rect pad=new Rect(14f,Screen.height/scale-241f,126f,126f);
             RingUi(pad,stickDisc,Color.white);
             Vector2 stick=touchMove*23f;

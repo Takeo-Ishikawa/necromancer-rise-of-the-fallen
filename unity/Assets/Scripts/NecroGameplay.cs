@@ -130,9 +130,25 @@ namespace Necromancer
                 if(self.hp<=0)continue;
                 self.cooldown=Mathf.Max(0,self.cooldown-dt);
                 self.flash=Mathf.Max(0,self.flash-dt);
-                if(self.kind=="grave_pup" && !friendly)
+                if(self.kind=="grave_pup")
                 {
-                    UpdatePup(self,dt);
+                    Actor prey=friendly?servantOrder:player;
+                    if(!friendly && servants.Count>0 &&
+                        Vector2.Distance(self.body.position,servants[0].body.position)<
+                        Vector2.Distance(self.body.position,player.body.position))
+                        prey=servants[0];
+                    if(prey!=null && prey.hp>0)
+                        UpdatePup(self,prey,dt);
+                    else if(friendly)
+                    {
+                        servantOrder=null;
+                        self.pupAttackTime=0;
+                        self.view.SetPupAction(0,Vector2.zero);
+                        Vector2 home=(Vector2)player.body.position+Vector2.right*.8f;
+                        if(Blocked(home,self.radius))home=player.body.position;
+                        if(Vector2.Distance(self.body.position,home)>.25f)
+                            MoveToward(self,home,dt);
+                    }
                     continue;
                 }
                 Actor target=null;
@@ -179,16 +195,16 @@ namespace Necromancer
                 }
             }
         }
-        void UpdatePup(Actor pup,float dt)
+        void UpdatePup(Actor pup,Actor prey,float dt)
         {
             const float windup=.42f, leap=.24f;
-            Vector2 offset=player.body.position-pup.body.position;
+            Vector2 offset=prey.body.position-pup.body.position;
             if(pup.pupAttackTime<=0)
             {
-                if(offset.magnitude>4.1f)return;
-                if(offset.magnitude>1.35f || !Visible(pup.body.position,player.body.position))
+                if(!pup.ally && offset.magnitude>4.1f)return;
+                if(offset.magnitude>1.35f || !Visible(pup.body.position,prey.body.position))
                 {
-                    MoveToward(pup,player.body.position,dt);
+                    MoveToward(pup,prey.body.position,dt);
                     return;
                 }
                 if(pup.cooldown>0)return;
@@ -204,10 +220,10 @@ namespace Necromancer
             {
                 pup.view.SetPupAction(3,pup.pupHeading);
                 Move(pup,pup.pupHeading*(5.8f*leapStep));
-                if(!pup.pupHit && Vector2.Distance(player.body.position,pup.body.position)<pup.radius+player.radius &&
-                    Visible(pup.body.position,player.body.position))
+                if(!pup.pupHit && Vector2.Distance(prey.body.position,pup.body.position)<pup.radius+prey.radius &&
+                    Visible(pup.body.position,prey.body.position))
                 {
-                    Damage(player,pup.attack);
+                    Damage(prey,pup.attack);
                     pup.pupHit=true;
                 }
             }
@@ -231,10 +247,56 @@ namespace Necromancer
             if(victim.view!=null)victim.view.Flash();
             NecroCombatFx.Emit(victim.body.position,current.root.transform,0);
             if(victim.hp>0)return;
-            current.enemies.Remove(victim);
-            if(victim.kind=="grave_pup")victim.view.Fall();
+            if(victim.ally)
+            {
+                servants.Remove(victim);
+                servantOrder=null;
+            }
+            else current.enemies.Remove(victim);
+            if(victim.kind=="grave_pup")
+            {
+                victim.view.Fall();
+                if(!victim.ally)current.fallenPups.Add(victim.view);
+            }
             else Destroy(victim.body.gameObject);
         }
+        Actor servantOrder;
+
+        NecroCreatureView NearbyFallenPup()
+        {
+            NecroCreatureView nearest=null;
+            float best=1.3f;
+            for(int i=current.fallenPups.Count-1;i>=0;i--)
+            {
+                var pup=current.fallenPups[i];
+                if(pup==null || !pup.CanBind)
+                {
+                    current.fallenPups.RemoveAt(i);
+                    continue;
+                }
+                if(servants.Count>0)continue;
+                float distance=Vector2.Distance(player.body.position,pup.transform.position);
+                if(distance<best && Visible(player.body.position,pup.transform.position))
+                {
+                    nearest=pup;
+                    best=distance;
+                }
+            }
+            return nearest;
+        }
+
+        void BindNearbyPup()
+        {
+            var pup=NearbyFallenPup();
+            if(pup==null)return;
+            Vector2 at=pup.transform.position;
+            servants.Add(Create("grave_pup",at,true,persistentRoot.transform));
+            current.fallenPups.Remove(pup);
+            Destroy(pup.gameObject);
+            NecroCombatFx.Emit(at,current.root.transform,1);
+            heroineRaisePulse=.92f;
+        }
+
         Actor Closest(float maxDistance)
         {
             Actor found=null;
@@ -257,6 +319,7 @@ namespace Necromancer
             if(player.hp<=0 || upgradeOpen || castCooldown>Time.time)return;
             Actor target=Closest(range);
             if(target==null){Announce("Nenhum alvo ao alcance.");return;}
+            if(servants.Count>0)servantOrder=target;
             if(!spellUnlocked)
             {
                 heroineStrikePulse=.53f;
