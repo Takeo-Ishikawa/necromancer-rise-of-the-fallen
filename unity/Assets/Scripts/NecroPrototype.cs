@@ -243,27 +243,7 @@ namespace Necromancer
             float dt=Mathf.Min(.045f,Time.deltaTime);
             Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
             float hudScale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
-            Vector2 stickCenter=new Vector2(77f,178f)*hudScale;
-            bool stickFound=false;
-            foreach(Touch touch in Input.touches)
-            {
-                if(touch.phase==TouchPhase.Ended || touch.phase==TouchPhase.Canceled)
-                {
-                    if(touch.fingerId==joystickFingerId)joystickFingerId=-1;
-                    continue;
-                }
-                if(touch.fingerId==joystickFingerId ||
-                   (joystickFingerId==-1 && touch.phase==TouchPhase.Began &&
-                    Vector2.Distance(touch.position,stickCenter)<66f*hudScale))
-                {
-                    joystickFingerId=touch.fingerId;
-                    touchMove=Vector2.ClampMagnitude(
-                        (touch.position-stickCenter)/(46f*hudScale),1f);
-                    stickFound=true;
-                    break;
-                }
-            }
-            if(!stickFound){joystickFingerId=-1;touchMove=Vector2.zero;}
+            ReadMovement(hudScale);
             Vector2 control=keyboard+touchMove;
             if(control.sqrMagnitude>1)control.Normalize();
             heroineWalking=control.sqrMagnitude>.01f;

@@ -29,15 +29,122 @@ namespace Necromancer
                 wordWrap=true
             };
         }
+        Vector2 joystickAnchor;
+        Texture2D attackDisc,bindDisc;
+        GUIStyle actionCaption;
+
+        bool MovementArea(Vector2 point,float scale)
+        {
+            Vector2 gui=new Vector2(point.x,Screen.height-point.y)/scale;
+            return point.x<Screen.width*.65f &&
+                !AttackRect(scale).Contains(gui) && !BindRect(scale).Contains(gui);
+        }
+
+        void ReadMovement(float scale)
+        {
+            bool active=false;
+            foreach(Touch touch in Input.touches)
+            {
+                if(touch.fingerId!=joystickFingerId)
+                {
+                    if(joystickFingerId!=-1 || touch.phase!=TouchPhase.Began ||
+                        !MovementArea(touch.position,scale))continue;
+                    joystickFingerId=touch.fingerId;
+                    joystickAnchor=touch.position;
+                }
+                if(touch.phase==TouchPhase.Ended || touch.phase==TouchPhase.Canceled)
+                {
+                    joystickFingerId=-1;
+                    continue;
+                }
+                touchMove=Vector2.ClampMagnitude(
+                    (touch.position-joystickAnchor)/(46f*scale),1f);
+                active=true;
+                break;
+            }
+            if(Input.touchCount==0)
+            {
+                if(Input.GetMouseButtonDown(0) && MovementArea(Input.mousePosition,scale))
+                {
+                    joystickFingerId=-2;
+                    joystickAnchor=Input.mousePosition;
+                }
+                if(joystickFingerId==-2 && Input.GetMouseButton(0))
+                {
+                    touchMove=Vector2.ClampMagnitude(
+                        ((Vector2)Input.mousePosition-joystickAnchor)/(46f*scale),1f);
+                    active=true;
+                }
+            }
+            if(!active){joystickFingerId=-1;touchMove=Vector2.zero;}
+        }
+
+        static Texture2D ActionDisc(bool binding)
+        {
+            const int size=192;
+            var texture=new Texture2D(size,size,TextureFormat.RGBA32,false);
+            var pixels=new Color[size*size];
+            Color accent=binding?new Color(.36f,.94f,.79f):new Color(.66f,.78f,1f);
+            for(int y=0;y<size;y++)for(int x=0;x<size;x++)
+            {
+                Vector2 p=new Vector2((x+.5f)/size*2f-1f,(y+.5f)/size*2f-1f);
+                float radius=p.magnitude;
+                if(radius>=1f)continue;
+                Color color=Color.Lerp(new Color(.055f,.065f,.105f,.96f),accent,
+                    .08f+.12f*Mathf.Max(0,p.y));
+                if(radius>.90f)color=Color.Lerp(accent*.55f,accent,(p.y+1f)*.5f);
+                else if(radius>.83f && radius<.85f)color=accent*.65f;
+                // White diamond for binding, a carved skull for the spell.
+                float symbolY=p.y-.12f;
+                bool ink;
+                if(binding)
+                {
+                    float diamond=Mathf.Abs(p.x)/.28f+Mathf.Abs(symbolY)/.38f;
+                    ink=diamond>.78f && diamond<1.05f;
+                }
+                else
+                {
+                    ink=(p.x*p.x/(.31f*.31f)+symbolY*symbolY/(.32f*.32f)<1f) ||
+                        (Mathf.Abs(p.x)<.19f && symbolY<-.13f && symbolY>-.37f);
+                    bool eyes=(Mathf.Abs(p.x-.12f)<.065f || Mathf.Abs(p.x+.12f)<.065f) &&
+                        Mathf.Abs(symbolY-.015f)<.07f;
+                    bool teeth=symbolY<-.25f && (Mathf.Abs(p.x)<.018f || Mathf.Abs(Mathf.Abs(p.x)-.10f)<.016f);
+                    if(eyes || teeth)ink=false;
+                }
+                if(ink)color=Color.Lerp(accent,Color.white,.4f);
+                color.a*=Mathf.Clamp01((1f-radius)*96f);
+                pixels[y*size+x]=color;
+            }
+            texture.SetPixels(pixels);
+            texture.Apply();
+            texture.filterMode=FilterMode.Bilinear;
+            return texture;
+        }
+
+        void DrawAction(Rect rect,bool binding,string caption,bool ready)
+        {
+            if(attackDisc==null)
+            {
+                attackDisc=ActionDisc(false);
+                bindDisc=ActionDisc(true);
+                actionCaption=new GUIStyle(hudAction){fontSize=10};
+            }
+            RingUi(new Rect(rect.x,rect.y+3f,rect.width,rect.height),attackDisc,
+                new Color(0,0,0,.35f));
+            RingUi(rect,binding?bindDisc:attackDisc,ready?Color.white:new Color(.62f,.65f,.74f,.9f));
+            GUI.Label(new Rect(rect.x,rect.y+rect.height*.66f,rect.width,rect.height*.23f),
+                caption,actionCaption);
+        }
+
         Rect AttackRect(float scale)
         {
-            return new Rect(Screen.width/scale-108f,Screen.height/scale-214f,82f,72f);
+            return new Rect(Screen.width/scale-108f,Screen.height/scale-214f,82f,82f);
         }
 
         Rect BindRect(float scale)
         {
             Rect rect=AttackRect(scale);
-            rect.y-=78f;
+            rect.y-=94f;
             return rect;
         }
 
@@ -83,18 +190,18 @@ namespace Necromancer
             float scale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
             GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
             Rect button=AttackRect(scale);
-            RingUi(button,stickDisc,Time.time<castCooldown?new Color(.67f,.62f,.73f):Color.white);
-            GUI.Label(button,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",hudAction);
-            if(CanBindNearby())
+            DrawAction(button,false,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",
+                Time.time>=castCooldown);
+            if(CanBindNearby())DrawAction(BindRect(scale),true,"ERGUER",true);
+            if(joystickFingerId!=-1)
             {
-                Rect bind=BindRect(scale);
-                RingUi(bind,stickDisc,new Color(.40f,.94f,.85f));
-                GUI.Label(bind,"ERGUER",hudAction);
+                Vector2 center=new Vector2(joystickAnchor.x,Screen.height-joystickAnchor.y)/scale;
+                Rect pad=new Rect(center.x-55f,center.y-55f,110f,110f);
+                RingUi(pad,stickDisc,new Color(.65f,.83f,.87f,.38f));
+                Vector2 stick=touchMove*38f;
+                RingUi(new Rect(center.x-19f+stick.x,center.y-19f-stick.y,38f,38f),
+                    smallRing,new Color(.65f,.95f,.92f,.78f));
             }
-            Rect pad=new Rect(14f,Screen.height/scale-241f,126f,126f);
-            RingUi(pad,stickDisc,Color.white);
-            Vector2 stick=touchMove*23f;
-            RingUi(new Rect(pad.center.x-26f+stick.x,pad.center.y-26f-stick.y,52f,52f),smallRing,UiGold);
         }
 
 
