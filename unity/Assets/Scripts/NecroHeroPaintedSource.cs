@@ -209,7 +209,7 @@ namespace Necromancer
             texture.wrapMode=TextureWrapMode.Clamp;
             texture.filterMode=FilterMode.Point;
             texture.SetPixels32(pixels);
-            texture.Apply(false,true);
+            texture.Apply(false,false);
             return texture;
         }
     }

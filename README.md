@@ -41,3 +41,8 @@ Inimigos comuns reaparecem em regiões conquistadas (sem reanimar chefes), o ex�
 ### Prévia 0.6.5a — Protagonista animada
 
 A protagonista tem uma nova folha PNG de 16 poses/vistas ilustradas (frente/costas/perfis e estados de ação). O Unity gera e utiliza 140 sprites animados em 24 sequências, sem deformar a mesma vista frontal para simular costas. A nova versão preserva as regras e saves e usa identificador separado para teste Android. Consulte [o guia visual 0.6.5a](unity/README.md).
+
+
+### 0.6.5b — personagem nítida e idle/walk aprimorados
+
+Corrigida a origem minúscula que borrava a necromante na versão anterior: agora são 16 poses de 160×160 pixels, com desenhos distintos para frente, costas, esquerda e direita e quadros de repouso/caminhada. O retrato da HUD também foi atualizado. [Detalhes](unity/README.md).

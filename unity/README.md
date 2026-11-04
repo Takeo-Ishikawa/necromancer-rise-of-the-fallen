@@ -1,43 +1,29 @@
-# Necromancer — 0.6.5a · Protagonista animada
+# Necromancer — 0.6.5b · Protagonista legível e repouso/caminhada em quatro direções
 
-A versão 0.6.5a inclui arte de poses ilustradas integrada ao Unity, um novo atlas de quatro direções e seis conjuntos de animação. A base de combate, a Cripta, o respawn, os 12 pontos de comando e o formato do save permanecem inalterados.
+Esta entrega implementa um novo padrão de arte da protagonista no Unity, concentrado em **legibilidade no celular** e animações de repouso/caminhada.
 
-## Direção de arte aplicada
+## Correção observada na captura Android
 
-A necromante mantém chapéu violeta com caveira, cabelos prateados, traje escuro, botas e cajado com brilho espectral. A arte-base foi extraída e tratada a partir de nossas próprias ilustrações aprovadas.
+A 0.6.5a utilizava uma folha PNG com apenas 124×184 pixels para **16 poses**, ou aproximadamente **31×46 pixels por personagem**. O aumento feito pelo Unity borrava o chapéu, o rosto e o cajado, fazendo a protagonista parecer menos definida que os monstros.
 
-O arquivo integrado `Assets/Resources/AnimationSheets/necromante_source.png` contém **16 poses/vistas em PNG transparente**. São quatro vistas realmente diferentes (frente, costas, esquerda e direita) e 12 estudos de poses: repouso, caminhada, ataque, conjuração, ressuscitar e dano, duas variantes de cada. Este arquivo é usado no build e não é apenas imagem de referência.
+A nova fonte de arte em `Assets/Scripts/NecroHeroPaintedSource.cs` é original, com cores e contornos definidos para a leitura durante a jogabilidade. Agora cada pose começa numa célula desenhada de **160×160 pixels**, mantendo o chapéu violeta e a caveira, o cabelo prateado, o manto escuro e o cajado com núcleo ciano.
 
-## Quadro a quadro dentro do Unity
+São quatro vistas distintas e duas poses de repouso mais duas de caminhada **em cada direção**. A biblioteca usa essas 16 células, sem esticar uma visão frontal para representar costas ou laterais. `NecroHeroSheetBuilder.cs` mantém um atlas de 96×96 pixels por quadro, e organiza os seis estados originais; os intervalos de repouso e caminhada são construídos a partir dos novos desenhos com deslocamentos leves, sem distorção da face.
 
-O `NecroHeroSheetBuilder` compõe os quadros a partir dessas artes, com deslocamentos rígidos por região do corpo e efeitos desenhados sobre o frame — em vez de esticar a mesma figura frontal em todas as direções.
+As animações continuam ligadas ao `NecroCharacterAnimation.cs`. O sprite da personagem ficou aproximadamente 13% maior, sem alterar a física nem as colisões. O retrato circular da HUD passou a usar a própria nova arte do jogo, no lugar da PNG anterior.
 
-| Ação | Quadros por direção | FPS | Estado |
-| --- | ---: | ---: | --- |
-| Repouso | 4 | 4 | Parado |
-| Caminhada | 8 | 11 | Movimento |
-| Ataque físico | 6 | 12 | Golpe básico |
-| Conjuração | 6 | 10 | Ataque automático mágico |
-| Ressurreição | 8 | 9 | Botão Reviver |
-| Reação a dano | 3 | 12 | Quando atingida |
+## Estado da arte
 
-Total: **140 sprites utilizados em 24 clipes** (6 ações × 4 direções), criados e armazenados em cache uma única vez na primeira execução. Os quadros são sprites distintos, embora **nem todos tenham sido desenhados manualmente**; os intermediários são composições da arte-base. A forma frontal já possui variantes próprias de cada ação; costas e perfis mantêm os desenhos próprios com poses/effects derivados.
+O novo desenho de origem é rasterizado uma única vez em uma textura transparente de 640×640 pixels pela classe C# instalada no Unity. Não é necessário importar a arte de um site ou anexar um screenshot como plano de fundo.
 
-A biblioteca `NecroFrameLibrary.cs` continua responsável por todas as sequências e aceita arquivos de atlas completos importados de artistas no futuro. `NecroCharacterAnimation.cs` mantém a máquina de estados e as prioridades de animação: dano, ressurreição, conjuração, ataque, caminhada e repouso.
+As sequências de ataque, magia, ressurreição e dano ainda reutilizam as poses de repouso com efeitos específicos; **esta fase cobre especialmente idle e walk**, conforme o escopo definido. A etapa seguinte poderá produzir poses exclusivas também para as outras ações e aprimorar a qualidade visual da caverna/HUD.
 
-## Efeitos visuais sincronizados
+## Segurança de instalação
 
-- Círculo necromântico sob os pés durante a ressurreição, com partículas esverdeadas ascendentes
-- Esfera espectral durante a conjuração do ataque básico gratuito
-- Arco violeta nas animações de ataque físico, sem mudar o dano, hitbox ou custo
-- Brilho do corpo ao sofrer dano, com duração alinhada aos três quadros
+A prévia `com.takeo.necromancer.unity.preview065b` é uma **instalação separada** das versões 0.5, 0.6.4 e 0.6.5a para preservar seus dados. Ela não importa automaticamente o salvamento das versões anteriores. Não desinstale a versão cuja partida queira conservar.
 
-A direção do personagem muda para o alvo ao atacar parado. A animação não mexe nos componentes de movimentação, colisão, inteligência artificial, salvamento ou condições de vitória.
+Nenhuma regra de combate, custo de ânima, comando de exército, Cripta ou formato de salvamento foi alterada.
 
-## Performance, qualidade e limitações
+## Verificação
 
-A folha de origem é compacta, em estilo pixel art ilustrado, e os quadros de 96×96 são construídos durante a inicialização e reutilizados. Nenhuma rasterização acontece a cada quadro do jogo. O atlas ocupa aproximadamente 7 MB de textura RGBA32 em memória gráfica, além de sobrecarga de sprites; o processamento inicial pode variar conforme o Android. O próximo refinamento seria desenhar cada um dos 140 quadros individualmente, melhorando a fluidez e reduzindo os intermediários compostos. **Não se trata ainda de animação manual final de estúdio.**
-
-## Instalação Android
-
-Esta prévia usa `com.takeo.necromancer.unity.preview065` (nome *Necromancer Preview 0.6.5a*) e armazenamento próprio, sem sobrescrever as instalações anteriores. Não desinstale a versão 0.5 nem outras prévias que queira manter. Uma compilação de produção com assinatura permanente só será possível após cadastrar a chave privada conforme [ANDROID_SIGNING.md](../docs/ANDROID_SIGNING.md).
+O Editor Unity gera o atlas e verifica as quatro vistas e as 16 poses. O script `tests/check_unity_project.py` valida a presença do gerador e a integração. A compilação Android confirma a integridade técnica, mas a qualidade artística e o conforto de movimento devem ser julgados no telefone.
