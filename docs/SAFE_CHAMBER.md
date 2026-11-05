@@ -34,6 +34,19 @@ não é ativada. **Os arquivos binários ainda precisam ser enviados ao GitHub**
 isso não impede a configuração da cena, mas impede vê-la completa na Unity
 até que as imagens sejam adicionadas.
 
+## Correção do contato com o piso
+
+As sombras de contato são elipses suaves geradas pela Unity e associadas
+individualmente ao GameObject de cada móvel. No layout v3, `shadowOffsetX`
+e `shadowOffsetY` são calibrados em relação ao **contato visível** de cada
+PNG, não à borda do arquivo (que pode conter pixels transparentes). Isso
+corrige o deslocamento observado na prévia anterior, especialmente em
+guarda-roupa, fonte e ninho.
+
+As sombras não alteram posição, escala ou hitbox dos sprites originais.
+Se um móvel mudar de arte, revise sua sombra no JSON junto com o
+respectivo pivô. A esteira, o sigilo e o arco não recebem sombra artificial.
+
 ## Como ajustar um elemento
 
 Edite `unity/Assets/Resources/Data/sanctuary_props.json`. O arquivo contém:

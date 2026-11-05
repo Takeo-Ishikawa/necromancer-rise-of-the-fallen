@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "notes": "Refuge uses 16 x 24 units. Coordinates refer to sprite center X and bottom pivot Y (.05), except wall_overlay and floor sprites, which are center-anchored. The eight PNGs stay independent.",
+  "version": 3,
+  "notes": "16x24 world units. Every prop remains a separate PNG and GameObject; furniture sprites use a bottom .05 pivot. Contact shadows are calibrated to the visible bases of each painting (which have different transparent padding); floor and wall_overlay stay center-pivoted.",
   "props": [
     {
       "id": "entrance_arch",
@@ -32,10 +32,10 @@
       "blockOffsetY": 0.65,
       "blockWidth": 2.6,
       "blockHeight": 1.45,
-      "shadowWidth": 2.9,
-      "shadowHeight": 0.78,
-      "shadowOffsetX": 0,
-      "shadowOffsetY": -0.15
+      "shadowWidth": 3.2,
+      "shadowHeight": 0.68,
+      "shadowOffsetX": 0.07,
+      "shadowOffsetY": 0.39
     },
     {
       "id": "bed",
@@ -49,10 +49,10 @@
       "blockOffsetY": 0.72,
       "blockWidth": 3.6,
       "blockHeight": 1.28,
-      "shadowWidth": 3.8,
-      "shadowHeight": 0.76,
-      "shadowOffsetX": 0,
-      "shadowOffsetY": -0.12
+      "shadowWidth": 3.7,
+      "shadowHeight": 0.68,
+      "shadowOffsetX": 0.22,
+      "shadowOffsetY": 0.04
     },
     {
       "id": "meditation_altar",
@@ -66,10 +66,10 @@
       "blockOffsetY": 0.74,
       "blockWidth": 3.1,
       "blockHeight": 1.4,
-      "shadowWidth": 3.8,
-      "shadowHeight": 0.8,
-      "shadowOffsetX": 0,
-      "shadowOffsetY": -0.12
+      "shadowWidth": 3.2,
+      "shadowHeight": 0.68,
+      "shadowOffsetX": -0.23,
+      "shadowOffsetY": 0.3
     },
     {
       "id": "meditation_mat",
@@ -92,10 +92,10 @@
       "blockOffsetY": 0.7,
       "blockWidth": 4.2,
       "blockHeight": 1.75,
-      "shadowWidth": 4.65,
-      "shadowHeight": 0.9,
+      "shadowWidth": 4.35,
+      "shadowHeight": 0.78,
       "shadowOffsetX": 0,
-      "shadowOffsetY": -0.14
+      "shadowOffsetY": 0.3
     },
     {
       "id": "mount_nest",
@@ -109,10 +109,10 @@
       "blockOffsetY": 0.77,
       "blockWidth": 4.65,
       "blockHeight": 1.4,
-      "shadowWidth": 4.95,
-      "shadowHeight": 1,
-      "shadowOffsetX": 0,
-      "shadowOffsetY": -0.15
+      "shadowWidth": 4.75,
+      "shadowHeight": 0.85,
+      "shadowOffsetX": -0.05,
+      "shadowOffsetY": 0.18
     }
   ]
 }

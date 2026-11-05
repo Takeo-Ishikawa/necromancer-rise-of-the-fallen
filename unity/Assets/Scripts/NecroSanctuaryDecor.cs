@@ -27,7 +27,9 @@ namespace Necromancer
             public float x, y, width, height;
             // Optional axis-aligned footprint relative to the sprite's bottom anchor.
             public float blockOffsetX, blockOffsetY, blockWidth, blockHeight;
-            // Optional ambient-occlusion footprint, separate from collision.
+            // Contact shadow in world units; each PNG has different transparent margins.
+            // Offset follows the painting's visible floor contact, not its texture edge.
+            // This footprint is independent of collision and sprite transform.
             public float shadowWidth, shadowHeight, shadowOffsetX, shadowOffsetY;
         }
 
