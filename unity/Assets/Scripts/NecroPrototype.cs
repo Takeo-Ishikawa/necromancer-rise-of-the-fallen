@@ -265,6 +265,7 @@ namespace Necromancer
             if(!inSanctuary)UpdateProjectiles(dt);
             if(!inSanctuary)TickRespawns(dt);
             AnimateHeroVisual(dt);
+            UpdateSanctuaryActorDepth();
             UpdateWorldCamera();
         }
 
