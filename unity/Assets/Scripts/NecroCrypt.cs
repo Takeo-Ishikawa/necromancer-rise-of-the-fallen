@@ -30,7 +30,7 @@ namespace Necromancer
 
         bool CanAccessCrypt()
         {
-            return stage==0 && stages!=null && stages.Length>0 &&
+            return !inSanctuary && stage==0 && stages!=null && stages.Length>0 &&
                 stages[0]!=null && stages[0].claimed && NearSeal();
         }
 
@@ -182,6 +182,7 @@ namespace Necromancer
 
         bool SaveProgress()
         {
+            if(inSanctuary){SaveCompanions();return true;}
             if(restoring || player==null || current==null || gameOver)return false;
             NecroSaveData save=new NecroSaveData {
                 version=NecroSaveStore.Version,

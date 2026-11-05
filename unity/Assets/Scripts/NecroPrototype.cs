@@ -106,9 +106,10 @@ namespace Necromancer
             player=Create("necromante",start,true,persistentRoot.transform);
             player.maxHp=115;player.hp=115;player.speed=3.4f;
             InitializeHeroAnimation();
-            LoadStage(0);
+            EnterSanctuary();
             spellUnlocked=true;
             LoadCompanions();
+            PlaceTravelCompanions();
         }
 
         SpriteRenderer Visual(string label,Vector2 at,Sprite sprite,int order,Transform parent)
@@ -175,6 +176,8 @@ namespace Necromancer
         {
             if(index<0 || index>=levels.Length)return;
             if(current!=null)current.root.SetActive(false);
+            inSanctuary=false;
+            ResetTravelCombat();
             stage=index;
             level=levels[stage];
             if(stages[stage]==null) {
@@ -221,6 +224,8 @@ namespace Necromancer
             projectiles.Clear();
             upgradeOpen=false;
             cryptOpen=false;
+            PlaceTravelCompanions();
+            UpdateWorldCamera();
 
         }
 
@@ -253,17 +258,13 @@ namespace Necromancer
                 facing=control.normalized;
                 Move(player,control*player.speed*dt);
             }
-            ReadManualAttack(hudScale);
-            UpdateActors(current.enemies,dt,false);
+            if(!inSanctuary)ReadManualAttack(hudScale);
+            if(!inSanctuary)UpdateActors(current.enemies,dt,false);
             UpdateActors(servants,dt,true);
-            UpdateProjectiles(dt);
-            TickRespawns(dt);
+            if(!inSanctuary)UpdateProjectiles(dt);
+            if(!inSanctuary)TickRespawns(dt);
             AnimateHeroVisual(dt);
-            Vector3 position=player.body.position;
-            float hy=cam.orthographicSize,hx=hy*cam.aspect;
-            cam.transform.position=new Vector3(
-                Mathf.Clamp(position.x,hx,Mathf.Max(hx,level.width-hx)),
-                Mathf.Clamp(position.y,hy,Mathf.Max(hy,level.height-hy)),-10);
+            UpdateWorldCamera();
         }
 
         bool NearSeal()

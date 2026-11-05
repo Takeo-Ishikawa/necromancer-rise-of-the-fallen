@@ -22,6 +22,7 @@ namespace Necromancer
 
         IEnumerator FallRotboar(Actor boar)
         {
+            StageInstance owner=current; // A transition can happen during the fall animation.
             LoadBoarFrames("Creatures/rotboar_fallen",boarFallFrames);
             var art=boar.boarArt;
             art.sortingOrder=2;
@@ -35,7 +36,7 @@ namespace Necromancer
             if(!boar.ally)
             {
                 boar.bindUntil=Time.time+3f;
-                current.fallenBoars.Add(boar);
+                owner.fallenBoars.Add(boar);
             }
             yield return new WaitForSeconds(3f);
             if(art!=null)Destroy(art.gameObject);

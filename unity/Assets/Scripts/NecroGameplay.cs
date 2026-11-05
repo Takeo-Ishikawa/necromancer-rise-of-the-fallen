@@ -79,6 +79,7 @@ namespace Necromancer
 
         bool Blocked(Vector2 point,float radius)
         {
+            if(inSanctuary)return SanctuaryBlocked(point,radius);
             if(point.x<radius || point.y<radius ||
                 point.x>level.width-radius || point.y>level.height-radius)return true;
             foreach(Obstacle obstacle in level.obstacles)
@@ -336,6 +337,7 @@ namespace Necromancer
 
         void Damage(Actor victim,float amount)
         {
+            if(inSanctuary)return;
             if(victim.hp<=0)return;
             if(victim==player)
             {
