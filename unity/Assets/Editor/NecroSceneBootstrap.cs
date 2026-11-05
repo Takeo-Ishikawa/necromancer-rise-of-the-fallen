@@ -48,15 +48,21 @@ namespace Necromancer.EditorTools
     {
         void OnPreprocessTexture()
         {
-            if(!assetPath.Contains("/Resources/Backgrounds/") &&
+            bool sanctuaryProp=assetPath.Contains("/Resources/SanctuaryProps/");
+            if(!sanctuaryProp &&
+               !assetPath.Contains("/Resources/Backgrounds/") &&
                !assetPath.Contains("/Resources/Sprites/"))return;
             TextureImporter t=(TextureImporter)assetImporter;
-            t.textureType=TextureImporterType.Sprite;
-            t.spriteImportMode=SpriteImportMode.Single;
+            // Props are loaded as Texture2D so a bottom-foot pivot can be
+            // created in code without altering the original source PNG.
+            t.textureType=sanctuaryProp ?
+                TextureImporterType.Default : TextureImporterType.Sprite;
+            if(!sanctuaryProp)t.spriteImportMode=SpriteImportMode.Single;
+            t.alphaIsTransparency=true;
             t.mipmapEnabled=false;
             t.filterMode=FilterMode.Bilinear;
             t.textureCompression=TextureImporterCompression.Compressed;
-            t.maxTextureSize=4096;
+            t.maxTextureSize=sanctuaryProp?2048:4096;
         }
     }
 }
