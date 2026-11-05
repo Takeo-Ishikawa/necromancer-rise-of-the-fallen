@@ -1,71 +1,66 @@
-# Câmara segura / refúgio
+# Câmara segura — cenário modular
 
-O jogo começa na câmara segura antes da Caverna Esquecida. Ao norte, a
-passagem oferece **ENTRAR NA CAVERNA**; no início da primeira região de combate
-há **VOLTAR AO REFÚGIO**. As duas transições exigem toque no botão.
+A câmara do refúgio começa antes da Caverna Esquecida. A necromante entra na
+caverna pela passagem ornamentada ao norte (botão **ENTRAR NA CAVERNA**) e
+retorna pela primeira região (botão **VOLTAR AO REFÚGIO**).
 
-Não há inimigos, respawn ou dano no refúgio. Servos ativos acompanham a
-necromante e são posicionados em áreas livres. Projéteis e ordens de combate
-são limpos ao mudar de cenário. Nenhum índice de fase nem formato de save é
-modificado.
+## Layout aprovado — arte independente
 
-## Arte separada em oito objetos
+O plano corresponde à composição visual aprovada: arco na parede norte;
+cama no canto superior esquerdo; fonte no superior direito; guarda-roupa na
+parede esquerda; altar à direita; ninho da montaria no canto inferior esquerdo.
+O centro fica intencionalmente desobstruído para personagem e servos. O sigilo
+turquesa fica sobreposto à passagem, e a esteira fica ao lado do altar.
 
-O fundo original permanece em
-`unity/Assets/Resources/Backgrounds/safe_chamber.png`.
+O fundo continua em `unity/Assets/Resources/Backgrounds/safe_chamber.png`.
+As oito imagens decorativas **não são incorporadas ao fundo**: o jogo instancia
+um GameObject independente por decoração (um contêiner sem escala, um SpriteRenderer
+de arte e, para os móveis, uma sombra de contato separada).
 
-A decoração é definida em
-`unity/Assets/Resources/Data/sanctuary_props.json`. Cada objeto recebe seu
-próprio GameObject, SpriteRenderer, tamanho, posição e (quando necessário)
-footprint de colisão. A arte deve existir exatamente neste local:
+| PNG em `unity/Assets/Resources/SanctuaryProps/` | Posição |
+| --- | --- |
+| `entrance_arch.png` | Arco e estandartes ao norte |
+| `protective_sigil.png` | Emblema sobre a passagem |
+| `bed.png` | Cama no superior esquerdo |
+| `fountain.png` | Fonte no superior direito |
+| `wardrobe.png` | Guarda-roupa na lateral esquerda |
+| `meditation_altar.png` | Altar e almofada na lateral direita |
+| `meditation_mat.png` | Esteira auxiliar junto ao altar |
+| `mount_nest.png` | Descanso da montaria no inferior esquerdo |
 
-| Recurso (Resources/SanctuaryProps) | Elemento | Função futura |
-| --- | --- | --- |
-| `entrance_arch.png` | Arco ornamentado de entrada | Transição existente |
-| `protective_sigil.png` | Sigilo turquesa no chão | Proteção estética |
-| `wardrobe.png` | Guarda-roupa | Equipamentos |
-| `bed.png` | Cama | Por enquanto decoração |
-| `meditation_altar.png` | Altar | Árvore de habilidades/atributos |
-| `meditation_mat.png` | Esteira | Meditação |
-| `fountain.png` | Fonte | Bônus temporário de dano/velocidade |
-| `mount_nest.png` | Ninho | Descanso de montaria/pet |
+Os PNGs enviados pelo usuário devem ser importados com esses nomes exatos.
+Se faltar alguma imagem, a decoração correspondente não aparece e sua colisão
+não é ativada. **Os arquivos binários ainda precisam ser enviados ao GitHub**;
+isso não impede a configuração da cena, mas impede vê-la completa na Unity
+até que as imagens sejam adicionadas.
 
-**IMPORTANTE:** os PNGs das oito decorações devem ser adicionados separadamente
-ao repositório. O código verifica cada recurso em runtime: se um PNG estiver
-ausente, o objeto não é renderizado **nem bloqueia a movimentação**.
+## Como ajustar um elemento
 
-A pasta pode ser criada arrastando os oito arquivos, com exatamente esses
-nomes, para `unity/Assets/Resources/SanctuaryProps/` dentro do projeto Git.
-Não é preciso alterar o JSON para que as imagens apareçam ao carregar a
-câmara. As imagens devem ter transparência; o importador de texturas da Unity
-preserva o canal alpha e usa compressão com mipmaps desativados.
+Edite `unity/Assets/Resources/Data/sanctuary_props.json`. O arquivo contém:
 
-## Ajustes de layout
-
-O mundo tem 16 × 24 unidades. Em `sanctuary_props.json`, cada objeto contém:
-
-- `x`, `y`: ponto de inserção (base inferior para móveis; centro para
-  camadas `floor`).
-- `width`, `height`: dimensões visuais em unidades do mundo.
-- `layer`: `wall` atrás da personagem, `floor` no chão ou `object`
-  com profundidade baseada em Y.
+- `x`, `y`: posição em unidades de mundo (largura 16, altura 24).
+- `width`, `height`: tamanho independente de cada arte.
+- `layer`: `wall` atrás de personagens, `wall_overlay` sobre o arco,
+  `floor` para os decalques, `object` com ordenação por Y.
 - `blockOffsetX`, `blockOffsetY`, `blockWidth`, `blockHeight`:
-  área de colisão aproximada, independente da arte. Campos omitidos significam
-  decoração atravessável.
+  footprint de colisão próximo à base, não a figura inteira.
+- `shadowWidth`, `shadowHeight`, `shadowOffsetX`, `shadowOffsetY`:
+  sombra suave opcional, independente da textura original.
 
-O caminho central até o arco permanece livre. No refúgio, a personagem e os
-servos usam SortingGroup por coordenada Y; ao voltar ao combate esse grupo é
-desabilitado, restaurando a lógica de renderização original.
+O código correspondente está em
+`unity/Assets/Scripts/NecroSanctuaryDecor.cs`. Não altere a imagem-base
+para mover móveis. Um ajuste deve envolver apenas o item no JSON.
 
-## Escopo
+## Gameplay e compatibilidade
 
-Somente ambientação, circulação e organização técnica. O guarda-roupa, a
-fonte, o altar e o ninho **ainda não concedem funcionalidades novas**.
+A personagem e os servos usam ordenação de sprites por Y no refúgio.
+Ao retornar ao combate, o sorting original é restaurado.
+A circulação central (x aproximadamente 6 a 10 unidades) continua aberta.
+A sala não possui inimigos, dano ou respawn. Transições limpam projéteis e
+ordens de combate, sem modificar saves nem índices das regiões existentes.
 
-Arquivos principais:
-- `unity/Assets/Scripts/NecroSanctuary.cs`: refúgio, limites, transição.
-- `unity/Assets/Scripts/NecroSanctuaryDecor.cs`: importação, objetos,
-  footprints e ordenação de profundidade.
-- `unity/Assets/Resources/Data/sanctuary_props.json`: composição editável.
+As mecânicas do guarda-roupa, da fonte, do altar e da montaria ficam para
+etapas futuras. Nenhuma funcionalidade foi ativada pela montagem decorativa.
 
-Compilação Android e validação no aparelho não executadas nesta alteração.
+A compilação Unity/Android e os testes no aparelho não foram executados;
+recomenda-se validar a renderização, colisões e importação dos PNGs localmente.

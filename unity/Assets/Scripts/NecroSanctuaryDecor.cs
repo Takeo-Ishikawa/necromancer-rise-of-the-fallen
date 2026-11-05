@@ -27,6 +27,8 @@ namespace Necromancer
             public float x, y, width, height;
             // Optional axis-aligned footprint relative to the sprite's bottom anchor.
             public float blockOffsetX, blockOffsetY, blockWidth, blockHeight;
+            // Optional ambient-occlusion footprint, separate from collision.
+            public float shadowWidth, shadowHeight, shadowOffsetX, shadowOffsetY;
         }
 
         class SanctuaryPropInstance
@@ -37,6 +39,7 @@ namespace Necromancer
 
         readonly List<SanctuaryPropInstance> sanctuaryProps =
             new List<SanctuaryPropInstance>();
+        static Sprite sanctuaryShadowSprite;
 
         static int SanctuaryDepth(float worldY)
         {
@@ -75,25 +78,76 @@ namespace Necromancer
                 texture.filterMode = FilterMode.Bilinear;
                 texture.wrapMode = TextureWrapMode.Clamp;
                 bool floor = prop.layer == "floor";
+                bool wallOverlay = prop.layer == "wall_overlay";
                 Sprite sprite = Sprite.Create(texture,
                     new Rect(0, 0, texture.width, texture.height),
-                    new Vector2(.5f, floor ? .5f : .05f),
+                    new Vector2(.5f, floor || wallOverlay ? .5f : .05f),
                     100f, 0, SpriteMeshType.FullRect);
                 sprite.name = "Safe chamber / " + prop.id;
 
+                // The unscaled container owns both visual and shadow, so moving
+                // it never distorts the prop or detaches its contact shadow.
                 GameObject instance = new GameObject("Decoration / " + prop.id);
                 instance.transform.SetParent(parent, false);
                 instance.transform.position = new Vector3(prop.x, prop.y, 0);
-                SpriteRenderer renderer = instance.AddComponent<SpriteRenderer>();
+                int order = floor ? -20 :
+                    prop.layer == "wall" ? -10 :
+                    wallOverlay ? -9 : SanctuaryDepth(prop.y);
+
+                if(prop.shadowWidth > 0f && prop.shadowHeight > 0f &&
+                   !floor && prop.layer != "wall" && !wallOverlay)
+                    CreateSanctuaryContactShadow(instance.transform, prop, order - 1);
+
+                GameObject artwork = new GameObject("Artwork / " + prop.asset);
+                artwork.transform.SetParent(instance.transform, false);
+                SpriteRenderer renderer = artwork.AddComponent<SpriteRenderer>();
                 renderer.sprite = sprite;
-                renderer.sortingOrder =
-                    floor ? -20 : prop.layer == "wall" ? -10 : SanctuaryDepth(prop.y);
+                renderer.sortingOrder = order;
                 Fit(renderer, prop.width, prop.height);
 
                 sanctuaryProps.Add(new SanctuaryPropInstance {
                     definition = prop, renderer = renderer
                 });
             }
+        }
+
+        static Sprite SanctuaryContactShadow()
+        {
+            if(sanctuaryShadowSprite != null)return sanctuaryShadowSprite;
+            const int width = 128, height = 64;
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            tex.filterMode = FilterMode.Bilinear;
+            tex.wrapMode = TextureWrapMode.Clamp;
+            Color[] pixels = new Color[width * height];
+            for(int y = 0; y < height; y++)
+            for(int x = 0; x < width; x++)
+            {
+                float dx = (x - (width - 1) * .5f) / (width * .5f);
+                float dy = (y - (height - 1) * .5f) / (height * .5f);
+                float falloff = Mathf.Clamp01(1f - Mathf.Sqrt(dx*dx + dy*dy));
+                pixels[y * width + x] =
+                    new Color(.13f, .09f, .12f, .38f * falloff * falloff);
+            }
+            tex.SetPixels(pixels);
+            tex.Apply();
+            sanctuaryShadowSprite = Sprite.Create(tex,
+                new Rect(0, 0, width, height),
+                new Vector2(.5f, .5f), 100f, 0, SpriteMeshType.FullRect);
+            sanctuaryShadowSprite.name = "Safe chamber / soft contact shadow";
+            return sanctuaryShadowSprite;
+        }
+
+        static void CreateSanctuaryContactShadow(Transform parent,
+            SanctuaryProp prop, int order)
+        {
+            GameObject obj = new GameObject("Soft contact shadow");
+            obj.transform.SetParent(parent, false);
+            obj.transform.localPosition =
+                new Vector3(prop.shadowOffsetX, prop.shadowOffsetY, 0);
+            SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
+            renderer.sprite = SanctuaryContactShadow();
+            renderer.sortingOrder = order;
+            Fit(renderer, prop.shadowWidth, prop.shadowHeight);
         }
 
         bool SanctuaryDecorationBlocked(Vector2 point, float radius)
