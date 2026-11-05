@@ -44,7 +44,7 @@ namespace Necromancer
             body.transform.localScale=new Vector3(1/size.x,1/size.y,1);
             body.transform.localPosition=new Vector3(0,-.52f/size.y,0);
             witchArtRenderer=body.AddComponent<SpriteRenderer>();
-            witchArtRenderer.sortingOrder=root.sortingOrder;
+            witchArtRenderer.sortingOrder=19; // Above creatures (12–15), below the spectral shot (20).
             witchArtRenderer.sprite=heroSprites[24];
 
             var shadow=Visual("Soft contact shadow",player.body.position,

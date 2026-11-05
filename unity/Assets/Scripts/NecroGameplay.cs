@@ -115,6 +115,37 @@ namespace Necromancer
             return null;
         }
 
+        const float PushSpeedFactor=.62f;
+        readonly List<Actor> pushedBodies=new List<Actor>();
+
+        void CollectPushContacts(Actor mover,Vector2 from,Vector2 to,List<Actor> group)
+        {
+            foreach(Actor other in group)
+                if(OverlapsActor(mover,other,from,to) && !pushedBodies.Contains(other))
+                    pushedBodies.Add(other);
+        }
+
+        bool TryPushStep(Vector2 from,Vector2 step)
+        {
+            Vector2 next=from+step;
+            if(Blocked(next,player.radius))return false;
+            pushedBodies.Clear();
+            CollectPushContacts(player,from,next,servants);
+            CollectPushContacts(player,from,next,current.enemies);
+            // Check the entire chain before displacing any creature.
+            for(int i=0;i<pushedBodies.Count;i++)
+            {
+                Actor body=pushedBodies[i];
+                Vector2 pos=body.body.position;
+                Vector2 dest=pos+step;
+                if(Blocked(dest,body.radius))return false;
+                CollectPushContacts(body,pos,dest,servants);
+                CollectPushContacts(body,pos,dest,current.enemies);
+            }
+            foreach(Actor body in pushedBodies)body.body.position+=(Vector3)step;
+            return true;
+        }
+
         Actor Move(Actor actor,Vector2 displacement,bool slide=true)
         {
             Vector2 at=actor.body.position;
@@ -127,6 +158,8 @@ namespace Necromancer
                 Actor hit=ActorAt(actor,at,next);
                 bool wall=Blocked(next,actor.radius);
                 if(hit==null && !wall)at=next;
+                else if(actor==player && hit!=null && TryPushStep(at,step*PushSpeedFactor))
+                    at+=step*PushSpeedFactor;
                 else
                 {
                     contact=hit;
