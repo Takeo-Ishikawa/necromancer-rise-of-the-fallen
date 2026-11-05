@@ -176,6 +176,7 @@ namespace Necromancer
         {
             if(index<0 || index>=levels.Length)return;
             if(current!=null)current.root.SetActive(false);
+            if(inSanctuary)RestoreCombatActorDepth();
             inSanctuary=false;
             ResetTravelCombat();
             stage=index;
