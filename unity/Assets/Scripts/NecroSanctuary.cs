@@ -21,6 +21,7 @@ namespace Necromancer
                     new Vector2(sanctuaryLevel.width/2,sanctuaryLevel.height/2),
                     NecroArt.Environment(sanctuaryLevel.background),-50,sanctuary.root.transform);
                 FitGround(sanctuary.backdrop,sanctuaryLevel);
+                BuildSanctuaryDecorations(sanctuary.root.transform);
             }
             if(current!=null)current.root.SetActive(false);
             inSanctuary=true;
@@ -30,6 +31,7 @@ namespace Necromancer
             ResetTravelCombat();
             player.body.position=NecroLevels.At(level,level.startX,level.startY);
             PlaceTravelCompanions();
+            UpdateSanctuaryActorDepth();
             touchMove=Vector2.zero;
             joystickFingerId=-1;
             UpdateWorldCamera();
@@ -81,7 +83,8 @@ namespace Necromancer
             if(p.y-radius<1.4f || p.y+radius>21f)return true;
             float inset=p.y<4f?Mathf.Lerp(2.2f,1.4f,(p.y-1.4f)/2.6f):1.4f;
             if(p.y>17.2f)inset=Mathf.Lerp(1.4f,6.3f,Mathf.Clamp01((p.y-17.2f)/1.4f));
-            return p.x-radius<inset || p.x+radius>level.width-inset;
+            if(p.x-radius<inset || p.x+radius>level.width-inset)return true;
+            return SanctuaryDecorationBlocked(p,radius);
         }
 
         bool SanctuaryTravelAvailable()
