@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "notes": "Positions use 16 x 24 sanctuary world units. Props are independent PNGs in Resources/SanctuaryProps; sprites are bottom anchored except floor decals.",
+  "props": [
+    {
+      "id": "entrance_arch",
+      "asset": "entrance_arch",
+      "layer": "wall",
+      "x": 8,
+      "y": 17.7,
+      "width": 8,
+      "height": 5.15
+    },
+    {
+      "id": "protective_sigil",
+      "asset": "protective_sigil",
+      "layer": "floor",
+      "x": 8,
+      "y": 15.5,
+      "width": 4.5,
+      "height": 2.25
+    },
+    {
+      "id": "wardrobe",
+      "asset": "wardrobe",
+      "layer": "object",
+      "x": 3.35,
+      "y": 13.45,
+      "width": 3.65,
+      "height": 4.95,
+      "blockOffsetX": 0,
+      "blockOffsetY": 0.65,
+      "blockWidth": 2.55,
+      "blockHeight": 1.3
+    },
+    {
+      "id": "bed",
+      "asset": "bed",
+      "layer": "object",
+      "x": 4.25,
+      "y": 8.75,
+      "width": 5.15,
+      "height": 4.65,
+      "blockOffsetX": 0,
+      "blockOffsetY": 0.85,
+      "blockWidth": 3.9,
+      "blockHeight": 1.7
+    },
+    {
+      "id": "meditation_altar",
+      "asset": "meditation_altar",
+      "layer": "object",
+      "x": 12.05,
+      "y": 11.1,
+      "width": 4.6,
+      "height": 4.6,
+      "blockOffsetX": 0,
+      "blockOffsetY": 0.65,
+      "blockWidth": 3,
+      "blockHeight": 1.3
+    },
+    {
+      "id": "meditation_mat",
+      "asset": "meditation_mat",
+      "layer": "floor",
+      "x": 11.6,
+      "y": 8.45,
+      "width": 3.1,
+      "height": 1.95
+    },
+    {
+      "id": "fountain",
+      "asset": "fountain",
+      "layer": "object",
+      "x": 3.45,
+      "y": 4,
+      "width": 4.65,
+      "height": 3,
+      "blockOffsetX": 0,
+      "blockOffsetY": 1.05,
+      "blockWidth": 3.25,
+      "blockHeight": 1.6
+    },
+    {
+      "id": "mount_nest",
+      "asset": "mount_nest",
+      "layer": "object",
+      "x": 12.25,
+      "y": 3.75,
+      "width": 4.8,
+      "height": 3.3,
+      "blockOffsetX": 0,
+      "blockOffsetY": 0.85,
+      "blockWidth": 4.1,
+      "blockHeight": 1.6
+    }
+  ]
+}
