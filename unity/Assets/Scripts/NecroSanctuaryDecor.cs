@@ -184,7 +184,7 @@ namespace Necromancer
             return false;
         }
 
-        static void SetSanctuaryActorDepth(Actor actor, bool enabled)
+        void SetSanctuaryActorDepth(Actor actor, bool enabled)
         {
             if(actor == null || actor.body == null)return;
             SortingGroup group = actor.body.GetComponent<SortingGroup>();
