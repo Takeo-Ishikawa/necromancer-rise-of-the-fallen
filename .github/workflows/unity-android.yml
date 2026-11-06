@@ -58,6 +58,10 @@ jobs:
           buildName: necromancer-unity
           buildsPath: build
           versioning: Semantic
+      - name: Record APK size in workflow summary
+        run: |
+          echo "### APK Unity Android — tamanho real" >> "$GITHUB_STEP_SUMMARY"
+          find build -type f -name '*.apk' -printf '%p | %s bytes\\n' | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Publish separately-installable preview
         uses: actions/upload-artifact@v4
         with:

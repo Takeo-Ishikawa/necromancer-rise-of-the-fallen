@@ -328,6 +328,30 @@ assert spectral[24:26]==bytes([8,6]), "Heroine and projectile require explicit 8
 assert "Resources.Load<Texture2D>(" in hero_anim and "Heroine/spectral" in hero_anim
 assert "Staff spectral aura" not in hero_anim
 
+
+# 0.7.6 mobile asset budget/policy: keep obsolete art out of Resources.
+policy=(unity/"Assets/Editor/NecroSanctuaryImportSettings.cs").read_text()
+for token in ("TextureImporterFormat.ETC2_RGBA8",
+              "TextureImporterFormat.ETC2_RGB4",
+              "TextureImporterCompression.CompressedHQ",
+              "t.mipmapEnabled = false",
+              't.GetPlatformTextureSettings("Android")',
+              "android.maxTextureSize = 2048"):
+    assert token in policy, "Android texture policy missing: "+token
+for obsolete in ("safe_chamber.png", "safe_chamber_v2.jpg"):
+    assert not (unity/"Assets/Resources/Backgrounds"/obsolete).exists(), (
+        "Legacy sanctuary painting returned to Resources: "+obsolete)
+safe_data=json.loads((unity/"Assets/Resources/Data/sanctuary.json").read_text())
+assert safe_data["background"]=="safe_chamber_v3"
+assert (unity/"Assets/Resources/Backgrounds/safe_chamber_v3.jpg").is_file()
+layout=json.loads((unity/"Assets/Resources/Data/sanctuary_props.json").read_text())
+assert layout["version"]>=6
+assert len(layout["props"])>=8
+for prop in layout["props"]:
+    if prop["layer"]!="disabled":
+        asset=unity/"Assets/Resources/SanctuaryProps"/(prop["asset"]+".png")
+        assert asset.is_file(), "Missing active sanctuary sprite: "+str(asset)
+
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")

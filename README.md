@@ -51,3 +51,7 @@ Corrigida a origem minúscula que borrava a necromante na versão anterior: agor
 ### 0.6.5c — Caverna ilustrada e interface compacta
 
 A primeira etapa de recursos gráficos estáticos PNG foi adicionada ao Unity: chão em escala nativa, rochas e cristais, HUD mais enxuta e sombras/halo da necromante. A URP ainda não foi ativada. [Implementação e testes](unity/README.md).
+
+### Padrão de otimização mobile (0.7.6)
+
+Antes de adicionar novos cenários, monstros, efeitos ou sprites, consultar o [guia permanente de recursos e otimização Android](docs/PADRAO_OTIMIZACAO_ANDROID.md). O projeto aplica compressão ETC2 no refúgio e impede que fundos antigos voltem à pasta `Resources` por meio dos testes automáticos.

@@ -1,6 +1,6 @@
 {
   "version": 6,
-  "notes": "HD sprites; original background includes entrance arch so standalone entrance_arch is disabled. Props and collisions remain modular. No-mipmap, uncompressed Android texture imports.",
+  "notes": "v7 mobile optimization: independent painted HD sprites, Android ETC2 (RGBA8 props / RGB4 background), bilinear, no mipmaps; arch remains disabled because entrance is painted on background. Collisions and positions unchanged.",
   "props": [
     {
       "id": "entrance_arch",
