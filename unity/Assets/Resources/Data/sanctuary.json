@@ -1,11 +1,11 @@
 {
   "id": "safe_chamber",
   "title": "Refúgio",
-  "background": "safe_chamber",
+  "background": "safe_chamber_v2",
   "width": 16,
   "height": 24,
   "startX": 8,
-  "startY": 12,
+  "startY": 5.55,
   "obstacles": [],
   "enemies": [],
   "resources": []

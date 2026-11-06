@@ -25,6 +25,9 @@ namespace Necromancer
             public string asset;
             public string layer; // wall, floor or object
             public float x, y, width, height;
+            // Optional sorting anchor distinct from the painting's actual base.
+            // Useful when a prop includes a walkable floor rug (meditation altar).
+            public float sortY;
             // Optional axis-aligned footprint relative to the sprite's bottom anchor.
             public float blockOffsetX, blockOffsetY, blockWidth, blockHeight;
             // Contact shadow in world units; each PNG has different transparent margins.
@@ -94,7 +97,7 @@ namespace Necromancer
                 instance.transform.position = new Vector3(prop.x, prop.y, 0);
                 int order = floor ? -20 :
                     prop.layer == "wall" ? -10 :
-                    wallOverlay ? -9 : SanctuaryDepth(prop.y);
+                    wallOverlay ? -9 : SanctuaryDepth(prop.sortY > 0f ? prop.sortY : prop.y);
 
                 if(prop.shadowWidth > 0f && prop.shadowHeight > 0f &&
                    !floor && prop.layer != "wall" && !wallOverlay)

@@ -1,79 +1,29 @@
-# Câmara segura — cenário modular
+# Câmara segura — arte modular v4 (novembro de 2026)
 
-A câmara do refúgio começa antes da Caverna Esquecida. A necromante entra na
-caverna pela passagem ornamentada ao norte (botão **ENTRAR NA CAVERNA**) e
-retorna pela primeira região (botão **VOLTAR AO REFÚGIO**).
+A câmara inicial usa agora uma pintura vazia original e móveis ilustrados independentes, de acordo com a referência aprovada. Está incorporada ao projeto Unity: **não é necessário importar um ZIP ou baixar assets adicionais para compilar**.
 
-## Layout aprovado — arte independente
+## Recursos incluídos
 
-O plano corresponde à composição visual aprovada: arco na parede norte;
-cama no canto superior esquerdo; fonte no superior direito; guarda-roupa na
-parede esquerda; altar à direita; ninho da montaria no canto inferior esquerdo.
-O centro fica intencionalmente desobstruído para personagem e servos. O sigilo
-turquesa fica sobreposto à passagem, e a esteira fica ao lado do altar.
+- `unity/Assets/Resources/Backgrounds/safe_chamber_v2.jpg`: piso, paredes, rochas e passagem natural, sem móveis nem personagem.
+- `unity/Assets/Resources/SanctuaryProps/entrance_arch.png`: arco de pedra vazado sobre a passagem.
+- `banner.png` (instanciado 2 vezes), `lantern.png` (instanciado 2 vezes), `bed.png`, `fountain.png`, `wardrobe.png`, `meditation_altar.png` e `mount_nest.png`: PNGs RGBA independentes.
+- `unity/Assets/Resources/Data/sanctuary.json`: mapa de 16 por 24 unidades, início próximo ao sul (8, 5.55), sem inimigos.
+- `unity/Assets/Resources/Data/sanctuary_props.json`: posições, dimensões, camadas, sombras e colisões ajustáveis.
 
-O fundo continua em `unity/Assets/Resources/Backgrounds/safe_chamber.png`.
-As oito imagens decorativas **não são incorporadas ao fundo**: o jogo instancia
-um GameObject independente por decoração (um contêiner sem escala, um SpriteRenderer
-de arte e, para os móveis, uma sombra de contato separada).
+Cada decoração possui um GameObject e SpriteRenderer próprios. As colisões ficam restritas às bases dos móveis. O altar inclui um tapete pintado: `sortY` altera apenas a profundidade de renderização, sem deslocar o sprite nem sua hitbox. As pedras, a cama, a fonte, o guarda-roupa e o ninho não ficam incorporados ao fundo.
 
-| PNG em `unity/Assets/Resources/SanctuaryProps/` | Posição |
-| --- | --- |
-| `entrance_arch.png` | Arco e estandartes ao norte |
-| `protective_sigil.png` | Emblema sobre a passagem |
-| `bed.png` | Cama no superior esquerdo |
-| `fountain.png` | Fonte no superior direito |
-| `wardrobe.png` | Guarda-roupa na lateral esquerda |
-| `meditation_altar.png` | Altar e almofada na lateral direita |
-| `meditation_mat.png` | Esteira auxiliar junto ao altar |
-| `mount_nest.png` | Descanso da montaria no inferior esquerdo |
+A câmera do refúgio utiliza um enquadramento mais amplo (`orthographicSize` até 11.7) sem modificar o zoom usado nas fases de combate.
 
-Os PNGs enviados pelo usuário devem ser importados com esses nomes exatos.
-Se faltar alguma imagem, a decoração correspondente não aparece e sua colisão
-não é ativada. **Os arquivos binários ainda precisam ser enviados ao GitHub**;
-isso não impede a configuração da cena, mas impede vê-la completa na Unity
-até que as imagens sejam adicionadas.
+## Como alterar a composição
 
-## Correção do contato com o piso
+Basta editar `sanctuary_props.json`: `x` e `y` são âncoras no mundo; `width`/`height` definem o tamanho do PNG; `layer` distingue piso, parede e móveis; `sortY` é uma âncora opcional para ordenação; `blockOffsetX`, `blockOffsetY`, `blockWidth`, `blockHeight` definem as áreas de colisão; e `shadowWidth`, `shadowHeight`, `shadowOffsetX`, `shadowOffsetY` definem a sombra suave.
 
-As sombras de contato são elipses suaves geradas pela Unity e associadas
-individualmente ao GameObject de cada móvel. No layout v3, `shadowOffsetX`
-e `shadowOffsetY` são calibrados em relação ao **contato visível** de cada
-PNG, não à borda do arquivo (que pode conter pixels transparentes). Isso
-corrige o deslocamento observado na prévia anterior, especialmente em
-guarda-roupa, fonte e ninho.
+## Teste recomendado
 
-As sombras não alteram posição, escala ou hitbox dos sprites originais.
-Se um móvel mudar de arte, revise sua sombra no JSON junto com o
-respectivo pivô. A esteira, o sigilo e o arco não recebem sombra artificial.
+1. Atualizar a branch `main` e abrir `unity/` no Unity 2022.3.62f2.
+2. Gerar o APK pelo fluxo Android do projeto (ou pelo workflow GitHub Actions já existente).
+3. Validar que o fundo novo aparece, que os oito arquivos PNG carregam sem mensagens `Safe chamber sprite missing`, e que os dois estandartes e as duas lanternas estão presentes.
+4. Conferir aproximação/oclusão em cada móvel, movimentação dos servos, colisão junto ao altar e ao ninho, entrada ao norte e retorno do estágio zero.
+5. Confirmar que combate, saves e fases anteriores permanecem inalterados.
 
-## Como ajustar um elemento
-
-Edite `unity/Assets/Resources/Data/sanctuary_props.json`. O arquivo contém:
-
-- `x`, `y`: posição em unidades de mundo (largura 16, altura 24).
-- `width`, `height`: tamanho independente de cada arte.
-- `layer`: `wall` atrás de personagens, `wall_overlay` sobre o arco,
-  `floor` para os decalques, `object` com ordenação por Y.
-- `blockOffsetX`, `blockOffsetY`, `blockWidth`, `blockHeight`:
-  footprint de colisão próximo à base, não a figura inteira.
-- `shadowWidth`, `shadowHeight`, `shadowOffsetX`, `shadowOffsetY`:
-  sombra suave opcional, independente da textura original.
-
-O código correspondente está em
-`unity/Assets/Scripts/NecroSanctuaryDecor.cs`. Não altere a imagem-base
-para mover móveis. Um ajuste deve envolver apenas o item no JSON.
-
-## Gameplay e compatibilidade
-
-A personagem e os servos usam ordenação de sprites por Y no refúgio.
-Ao retornar ao combate, o sorting original é restaurado.
-A circulação central (x aproximadamente 6 a 10 unidades) continua aberta.
-A sala não possui inimigos, dano ou respawn. Transições limpam projéteis e
-ordens de combate, sem modificar saves nem índices das regiões existentes.
-
-As mecânicas do guarda-roupa, da fonte, do altar e da montaria ficam para
-etapas futuras. Nenhuma funcionalidade foi ativada pela montagem decorativa.
-
-A compilação Unity/Android e os testes no aparelho não foram executados;
-recomenda-se validar a renderização, colisões e importação dos PNGs localmente.
+Os sprites são uma primeira versão ilustrada extraída de uma prancha de conceitos; as proporções podem ser refinadas depois do teste em aparelho, sem reescrever o código. A compilação e os testes Android ainda não foram executados nesta sessão.

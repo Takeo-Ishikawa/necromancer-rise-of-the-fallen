@@ -121,7 +121,10 @@ namespace Necromancer
 
         void UpdateWorldCamera()
         {
-            float hy=Mathf.Min(5.6f,level.height/2,level.width/(2*cam.aspect));
+            // The refuge is a composed room, not a close-quarters combat arena.
+            // On portrait phones show most of the chamber at once; combat remains zoomed in.
+            float targetSize=inSanctuary?11.7f:5.6f;
+            float hy=Mathf.Min(targetSize,level.height/2,level.width/(2*cam.aspect));
             cam.orthographicSize=hy;
             float hx=hy*cam.aspect;
             Vector3 p=player.body.position;
