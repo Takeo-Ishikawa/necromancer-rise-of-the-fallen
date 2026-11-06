@@ -73,6 +73,7 @@ namespace Necromancer
                 if(prop == null || string.IsNullOrEmpty(prop.id) ||
                    string.IsNullOrEmpty(prop.asset) ||
                    prop.width <= 0 || prop.height <= 0)continue;
+                if(prop.layer == "disabled")continue;
 
                 Texture2D texture =
                     Resources.Load<Texture2D>("SanctuaryProps/" + prop.asset);

@@ -1,27 +1,9 @@
-# Câmara segura — ajuste de proporções, oclusão e colisões (v5)
+# Câmara segura HD modular v6 — 2026-11-06
 
-Esta revisão corrige a diferença de escala entre a protagonista e os móveis e evita que ela atravesse visualmente os obstáculos. A câmara continua modular e todas as artes anteriores permanecem independentes.
+A nova arte do refúgio está integrada na Unity com um fundo 1024×1536 (`Assets/Resources/Backgrounds/safe_chamber_v3.jpg`) e oito sprites RGBA independentes (`SanctuaryProps/`: `bed`, `wardrobe`, `fountain`, `meditation_altar`, `mount_nest`, `entrance_arch`, `banner`, `lantern`). O tamanho dos PNGs finais vai até aproximadamente 1350 pixels no maior eixo. Os arquivos são PNGs de paleta otimizada, com transparência, não miniaturas para esticar.
 
-## Alterações
+A passagem de pedra já está pintada no fundo. Por isso o `entrance_arch` é guardado como asset separado, mas marcado como `disabled` no JSON para evitar um arco duplicado. Estão ativos cama à esquerda ao norte, fonte à direita, armário à esquerda, altar à direita e ninho no canto inferior esquerdo, com centro livre. As posições são editáveis em `sanctuary_props.json`.
 
-- A protagonista aparece a **1,9×** do tamanho usado em combate **apenas dentro do refúgio**. Não altera velocidade, raio de colisão, atributos, animações ou progressão. Ao entrar na caverna, a escala original é restaurada.
-- A ordenação por profundidade da protagonista considera o **ponto visual dos pés**, 0,52 unidade abaixo da posição lógica do ator. Os servos usam correção menor, de 0,30 unidade.
-- Colisões agora bloqueiam a área ocupada **pelos móveis e rochas representadas**, não somente uma faixa fina no rodapé do desenho: armário alto, cama e altar têm volumes retangulares; fonte e ninho têm volumes elípticos. O tapete do altar permanece acessível pela frente.
-- A posição, escala, colisor e ordenação de cada móvel continuam configuráveis em `unity/Assets/Resources/Data/sanctuary_props.json`. O campo opcional `blockShape` aceita `box` (padrão) ou `ellipse`.
-- Fundo, entrada norte, servos, combate nas cavernas e salvamentos não foram modificados.
+O novo `Assets/Editor/NecroSanctuaryImportSettings.cs` aplica bilinear com `Clamp`, sem mipmaps, sem compressão de textura no Android, sRGB e limite de 2048 px em Android. Texturas sem compressão usam mais memória que ASTC; testar desempenho em aparelhos mais modestos.
 
-## Geometria e enquadramento
-
-O mapa segue **16 × 24 unidades** com início em (8, 5.55). As zonas de bloqueio foram revisadas contra o PNG efetivamente desenhado e verificados, por simulação de ocupação, os caminhos entre o centro inicial e a saída em (8, 18.6).
-
-A câmera permanece mais aberta no refúgio (ortographicSize de até 11.7); a escala adicional da protagonista compensa a distância sem mudar o zoom de combate.
-
-## Conferência no aparelho
-
-1. Em cada canto do mapa, aproximar-se da cama, fonte, guarda-roupa, altar e ninho por frente e pelas laterais: a protagonista deve parar antes das áreas sólidas e não atravessar os objetos.
-2. Observar os pés e o ponto de contato com o chão. A personagem deve ficar à frente dos móveis quando caminha em primeiro plano e atrás somente quando fisicamente mais distante, fora da área bloqueada.
-3. Confirmar que ainda é possível caminhar pelo centro até a saída norte.
-4. Entrar na caverna e conferir que a protagonista volta à **escala original**.
-5. Verificar servos e retorno ao refúgio.
-
-**Validação:** a geometria e os caminhos foram checados por simulação, mas ainda é necessário compilar e verificar os sprites e movimento na Unity/Android.
+A correção v5 de proporções, ordem de sprites por pés e colisões independentes foi preservada. Compilação e teste Android pendentes: validar nitidez, ausência de arco duplicado, colisões ao redor dos móveis, movimentação até a saída e retorno do zoom em combate.
