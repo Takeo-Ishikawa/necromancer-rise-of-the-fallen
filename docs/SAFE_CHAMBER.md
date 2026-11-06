@@ -1,29 +1,27 @@
-# Câmara segura — arte modular v4 (novembro de 2026)
+# Câmara segura — ajuste de proporções, oclusão e colisões (v5)
 
-A câmara inicial usa agora uma pintura vazia original e móveis ilustrados independentes, de acordo com a referência aprovada. Está incorporada ao projeto Unity: **não é necessário importar um ZIP ou baixar assets adicionais para compilar**.
+Esta revisão corrige a diferença de escala entre a protagonista e os móveis e evita que ela atravesse visualmente os obstáculos. A câmara continua modular e todas as artes anteriores permanecem independentes.
 
-## Recursos incluídos
+## Alterações
 
-- `unity/Assets/Resources/Backgrounds/safe_chamber_v2.jpg`: piso, paredes, rochas e passagem natural, sem móveis nem personagem.
-- `unity/Assets/Resources/SanctuaryProps/entrance_arch.png`: arco de pedra vazado sobre a passagem.
-- `banner.png` (instanciado 2 vezes), `lantern.png` (instanciado 2 vezes), `bed.png`, `fountain.png`, `wardrobe.png`, `meditation_altar.png` e `mount_nest.png`: PNGs RGBA independentes.
-- `unity/Assets/Resources/Data/sanctuary.json`: mapa de 16 por 24 unidades, início próximo ao sul (8, 5.55), sem inimigos.
-- `unity/Assets/Resources/Data/sanctuary_props.json`: posições, dimensões, camadas, sombras e colisões ajustáveis.
+- A protagonista aparece a **1,9×** do tamanho usado em combate **apenas dentro do refúgio**. Não altera velocidade, raio de colisão, atributos, animações ou progressão. Ao entrar na caverna, a escala original é restaurada.
+- A ordenação por profundidade da protagonista considera o **ponto visual dos pés**, 0,52 unidade abaixo da posição lógica do ator. Os servos usam correção menor, de 0,30 unidade.
+- Colisões agora bloqueiam a área ocupada **pelos móveis e rochas representadas**, não somente uma faixa fina no rodapé do desenho: armário alto, cama e altar têm volumes retangulares; fonte e ninho têm volumes elípticos. O tapete do altar permanece acessível pela frente.
+- A posição, escala, colisor e ordenação de cada móvel continuam configuráveis em `unity/Assets/Resources/Data/sanctuary_props.json`. O campo opcional `blockShape` aceita `box` (padrão) ou `ellipse`.
+- Fundo, entrada norte, servos, combate nas cavernas e salvamentos não foram modificados.
 
-Cada decoração possui um GameObject e SpriteRenderer próprios. As colisões ficam restritas às bases dos móveis. O altar inclui um tapete pintado: `sortY` altera apenas a profundidade de renderização, sem deslocar o sprite nem sua hitbox. As pedras, a cama, a fonte, o guarda-roupa e o ninho não ficam incorporados ao fundo.
+## Geometria e enquadramento
 
-A câmera do refúgio utiliza um enquadramento mais amplo (`orthographicSize` até 11.7) sem modificar o zoom usado nas fases de combate.
+O mapa segue **16 × 24 unidades** com início em (8, 5.55). As zonas de bloqueio foram revisadas contra o PNG efetivamente desenhado e verificados, por simulação de ocupação, os caminhos entre o centro inicial e a saída em (8, 18.6).
 
-## Como alterar a composição
+A câmera permanece mais aberta no refúgio (ortographicSize de até 11.7); a escala adicional da protagonista compensa a distância sem mudar o zoom de combate.
 
-Basta editar `sanctuary_props.json`: `x` e `y` são âncoras no mundo; `width`/`height` definem o tamanho do PNG; `layer` distingue piso, parede e móveis; `sortY` é uma âncora opcional para ordenação; `blockOffsetX`, `blockOffsetY`, `blockWidth`, `blockHeight` definem as áreas de colisão; e `shadowWidth`, `shadowHeight`, `shadowOffsetX`, `shadowOffsetY` definem a sombra suave.
+## Conferência no aparelho
 
-## Teste recomendado
+1. Em cada canto do mapa, aproximar-se da cama, fonte, guarda-roupa, altar e ninho por frente e pelas laterais: a protagonista deve parar antes das áreas sólidas e não atravessar os objetos.
+2. Observar os pés e o ponto de contato com o chão. A personagem deve ficar à frente dos móveis quando caminha em primeiro plano e atrás somente quando fisicamente mais distante, fora da área bloqueada.
+3. Confirmar que ainda é possível caminhar pelo centro até a saída norte.
+4. Entrar na caverna e conferir que a protagonista volta à **escala original**.
+5. Verificar servos e retorno ao refúgio.
 
-1. Atualizar a branch `main` e abrir `unity/` no Unity 2022.3.62f2.
-2. Gerar o APK pelo fluxo Android do projeto (ou pelo workflow GitHub Actions já existente).
-3. Validar que o fundo novo aparece, que os oito arquivos PNG carregam sem mensagens `Safe chamber sprite missing`, e que os dois estandartes e as duas lanternas estão presentes.
-4. Conferir aproximação/oclusão em cada móvel, movimentação dos servos, colisão junto ao altar e ao ninho, entrada ao norte e retorno do estágio zero.
-5. Confirmar que combate, saves e fases anteriores permanecem inalterados.
-
-Os sprites são uma primeira versão ilustrada extraída de uma prancha de conceitos; as proporções podem ser refinadas depois do teste em aparelho, sem reescrever o código. A compilação e os testes Android ainda não foram executados nesta sessão.
+**Validação:** a geometria e os caminhos foram checados por simulação, mas ainda é necessário compilar e verificar os sprites e movimento na Unity/Android.

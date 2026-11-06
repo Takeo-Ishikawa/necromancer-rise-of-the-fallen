@@ -9,6 +9,9 @@ namespace Necromancer
         readonly Sprite[] heroSprites=new Sprite[32];
         SpriteRenderer witchArtRenderer;
         Sprite skullSprite;
+        const float HeroPaintedFootOffset = .52f;
+        const float SanctuaryHeroScale = 1.9f;
+        Vector3 heroineNormalScale;
         int walkDirection;
         float walkClock,heroineCastPulse,heroineStrikePulse,heroineRaisePulse,heroineHitPulse;
         bool heroineWalking,releasePending;
@@ -42,7 +45,8 @@ namespace Necromancer
             body.transform.SetParent(player.body,false);
             Vector3 size=player.body.lossyScale;
             body.transform.localScale=new Vector3(1/size.x,1/size.y,1);
-            body.transform.localPosition=new Vector3(0,-.52f/size.y,0);
+            body.transform.localPosition=new Vector3(0,-HeroPaintedFootOffset/size.y,0);
+            heroineNormalScale=body.transform.localScale;
             witchArtRenderer=body.AddComponent<SpriteRenderer>();
             witchArtRenderer.sortingOrder=19; // Above creatures (12–15), below the spectral shot (20).
             witchArtRenderer.sprite=heroSprites[24];
@@ -52,6 +56,16 @@ namespace Necromancer
             shadow.transform.localPosition=Vector3.zero;
             Fit(shadow,.70f,.19f);
             shadow.color=new Color(.16f,.13f,.23f,.43f);
+        }
+
+        // Sanctuary keeps the full portrait-room camera, so its painted
+        // protagonist needs a distinct *visual-only* scale. Never alter actor
+        // radius, speed or combat artwork; feet stay on the same floor anchor.
+        void SetSanctuaryHeroAppearance(bool sanctuaryEnabled)
+        {
+            if(witchArtRenderer==null)return;
+            witchArtRenderer.transform.localScale=heroineNormalScale*
+                (sanctuaryEnabled?SanctuaryHeroScale:1f);
         }
 
         static int DirectionFrom(Vector2 move)

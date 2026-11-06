@@ -28,8 +28,11 @@ namespace Necromancer
             // Optional sorting anchor distinct from the painting's actual base.
             // Useful when a prop includes a walkable floor rug (meditation altar).
             public float sortY;
-            // Optional axis-aligned footprint relative to the sprite's bottom anchor.
+            // Solid footprint in logical movement coordinates (world units).
+            // Box for tall furniture, ellipse for rounded obstacles such as the basin.
+            // Covers visible occupied space instead of only a thin line at its base.
             public float blockOffsetX, blockOffsetY, blockWidth, blockHeight;
+            public string blockShape; // "box" (default), "ellipse"
             // Contact shadow in world units; each PNG has different transparent margins.
             // Offset follows the painting's visible floor contact, not its texture edge.
             // This footprint is independent of collision and sprite transform.
@@ -164,9 +167,18 @@ namespace Necromancer
                 float cx = prop.x + prop.blockOffsetX;
                 float cy = prop.y + prop.blockOffsetY;
                 // Axis-aligned footprint; only furniture bases block movement.
-                if(Mathf.Abs(point.x-cx) < prop.blockWidth*.5f+radius &&
-                   Mathf.Abs(point.y-cy) < prop.blockHeight*.5f+radius)
-                    return true;
+                float halfWidth = prop.blockWidth * .5f + radius;
+                float halfHeight = prop.blockHeight * .5f + radius;
+                float dx = Mathf.Abs(point.x - cx);
+                float dy = Mathf.Abs(point.y - cy);
+                // Minkowski-style radius padding prevents actors' feet clipping into
+                // the artwork while preserving a natural rounded contour.
+                if(prop.blockShape == "ellipse")
+                {
+                    float nx = dx / halfWidth, ny = dy / halfHeight;
+                    if(nx * nx + ny * ny < 1f)return true;
+                }
+                else if(dx < halfWidth && dy < halfHeight)return true;
             }
             return false;
         }
@@ -182,7 +194,12 @@ namespace Necromancer
             }
             if(group == null)group = actor.body.gameObject.AddComponent<SortingGroup>();
             group.enabled = true;
-            group.sortingOrder = SanctuaryDepth(actor.body.position.y) + 2;
+            // The painted heroine is placed 0.52 world units below the logical
+            // actor origin; sorting on body.position causes wrong occlusion.
+            // Shadows/companions also sit slightly below their actor origins.
+            float paintedFootY = actor.body.position.y -
+                (actor == player ? HeroPaintedFootOffset : .30f);
+            group.sortingOrder = SanctuaryDepth(paintedFootY) + 2;
         }
 
         void UpdateSanctuaryActorDepth()
@@ -194,6 +211,7 @@ namespace Necromancer
 
         void RestoreCombatActorDepth()
         {
+            SetSanctuaryHeroAppearance(false);
             SetSanctuaryActorDepth(player, false);
             foreach(Actor servant in servants)SetSanctuaryActorDepth(servant, false);
         }

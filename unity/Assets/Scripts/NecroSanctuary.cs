@@ -30,6 +30,7 @@ namespace Necromancer
             current.root.SetActive(true);
             ResetTravelCombat();
             player.body.position=NecroLevels.At(level,level.startX,level.startY);
+            SetSanctuaryHeroAppearance(true);
             PlaceTravelCompanions();
             UpdateSanctuaryActorDepth();
             touchMove=Vector2.zero;

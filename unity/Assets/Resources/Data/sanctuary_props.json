@@ -1,12 +1,12 @@
 {
-  "version": 4,
-  "notes": "16x24 world units. All painted objects remain separate transparent sprites. x/y are anchors (pivots at bottom 0.05 except wall_overlay); sortY overrides visual depth for composite furniture with rugs. Floor footprint only blocks actual furniture, not carpets.",
+  "version": 5,
+  "notes": "v5: independent transparent sprites. Each solid zone corresponds to painted occupied space (box or ellipse) in logical actor coordinates. Character sorts by painted foot position; the heroine has a reversible sanctuary-only visual scale. All world coordinates and footprints remain editable.",
   "props": [
     {
       "id": "entrance_arch",
       "asset": "entrance_arch",
       "layer": "wall",
-      "x": 8.0,
+      "x": 8,
       "y": 19.1,
       "width": 7.15,
       "height": 5.2
@@ -55,31 +55,33 @@
       "y": 16.5,
       "width": 5.15,
       "height": 4.7,
-      "blockOffsetX": 0.05,
-      "blockOffsetY": 0.36,
-      "blockWidth": 3.85,
-      "blockHeight": 1.12,
+      "blockOffsetX": 0.1,
+      "blockOffsetY": 1.5,
+      "blockWidth": 4.25,
+      "blockHeight": 2.2,
       "shadowWidth": 3.95,
       "shadowHeight": 0.63,
       "shadowOffsetX": 0.12,
-      "shadowOffsetY": 0.22
+      "shadowOffsetY": 0.22,
+      "blockShape": "box"
     },
     {
       "id": "fountain",
       "asset": "fountain",
       "layer": "object",
       "x": 13.2,
-      "y": 15.0,
+      "y": 15,
       "width": 5.2,
       "height": 4.35,
       "blockOffsetX": 0,
-      "blockOffsetY": 0.43,
-      "blockWidth": 4.3,
-      "blockHeight": 1.32,
+      "blockOffsetY": 1.85,
+      "blockWidth": 4.55,
+      "blockHeight": 3.5,
       "shadowWidth": 4.3,
       "shadowHeight": 0.7,
       "shadowOffsetX": 0,
-      "shadowOffsetY": 0.25
+      "shadowOffsetY": 0.25,
+      "blockShape": "ellipse"
     },
     {
       "id": "wardrobe",
@@ -90,13 +92,14 @@
       "width": 4.28,
       "height": 5.35,
       "blockOffsetX": 0,
-      "blockOffsetY": 0.32,
-      "blockWidth": 2.6,
-      "blockHeight": 0.88,
+      "blockOffsetY": 2.33,
+      "blockWidth": 3.9,
+      "blockHeight": 5.55,
       "shadowWidth": 3.1,
       "shadowHeight": 0.65,
       "shadowOffsetX": 0,
-      "shadowOffsetY": 0.18
+      "shadowOffsetY": 0.18,
+      "blockShape": "box"
     },
     {
       "id": "meditation_altar",
@@ -108,30 +111,32 @@
       "width": 5.05,
       "height": 5.8,
       "blockOffsetX": 0.35,
-      "blockOffsetY": 2.0,
-      "blockWidth": 2.45,
-      "blockHeight": 0.96,
+      "blockOffsetY": 3.1,
+      "blockWidth": 3.3,
+      "blockHeight": 3.4,
       "shadowWidth": 2.4,
       "shadowHeight": 0.55,
       "shadowOffsetX": 0.37,
-      "shadowOffsetY": 1.8
+      "shadowOffsetY": 1.8,
+      "blockShape": "box"
     },
     {
       "id": "mount_nest",
       "asset": "mount_nest",
       "layer": "object",
-      "x": 3.0,
+      "x": 3,
       "y": 2.05,
       "width": 5.88,
       "height": 4.1,
-      "blockOffsetX": -0.2,
-      "blockOffsetY": 0.46,
-      "blockWidth": 4.5,
-      "blockHeight": 1.14,
+      "blockOffsetX": -0.1,
+      "blockOffsetY": 2.1,
+      "blockWidth": 5.25,
+      "blockHeight": 3.35,
       "shadowWidth": 4.55,
       "shadowHeight": 0.72,
       "shadowOffsetX": -0.13,
-      "shadowOffsetY": 0.26
+      "shadowOffsetY": 0.26,
+      "blockShape": "ellipse"
     }
   ]
 }
