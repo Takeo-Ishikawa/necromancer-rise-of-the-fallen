@@ -97,10 +97,16 @@ namespace Necromancer
         {
             // A button press/keyboard command must be checked again at dispatch
             // time to stop remote activation or duplicate taps.
-            if(station == null || !inSanctuary || inventoryOpen || gameOver ||
+            if(station == null || !inSanctuary || inventoryOpen ||
+                wardrobeOpen || gameOver ||
                 NearbySanctuaryStation() != station ||
                 StationCooldownRemaining(station) > 0f)return;
 
+            if(station.kind == "wardrobe")
+            {
+                OpenSanctuaryWardrobe();
+                return;
+            }
             if(station.kind != "fountain_buff")
             {
                 Debug.LogWarning("Unknown sanctuary station kind: " + station.kind);
@@ -157,7 +163,7 @@ namespace Necromancer
             }
 
             SanctuaryStation station = NearbySanctuaryStation();
-            if(station == null || inventoryOpen)return;
+            if(station == null || inventoryOpen || wardrobeOpen)return;
             float cooldown = StationCooldownRemaining(station);
             bool active = station.kind == "fountain_buff" && remaining > 0f;
             string caption = active ? "BENCAO ATIVA" :
@@ -166,6 +172,7 @@ namespace Necromancer
             Rect button = SanctuaryInteractionButtonRect(scale);
             GUI.Label(new Rect(button.x - 2f, button.y - 27f,
                     button.width + 4f, 24f),
+                station.kind == "wardrobe" ? "GUARDA-ROUPA  |  EQUIPAMENTOS" :
                 "FONTE ARCANA  |  +25% DANO  +20% VELOCIDADE", smallStyle);
             GUI.enabled = !active && cooldown <= 0f && !gameOver;
             if(GUI.Button(button, caption, buttonStyle))

@@ -182,8 +182,14 @@ namespace Necromancer
 
         bool SaveProgress()
         {
-            if(inSanctuary){SaveCompanions();return true;}
             if(restoring || player==null || current==null || gameOver)return false;
+            // The wardrobe can permanently improve gear while inside the refuge.
+            // Save a valid combat checkpoint instead of discarding those changes.
+            // Preserve saved stage indices (sanctuary is not a numbered combat stage).
+            if(inSanctuary)SaveCompanions();
+            Vector2 checkpoint = inSanctuary
+                ? NecroLevels.At(levels[stage],levels[stage].startX,levels[stage].startY)
+                : (Vector2)player.body.position;
             NecroSaveData save=new NecroSaveData {
                 version=NecroSaveStore.Version,
                 stage=stage,level=playerLevel,experience=experience,
@@ -192,7 +198,7 @@ namespace Necromancer
                 lifeRitual=lifeRitual,vaultRitual=vaultRitual,spiritRitual=spiritRitual,
                 spellUnlocked=spellUnlocked,huntOrder=huntOrder,completed=completed,
                 hp=player.hp,maxHp=player.maxHp,
-                playerX=player.body.position.x,playerY=player.body.position.y
+                playerX=checkpoint.x,playerY=checkpoint.y
             };
             List<string> kinds=new List<string>(speciesRanks.Keys);
             kinds.Sort(StringComparer.Ordinal);

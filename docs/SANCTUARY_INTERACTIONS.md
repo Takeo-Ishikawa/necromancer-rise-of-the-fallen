@@ -33,3 +33,12 @@ Para adicionar armário, altar ou outra estação: incluir registro com ID únic
 6. Validar que movimentos, combate, servos, câmera, colisões e imagens HD continuam corretos.
 
 A preview 0.8.0 usa o package com.takeo.necromancer.unity.preview080, separado da preview 0.7.5. A instalação e os efeitos exigem teste no Android após a compilação.
+
+
+## 0.8.1 — Guarda-roupa interativo
+
+Perto do guarda-roupa no lado esquerdo, o botão **ABRIR ARMARIO** abre uma janela modal com o foco arcano e o manto atuais. O painel mostra os bônus reais já utilizados pelo sistema de combate (foco: +5 dano corpo a corpo e +8 por projétil para cada grau; manto: +18 vida máxima por grau) e permite aprimorar cada item com fragmentos. Custo do foco: 8/14/20 fragmentos para graus 1/2/3; custo do manto: 10/16/22 fragmentos. Os níveis continuam limitados a 3 e continuam compatíveis com os equipamentos ganhos como drops. A melhoria do manto aumenta a vida máxima em 18 e restaura até 18 pontos de vida; não reseta a vida atual. O botão FECHAR encerra o painel sem perder os dados.
+
+O armário usa `NecroSanctuaryWardrobe.cs`, com interface desenhada em GUI e nenhuma imagem nova. O registro `wardrobe` vive em `sanctuary_interactions.json`, fora da hitbox do armário. Melhorias são registradas por `SaveProgress` mesmo quando a necromante está no refúgio; nessa situação o save usa o início do estágio de combate como checkpoint para não registrar posição inválida no mapa. A assinatura Android, o ID estável da preview e o incremento automático de versionCode são preservados.
+
+Testar: aproximar pela direita do guarda-roupa; abrir e fechar sem mover o personagem, custos e limites, bloqueio de upgrade sem cristais, retorno à caverna e reinício preservando os aprimoramentos. O visual de equipamento no personagem continua inalterado nesta etapa; troca visual de trajes exige sprites específicos posteriormente.

@@ -32,6 +32,7 @@ required = [
     "Assets/Editor/NecroVisualEditorCheck.cs",
     "Assets/Scripts/NecroCharacterAnimation.cs",
     "Assets/Scripts/NecroSanctuaryInteractions.cs",
+    "Assets/Scripts/NecroSanctuaryWardrobe.cs",
     "Assets/Resources/Data/sanctuary_interactions.json",
     "Assets/Resources/Sprites/necromante.png",
     "Assets/Scripts/NecroCrypt.cs",
@@ -213,7 +214,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.8.0\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.8.1\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -358,6 +359,11 @@ for prop in layout["props"]:
 station_json=json.loads((unity/"Assets/Resources/Data/sanctuary_interactions.json").read_text())
 fountains=[s for s in station_json["stations"] if s["kind"]=="fountain_buff"]
 assert len(fountains)==1
+wardrobes=[s for s in station_json["stations"] if s["kind"]=="wardrobe"]
+assert len(wardrobes)==1
+wardrobe=wardrobes[0]
+assert wardrobe["id"]=="wardrobe" and wardrobe["radius"]>0
+assert wardrobe["x"]>4.5 and wardrobe["y"]>9.5
 f=fountains[0]
 assert f["id"]=="fountain" and f["radius"]>0
 assert f["durationSeconds"]==45 and f["cooldownSeconds"]==120
@@ -413,6 +419,30 @@ gitignore=(root/".gitignore").read_text()
 assert 'unity/.android-build-settings.json' in gitignore
 assert 'unity/.android-preview.keystore' in gitignore
 assert 'unity/.android-release.keystore' in gitignore
+
+
+# 0.8.1: wardrobe upgrades reuse current equipped focus/mantle (no new art).
+wardrobe_source=(unity/"Assets/Scripts/NecroSanctuaryWardrobe.cs").read_text()
+for token in ("bool wardrobeOpen", "OpenSanctuaryWardrobe()",
+              "CloseSanctuaryWardrobe()", "DrawSanctuaryWardrobePanel(",
+              "UpgradeSanctuaryEquipment(", "FocusUpgradeCost(",
+              "MantleUpgradeCost(", "SaveProgress();",
+              "staffTier++;", "mantleTier++;",
+              "player.maxHp += 18f", "player.hp = Mathf.Min("):
+    assert token in wardrobe_source, "Missing wardrobe action: "+token
+assert '"Assets/Scripts/NecroSanctuaryWardrobe.cs"' in str(required)
+assert 'if(station.kind == "wardrobe")' in interactions
+assert 'OpenSanctuaryWardrobe();' in interactions
+assert 'station.kind == "wardrobe" ? "GUARDA-ROUPA' in interactions
+assert 'if(wardrobeOpen)' in ui
+assert 'DrawSanctuaryWardrobePanel(Screen.width/scale,Screen.height/scale);' in ui
+assert 'if(wardrobeOpen)' in core
+assert 'if(inSanctuary)SaveCompanions();' in crypt
+assert 'playerX=checkpoint.x,playerY=checkpoint.y' in crypt
+assert 'NecroLevels.At(levels[stage],levels[stage].startX,levels[stage].startY)' in crypt
+assert '"com.takeo.necromancer.unity.preview080"' in builder
+assert '10000 + previewBuildNumber' in builder
+assert 'LoadCiBuildSettings()' in builder
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "

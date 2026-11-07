@@ -12,3 +12,8 @@ A correção v5 de proporções, ordem de sprites por pés e colisões independe
 ## Interação da fonte — versão 0.8.0
 
 A fonte usa uma estação definida em Data/sanctuary_interactions.json, acessível por toque ou pela tecla E. A bênção concede +25% de dano da necromante e +20% de velocidade por 45 segundos, com recarga de 120 segundos contados da ativação. O buff acompanha a personagem à caverna, não se acumula e não é salvo. O halo reutiliza a arte procedural existente, sem adicionar imagens. Ver docs/SANCTUARY_INTERACTIONS.md.
+
+
+## Guarda-roupa 0.8.1
+
+Aproxime-se da lateral acessível do guarda-roupa à esquerda e pressione ABRIR ARMARIO (ou E no Editor). O painel permite consultar e aprimorar o foco arcano e o manto com fragmentos, utilizando as mesmas escalas de dano/vida dos equipamentos já coletáveis. Não adiciona sprites ou mudanças nos colliders. Consulte `docs/SANCTUARY_INTERACTIONS.md`.

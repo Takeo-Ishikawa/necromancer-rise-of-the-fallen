@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "notes": "Walkable interaction anchor at the front of the fountain, independent of furniture collision.",
+  "version": 2,
+  "notes": "Walkable interaction points kept outside furniture collision. Fountain buff + wardrobe gear upgrades; add future stations by JSON id/kind. No additional art resources.",
   "stations": [
     {
       "id": "fountain",
@@ -15,6 +15,20 @@
       "speedMultiplier": 1.2,
       "effectX": 13,
       "effectY": 15.15
+    },
+    {
+      "id": "wardrobe",
+      "kind": "wardrobe",
+      "label": "ABRIR ARMARIO",
+      "x": 5.12,
+      "y": 12.25,
+      "radius": 1.58,
+      "durationSeconds": 0,
+      "cooldownSeconds": 0,
+      "damageMultiplier": 1,
+      "speedMultiplier": 1,
+      "effectX": 0,
+      "effectY": 0
     }
   ]
 }

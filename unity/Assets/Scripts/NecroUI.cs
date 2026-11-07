@@ -152,9 +152,21 @@ namespace Necromancer
             EnsureHudArt();
             float scale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
             GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
+            if(wardrobeOpen)
+            {
+                DrawSanctuaryWardrobePanel(Screen.width/scale,Screen.height/scale);
+                return;
+            }
             if(DrawRoster(Screen.width/scale,Screen.height/scale))return;
             DrawSanctuaryNavigation(scale);
             DrawSanctuaryInteractionUi(scale);
+            // Opening the station consumes this GUI event. Do not draw gameplay
+            // controls underneath the modal or let their buttons consume taps.
+            if(wardrobeOpen)
+            {
+                DrawSanctuaryWardrobePanel(Screen.width/scale,Screen.height/scale);
+                return;
+            }
             if(pearl==null)pearl=Resources.Load<Texture2D>("HUD/pearl");
             Rect button=AttackRect(scale);
             if(!inSanctuary)DrawAction(button,false,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",

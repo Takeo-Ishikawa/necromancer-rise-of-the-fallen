@@ -247,6 +247,11 @@ namespace Necromancer
         void Update()
         {
             if(player==null || level==null || gameOver || inventoryOpen)return;
+            if(wardrobeOpen)
+            {
+                if(Input.GetKeyDown(KeyCode.Escape))CloseSanctuaryWardrobe();
+                return;
+            }
             float dt=Mathf.Min(.045f,Time.deltaTime);
             Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
             float hudScale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
