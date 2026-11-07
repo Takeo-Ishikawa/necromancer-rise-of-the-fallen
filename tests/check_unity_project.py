@@ -34,6 +34,7 @@ required = [
     "Assets/Scripts/NecroCharacterAnimation.cs",
     "Assets/Scripts/NecroSanctuaryInteractions.cs",
     "Assets/Scripts/NecroSanctuaryWardrobe.cs",
+    "Assets/Scripts/NecroSanctuaryMeditation.cs",
     "Assets/Resources/Data/sanctuary_interactions.json",
     "Assets/Resources/Sprites/necromante.png",
     "Assets/Scripts/NecroCrypt.cs",
@@ -215,7 +216,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.8.2\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.0\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -365,6 +366,12 @@ assert len(wardrobes)==1
 wardrobe=wardrobes[0]
 assert wardrobe["id"]=="wardrobe" and wardrobe["radius"]>0
 assert wardrobe["x"]>4.5 and wardrobe["y"]>9.5
+meditation_stations=[s for s in station_json["stations"] if s["kind"]=="meditation"]
+assert len(meditation_stations)==1
+altar=meditation_stations[0]
+assert altar["id"]=="meditation" and altar["radius"]>0
+assert 9.5<altar["x"]<12 and 7<altar["y"]<12
+assert abs(altar["x"]-13.67)>1.0, "Altar must be approached from outside furniture collision"
 f=fountains[0]
 assert f["id"]=="fountain" and f["radius"]>0
 assert f["durationSeconds"]==45 and f["cooldownSeconds"]==120
@@ -488,6 +495,37 @@ for token in ("public static void BuildWindows()", "NecroSceneBootstrap.Setup();
     assert token in win_builder, "Windows builder missing: "+token
 assert "AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64" in builder
 assert (root/"docs/COMPILACAO_ANDROID_WINDOWS.md").is_file()
+
+
+# 0.9.0: meditation station and real XP, permanent attributes and safe loading.
+meditation_source=(unity/"Assets/Scripts/NecroSanctuaryMeditation.cs").read_text()
+assert station_json["version"]>=3
+assert 'station.kind == "meditation"' in interactions
+assert 'OpenSanctuaryMeditation();' in interactions
+for token in ("RestoreMeditationAllocations(", "MeditationPointsAvailable()",
+              "AwardMeditationExperience(", "playerLevel++;",
+              "experience+=ExperienceValue(kind);", "vitalityPoints++",
+              "powerPoints++", "agilityPoints++", "SaveProgress();",
+              "DrawSanctuaryMeditationPanel(", "CloseSanctuaryMeditation()",
+              "WardrobeActionButton(", "WardrobeBackground",
+              "Mathf.Max(0,playerLevel-1-", "MeditationAttributeCap=12"):
+    assert token in meditation_source, "Meditation missing: "+token
+assert "if(!victim.ally)AwardMeditationExperience(victim.kind);" in gameplay
+assert "powerPoints*2" in gameplay and "powerPoints*4" in gameplay
+assert "(1f+agilityPoints*.06f)" in core
+assert "if(meditationOpen)" in core
+assert "RestoreSanctuaryProfile();" in core
+assert "if(meditationOpen)" in ui
+assert "DrawSanctuaryMeditationPanel(Screen.width/scale,Screen.height/scale);" in ui
+assert "RestoreSanctuaryProfile()" in crypt
+assert "vitalityPoints=vitalityPoints,powerPoints=powerPoints" in crypt
+assert "RestoreMeditationAllocations(saved);" in crypt
+assert "RestoreMeditationAllocations(save);" in crypt
+assert "public int vitalityPoints,powerPoints,agilityPoints;" in data
+assert "public const int Version=1;" in data
+assert 'PlayerSettings.bundleVersion = "0.9.0";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.0";' in win_builder
+assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "

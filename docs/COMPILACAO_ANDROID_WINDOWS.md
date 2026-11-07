@@ -36,3 +36,7 @@ A Unity não produz um único EXE independente: a pasta `_Data` e eventuais bibl
 Não adicionar gatilho `push` nos workflows de builds Unity sem autorização. Não misturar `StandaloneWindows64` e `Android` num workflow de matriz automática. Não modificar a assinatura, o package ID ou o versionCode do Android ao configurar Windows. Ao acrescentar uma nova plataforma, criar script de build separado em `unity/Assets/Editor` e uma distribuição com os arquivos necessários. Acompanhar falhas na aba **Actions** e manter `tests/check_unity_project.py` atualizado.
 
 O fluxo Windows ainda exige a primeira compilação de validação e teste no computador; compilar com sucesso não garante que a interface, os controles ou o salvamento estejam corretos em todos os dispositivos.
+
+## 0.9.0 e versões seguintes
+
+O painel de meditação e o sistema de atributos são compartilhados pelo build Windows e pelo Android. Ambas as plataformas continuam com workflows **manuais**; modificar scripts Unity não dispara automaticamente o build. O identificador e a assinatura da prévia Android permanecem estáveis, e o versionCode continua sendo incrementado pelo número da execução. Arquivos de save local do Windows e do Android são independentes.

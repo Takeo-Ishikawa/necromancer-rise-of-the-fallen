@@ -49,3 +49,18 @@ Testar: aproximar pela direita do guarda-roupa; abrir e fechar sem mover o perso
 Após testes em um aparelho Android, o painel estava transparente demais: o antigo `GUI.Box` utilizava o fundo translúcido do tema IMGUI padrão e não separava a interface do cenário da câmara. A versão 0.8.2 substitui esse fundo por um quadro roxo-acinzentado escuro de alpha 0,97, um véu discreto sobre o mundo, sombra externa e bordas claras. Cada equipamento agora ocupa um cartão independente de alpha 0,975; títulos, valores, descrição e botões têm contraste e hierarquia de leitura reforçados. Botões habilitados e desabilitados possuem superfícies próprias; o botão FECHAR é destacado e as áreas clicáveis continuam no mesmo painel modal. Toda a composição usa `FillUi`/`Texture2D.whiteTexture`, já existentes no projeto: nenhuma textura nova, animação ou efeito pesado foi introduzido. Custos, níveis, colisões, saves e identificação/assinatura de APK são preservados.
 
 **Validação recomendada:** abrir o guarda-roupa na câmara, conferir leitura com o cenário brilhante, verificar botões desativados com 0 fragmentos, aprimorar com fragmentos, fechar, caminhar e reabrir. O número visual muda para 0.8.2; o `versionCode` continua crescente pelo número da execução para atualizar a instalação anterior.
+
+
+## 0.9.0 — Altar de meditação e progressão de nível
+
+O altar de meditação, no canto inferior direito, possui agora a estação `meditation` com ponto alcançável **pela esquerda** (x=10,72; y=8,90; raio=1,62). Aproxime-se e pressione **MEDITAR** ou **E** no Windows. O painel modal usa os mesmos componentes opacos do guarda-roupa, sem sprites adicionais.
+
+Matar criaturas hostis concede XP uma única vez por morte, inclusive quando um servo aplica o golpe final. O limiar de experiência para cada nível é `28 + nível × 18`; cada nível adquirido (até 100) concede um ponto para distribuir. Os pontos disponíveis são derivados do nível e do total investido, impedindo valores duplicados no salvamento.
+
+Três atributos: **Vitalidade** concede +12 de vida máxima e recupera até 12 de vida; **Poder** concede +2 de dano corpo a corpo e +4 de dano do projétil por ponto (não afeta os servos); **Agilidade** concede +6% de velocidade de movimento por ponto, combinado multiplicativamente com o bônus temporário da fonte. Cada um comporta até 12 pontos; pontos excedentes ficam reservados para futuras habilidades. Não é possível gastar pontos que não existem, o botão FECHAR não consome recursos e a tecla Esc fecha o painel no Windows.
+
+### Compatibilidade e persistência
+
+O arquivo `necro-save-v1.json` continua na mesma versão, incluindo três campos **opcionais** `vitalityPoints`, `powerPoints` e `agilityPoints` (zerados automaticamente em saves antigos). Ao iniciar no refúgio, o jogo lê agora a experiência, o nível, os equipamentos, os atributos, a vida, a ânima, os rituais e os fragmentos do arquivo existente; o sistema de companheiros permanece em PlayerPrefs. O preview ainda começa no refúgio, sem recriar automaticamente os inimigos e as regiões guardadas no snapshot anterior. Essa restauração integral será uma evolução posterior.
+
+Testes: (1) matar criaturas e atingir o próximo nível; (2) voltar ao refúgio e abrir o altar; (3) conferir pontos restantes e bônus; (4) reiniciar e confirmar persistência dos investimentos; (5) testar cap de atributo, falta de pontos, voltar do altar, e interação com fonte/guarda-roupa. Android e Windows compartilham o sistema mas mantêm salvamentos locais separados. Os workflows de compilação seguem **manuais** e independentes.

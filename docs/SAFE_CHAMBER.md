@@ -17,3 +17,8 @@ A fonte usa uma estação definida em Data/sanctuary_interactions.json, acessív
 ## Guarda-roupa 0.8.1
 
 Aproxime-se da lateral acessível do guarda-roupa à esquerda e pressione ABRIR ARMARIO (ou E no Editor). O painel permite consultar e aprimorar o foco arcano e o manto com fragmentos, utilizando as mesmas escalas de dano/vida dos equipamentos já coletáveis. Não adiciona sprites ou mudanças nos colliders. Consulte `docs/SANCTUARY_INTERACTIONS.md`.
+
+
+## Altar de meditação (0.9.0)
+
+O altar inferior direito está interativo: aproxime-se pela esquerda e escolha MEDITAR. A experiência dos inimigos concede pontos por nível, distribuídos entre Vitalidade, Poder e Agilidade. Os bônus são permanentes e persistem em saves compatíveis com a versão anterior. Nenhuma nova textura foi adicionada. Veja `docs/SANCTUARY_INTERACTIONS.md`.
