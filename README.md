@@ -59,3 +59,7 @@ Antes de adicionar novos cenários, monstros, efeitos ou sprites, consultar o [g
 ### APK direto e atualização contínua
 
 As próximas previews Unity usam sempre o mesmo identificador Android e uma assinatura de testes permanente. O workflow publica o arquivo APK diretamente, sem ZIP. Para realizar a configuração inicial segura da chave de testes (apenas uma vez), siga [APK de teste atualizável](docs/APK_PREVIEW_ATUALIZAVEL.md). A versão antiga com assinatura temporária pode exigir uma única migração.
+
+### Compilações seletivas Windows/Android
+
+Agora você escolhe a plataforma na aba Actions: [Unity Android Preview APK](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/unity-android.yml) ou [Unity Windows x64 Preview](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/unity-windows.yml). **Ambos são manuais**, não executam no mesmo commit. Guia: [Compilação Android e Windows](docs/COMPILACAO_ANDROID_WINDOWS.md).

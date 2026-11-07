@@ -1,0 +1,78 @@
+name: Unity Windows x64 Preview
+
+# Manually requested only: developing for mobile should never build Windows.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: unity-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  windows-preview:
+    name: Unity 2022.3 Windows 64-bit
+    runs-on: ubuntu-latest
+    timeout-minutes: 85
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Unity project structure
+        run: python tests/check_unity_project.py
+
+      - name: Verify Unity license configured
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        run: |
+          if [ -z "$UNITY_LICENSE" ] && [ -z "$UNITY_SERIAL" ]; then
+            echo "::error::Unity license missing. Reuse existing UNITY_LICENSE or UNITY_SERIAL in repository secrets."
+            exit 1
+          fi
+
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+
+      - name: Unity Builder - Windows x64
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          projectPath: unity
+          buildMethod: Necromancer.EditorTools.NecromancerWindowsBuild.BuildWindows
+          targetPlatform: StandaloneWindows64
+          buildName: necromancer-windows
+          buildsPath: build
+          versioning: None
+
+      - name: Verify complete Windows player
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s build/StandaloneWindows64/necromancer-windows.exe
+          test -d build/StandaloneWindows64/necromancer-windows_Data
+          echo "### Necromancer Windows x64" >> "$GITHUB_STEP_SUMMARY"
+          find build/StandaloneWindows64 -maxdepth 1 -type f -printf '%f | %s bytes\n' >> "$GITHUB_STEP_SUMMARY"
+          echo "Download and extract the whole artifact before starting the .exe." >> "$GITHUB_STEP_SUMMARY"
+
+      # A Windows Unity player is a directory, not a portable standalone EXE.
+      # GitHub archives the folder so that required data and DLLs stay together.
+      - name: Publish Windows build (ZIP with EXE + Data)
+        uses: actions/upload-artifact@v4
+        with:
+          name: necromancer-windows-x64
+          path: build/StandaloneWindows64/
+          if-no-files-found: error
+          retention-days: 30

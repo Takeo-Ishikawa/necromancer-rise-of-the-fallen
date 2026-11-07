@@ -13,6 +13,7 @@ required = [
     "Packages/manifest.json",
     "Assets/Editor/NecroSceneBootstrap.cs",
     "Assets/Editor/NecromancerAndroidBuild.cs",
+    "Assets/Editor/NecromancerWindowsBuild.cs",
     "Assets/Scripts/NecroLevels.cs",
     "Assets/Scripts/NecroArt.cs",
     "Assets/Scripts/NecroPrototype.cs",
@@ -456,6 +457,37 @@ for token in ("WardrobeBackground", "new Color(.095f,.069f,.134f,.97f)",
 assert 'GUI.Box(panel,GUIContent.none)' not in wardrobe_source
 assert "Texture2D(" not in wardrobe_source
 assert "Resources.Load" not in wardrobe_source
+
+
+# Independent, on-demand Unity target builds (no unnecessary platform build).
+android_preview=(root/".github/workflows/unity-android.yml").read_text()
+windows_preview=(root/".github/workflows/unity-windows.yml").read_text()
+legacy_android=(root/".github/workflows/android.yml").read_text()
+assert "workflow_dispatch:" in android_preview
+assert "workflow_dispatch:" in windows_preview
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
+assert "targetPlatform: Android" in android_preview
+assert "targetPlatform: StandaloneWindows64" in windows_preview
+assert "NecromancerWindowsBuild.BuildWindows" in windows_preview
+assert "NecromancerAndroidBuild.BuildAndroid" in android_preview
+assert "build/StandaloneWindows64/necromancer-windows.exe" in windows_preview
+assert "build/StandaloneWindows64/necromancer-windows_Data" in windows_preview
+assert "necromancer-windows-x64" in windows_preview
+assert "path: build/StandaloneWindows64/" in windows_preview
+assert "path: build/Android/necromancer-unity.apk" in android_preview
+assert "archive: false" in android_preview
+assert "Unity project structure" not in windows_preview.split("name:",1)[0]
+assert "      - 'app/**'" in legacy_android
+assert "      - 'tests/com/**'" in legacy_android
+win_builder=(unity/"Assets/Editor/NecromancerWindowsBuild.cs").read_text()
+for token in ("public static void BuildWindows()", "NecroSceneBootstrap.Setup();",
+              "NamedBuildTarget.Standalone", "ScriptingImplementation.Mono2x",
+              "BuildTarget.StandaloneWindows64", "necromancer-windows.exe",
+              "BuildPipeline.BuildPlayer(options)", "BuildResult.Succeeded"):
+    assert token in win_builder, "Windows builder missing: "+token
+assert "AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64" in builder
+assert (root/"docs/COMPILACAO_ANDROID_WINDOWS.md").is_file()
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "

@@ -23,3 +23,7 @@ A implementacao Java/Canvas em `app/` continua disponivel para comparacao.
 ### Prévia contínua: APK sem ZIP
 
 A partir do novo padrão, o workflow `unity-android.yml` usa `actions/upload-artifact@v7` com `archive: false`, disponibilizando o APK diretamente. A assinatura é persistente e o versionCode cresce com cada execução. **Antes do primeiro build dessa modalidade, configure os dois Secrets de preview** conforme [APK de teste atualizável](APK_PREVIEW_ATUALIZAVEL.md). Não reinstale versões antigas sem antes considerar os salvamentos.
+
+### Fluxo independente por plataforma
+
+O Android Unity agora é compilado **somente pelo Run workflow**. A versão Windows usa um workflow separado e também manual. Consulte [Compilações Android e Windows](COMPILACAO_ANDROID_WINDOWS.md). O APK continua direto e atualizável; a versão Windows é um ZIP com EXE, DLLs e arquivos de dados do Unity.

@@ -1,12 +1,9 @@
 name: Unity Android Preview APK
 
+# Only compile Android when explicitly requested. The lightweight static
+# structure workflow continues to run automatically on source changes.
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'unity/**'
-      - 'tests/check_unity_project.py'
-      - '.github/workflows/unity-android.yml'
 
 concurrency:
   group: unity-android-${{ github.ref }}
