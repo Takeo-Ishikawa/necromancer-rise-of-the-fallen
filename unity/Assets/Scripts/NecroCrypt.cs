@@ -15,6 +15,10 @@ namespace Necromancer
         bool cryptOpen,restoring;
         int vaultPage,lifeRitual,vaultRitual,spiritRitual;
         float autoSaveClock;
+        // Save snapshots of regions not currently loaded in this refuge-first
+        // preview. Attribute/wardrobe purchases must not erase old cave data.
+        NecroStageRecord[] previousStageSnapshots;
+        int previousCheckpointStage;
 
         int VaultCapacity() {return 8+vaultRitual*4;}
 
@@ -187,6 +191,8 @@ namespace Necromancer
         {
             NecroSaveData saved;
             if(!NecroSaveStore.TryLoad(out saved))return false;
+            previousStageSnapshots=saved.stages;
+            previousCheckpointStage=Mathf.Clamp(saved.stage,0,levels.Length-1);
             playerLevel=Mathf.Clamp(saved.level,1,100);
             experience=Mathf.Clamp(saved.experience,0,100000);
             maxMana=Mathf.Clamp(saved.maxMana,55,3000);
@@ -199,6 +205,13 @@ namespace Necromancer
             lifeRitual=Mathf.Clamp(saved.lifeRitual,0,5);
             vaultRitual=Mathf.Clamp(saved.vaultRitual,0,2);
             spiritRitual=Mathf.Clamp(saved.spiritRitual,0,3);
+            huntOrder=saved.huntOrder;
+            completed=saved.completed;
+            spellUnlocked=spellUnlocked || saved.spellUnlocked;
+            vault.Clear();
+            if(saved.vault!=null)foreach(NecroActorRecord item in saved.vault)
+                if(item!=null && !string.IsNullOrEmpty(item.kind) &&
+                   vault.Count<VaultCapacity())vault.Add(item);
             player.maxHp=Mathf.Clamp(saved.maxHp,115f,10000f);
             player.hp=Mathf.Clamp(saved.hp,1f,player.maxHp);
             RestoreMeditationAllocations(saved);
@@ -216,16 +229,18 @@ namespace Necromancer
         bool SaveProgress()
         {
             if(restoring || player==null || current==null || gameOver)return false;
-            // The wardrobe can permanently improve gear while inside the refuge.
-            // Save a valid combat checkpoint instead of discarding those changes.
-            // Preserve saved stage indices (sanctuary is not a numbered combat stage).
+            // Permanent changes can be made inside the refuge. Preserve the
+            // last cave checkpoint and snapshots of as-yet-unloaded regions.
             if(inSanctuary)SaveCompanions();
+            int checkpointStage=inSanctuary ? previousCheckpointStage : stage;
+            checkpointStage=Mathf.Clamp(checkpointStage,0,levels.Length-1);
             Vector2 checkpoint = inSanctuary
-                ? NecroLevels.At(levels[stage],levels[stage].startX,levels[stage].startY)
+                ? NecroLevels.At(levels[checkpointStage],
+                    levels[checkpointStage].startX,levels[checkpointStage].startY)
                 : (Vector2)player.body.position;
             NecroSaveData save=new NecroSaveData {
                 version=NecroSaveStore.Version,
-                stage=stage,level=playerLevel,experience=experience,
+                stage=checkpointStage,level=playerLevel,experience=experience,
                 mana=mana,maxMana=maxMana,shards=shards,kills=kills,
                 gathered=gathered,staffTier=staffTier,mantleTier=mantleTier,
                 vitalityPoints=vitalityPoints,powerPoints=powerPoints,
@@ -246,14 +261,26 @@ namespace Necromancer
             save.army=active.ToArray();
             save.vault=vault.ToArray();
             save.stages=new NecroStageRecord[stages.Length];
-            for(int i=0;i<stages.Length;i++)save.stages[i]=RecordStage(stages[i]);
-            return NecroSaveStore.Write(save);
+            for(int i=0;i<stages.Length;i++)
+                save.stages[i]=stages[i]!=null ? RecordStage(stages[i]) :
+                    (previousStageSnapshots!=null && i<previousStageSnapshots.Length &&
+                     previousStageSnapshots[i]!=null ?
+                     previousStageSnapshots[i] : RecordStage(null));
+            bool written=NecroSaveStore.Write(save);
+            if(written)
+            {
+                previousStageSnapshots=save.stages;
+                previousCheckpointStage=save.stage;
+            }
+            return written;
         }
 
         private bool RestoreProgress()
         {
             if(!NecroSaveStore.TryLoad(out NecroSaveData save))return false;
             if(save.stage<0 || save.stage>=levels.Length || save.stages.Length==0)return false;
+            previousStageSnapshots=save.stages;
+            previousCheckpointStage=save.stage;
             restoring=true;
             try
             {
