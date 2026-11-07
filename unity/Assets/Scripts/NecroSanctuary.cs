@@ -22,6 +22,7 @@ namespace Necromancer
                     NecroArt.Environment(sanctuaryLevel.background),-50,sanctuary.root.transform);
                 FitGround(sanctuary.backdrop,sanctuaryLevel);
                 BuildSanctuaryDecorations(sanctuary.root.transform);
+                BuildSanctuaryInteractions(sanctuary.root.transform);
             }
             if(current!=null)current.root.SetActive(false);
             inSanctuary=true;

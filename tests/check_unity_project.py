@@ -31,6 +31,8 @@ required = [
     "Assets/Scripts/NecroScenery.cs",
     "Assets/Editor/NecroVisualEditorCheck.cs",
     "Assets/Scripts/NecroCharacterAnimation.cs",
+    "Assets/Scripts/NecroSanctuaryInteractions.cs",
+    "Assets/Resources/Data/sanctuary_interactions.json",
     "Assets/Resources/Sprites/necromante.png",
     "Assets/Scripts/NecroCrypt.cs",
     "Assets/Scripts/NecroSaveData.cs",
@@ -211,8 +213,8 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.7.5\"" in builder
-assert "com.takeo.necromancer.unity.preview075" in builder
+assert "PlayerSettings.bundleVersion = \"0.8.0\"" in builder
+assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
 hero_sheet=(unity/"Assets/Resources/AnimationSheets/necromante_source.png").read_bytes()
@@ -253,7 +255,7 @@ assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
 assert "heroineStrikePulse=.53f;" in gameplay
 assert "heroineHitPulse=.27f;" in gameplay
 assert "VerifySet(\"necromante\",true);" in frame_editor
-assert "com.takeo.necromancer.unity.preview075" in builder
+assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
 creature_art=(unity/"Assets/Scripts/NecroCreatureArt.cs").read_text()
 creature_visual=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
@@ -351,6 +353,31 @@ for prop in layout["props"]:
     if prop["layer"]!="disabled":
         asset=unity/"Assets/Resources/SanctuaryProps"/(prop["asset"]+".png")
         assert asset.is_file(), "Missing active sanctuary sprite: "+str(asset)
+
+# 0.8.0: temporary, data-driven sanctuary blessing.
+station_json=json.loads((unity/"Assets/Resources/Data/sanctuary_interactions.json").read_text())
+fountains=[s for s in station_json["stations"] if s["kind"]=="fountain_buff"]
+assert len(fountains)==1
+f=fountains[0]
+assert f["id"]=="fountain" and f["radius"]>0
+assert f["durationSeconds"]==45 and f["cooldownSeconds"]==120
+assert f["damageMultiplier"]==1.25 and f["speedMultiplier"]==1.2
+assert f["cooldownSeconds"]>=f["durationSeconds"]
+assert 0<f["x"]<16 and 0<f["y"]<24
+assert abs(f["y"]-16.85)>3.5/2+.384, "Interaction inside fountain collision"
+interactions=(unity/"Assets/Scripts/NecroSanctuaryInteractions.cs").read_text()
+for token in ("NearbySanctuaryStation()", "StationCooldownRemaining(",
+              "ActivateSanctuaryStation(", "FountainDamageMultiplier",
+              "FountainSpeedMultiplier", "KeyCode.E", "Time.time + duration",
+              "NecroArt.RitualCircle()", "NearbySanctuaryStation() != station"):
+    assert token in interactions, token
+assert "BuildSanctuaryInteractions(sanctuary.root.transform);" in (
+    unity/"Assets/Scripts/NecroSanctuary.cs").read_text()
+assert "DrawSanctuaryInteractionUi(scale);" in ui
+assert "SanctuaryInteractionButtonRect(scale).Contains(gui)" in ui
+assert "FountainSpeedMultiplier*dt" in core
+assert "FountainDamageMultiplier" in gameplay
+assert "PlayerSettings.Android.bundleVersionCode = 20;" in builder
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "

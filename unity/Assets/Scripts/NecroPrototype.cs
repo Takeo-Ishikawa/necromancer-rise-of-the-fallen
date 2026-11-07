@@ -257,8 +257,9 @@ namespace Necromancer
             if(heroineWalking)
             {
                 facing=control.normalized;
-                Move(player,control*player.speed*dt);
+                Move(player,control*player.speed*FountainSpeedMultiplier*dt);
             }
+            if(inSanctuary)ReadSanctuaryInteractionKey();
             if(!inSanctuary)ReadManualAttack(hudScale);
             if(!inSanctuary)UpdateActors(current.enemies,dt,false);
             UpdateActors(servants,dt,true);
@@ -266,6 +267,7 @@ namespace Necromancer
             if(!inSanctuary)TickRespawns(dt);
             AnimateHeroVisual(dt);
             UpdateSanctuaryActorDepth();
+            UpdateSanctuaryInteractionVisual();
             UpdateWorldCamera();
         }
 

@@ -7,3 +7,8 @@ A passagem de pedra já está pintada no fundo. Por isso o `entrance_arch` é gu
 O novo `Assets/Editor/NecroSanctuaryImportSettings.cs` aplica bilinear com `Clamp`, sem mipmaps, sem compressão de textura no Android, sRGB e limite de 2048 px em Android. Texturas sem compressão usam mais memória que ASTC; testar desempenho em aparelhos mais modestos.
 
 A correção v5 de proporções, ordem de sprites por pés e colisões independentes foi preservada. Compilação e teste Android pendentes: validar nitidez, ausência de arco duplicado, colisões ao redor dos móveis, movimentação até a saída e retorno do zoom em combate.
+
+
+## Interação da fonte — versão 0.8.0
+
+A fonte usa uma estação definida em Data/sanctuary_interactions.json, acessível por toque ou pela tecla E. A bênção concede +25% de dano da necromante e +20% de velocidade por 45 segundos, com recarga de 120 segundos contados da ativação. O buff acompanha a personagem à caverna, não se acumula e não é salvo. O halo reutiliza a arte procedural existente, sem adicionar imagens. Ver docs/SANCTUARY_INTERACTIONS.md.

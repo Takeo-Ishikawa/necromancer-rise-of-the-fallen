@@ -36,6 +36,8 @@ namespace Necromancer
         {
             Vector2 gui=new Vector2(point.x,Screen.height-point.y)/scale;
             if(SanctuaryTravelAvailable() && SanctuaryTravelRect(scale).Contains(gui))return false;
+            if(NearbySanctuaryStation()!=null &&
+               SanctuaryInteractionButtonRect(scale).Contains(gui))return false;
             return !RosterButton.Contains(gui) && point.x<Screen.width*.65f &&
                 !AttackRect(scale).Contains(gui) && !BindRect(scale).Contains(gui);
         }
@@ -152,6 +154,7 @@ namespace Necromancer
             GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
             if(DrawRoster(Screen.width/scale,Screen.height/scale))return;
             DrawSanctuaryNavigation(scale);
+            DrawSanctuaryInteractionUi(scale);
             if(pearl==null)pearl=Resources.Load<Texture2D>("HUD/pearl");
             Rect button=AttackRect(scale);
             if(!inSanctuary)DrawAction(button,false,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",

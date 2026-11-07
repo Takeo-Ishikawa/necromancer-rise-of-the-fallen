@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "notes": "Walkable interaction anchor at the front of the fountain, independent of furniture collision.",
+  "stations": [
+    {
+      "id": "fountain",
+      "kind": "fountain_buff",
+      "label": "RECEBER BENCAO",
+      "x": 12,
+      "y": 13.45,
+      "radius": 1.65,
+      "durationSeconds": 45,
+      "cooldownSeconds": 120,
+      "damageMultiplier": 1.25,
+      "speedMultiplier": 1.2,
+      "effectX": 13,
+      "effectY": 15.15
+    }
+  ]
+}

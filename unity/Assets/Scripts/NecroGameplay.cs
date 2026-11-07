@@ -471,7 +471,7 @@ namespace Necromancer
             {
                 heroineStrikePulse=.53f;
                 castCooldown=Time.time+.47f;
-                Damage(target,26+staffTier*5+(playerLevel-1)*2);
+                Damage(target,(26+staffTier*5+(playerLevel-1)*2)*FountainDamageMultiplier);
                 return;
             }
             castAim=((Vector2)(target.body.position-player.body.position)).normalized;
@@ -514,7 +514,7 @@ namespace Necromancer
                         Actor enemy=current.enemies[j];
                         if(Vector2.Distance(bolt.body.position,enemy.body.position)<enemy.radius+.15f)
                         {
-                            Damage(enemy,34+staffTier*8+(playerLevel-1)*3);
+                            Damage(enemy,(34+staffTier*8+(playerLevel-1)*3)*FountainDamageMultiplier);
                             finished=true;break;
                         }
                     }
