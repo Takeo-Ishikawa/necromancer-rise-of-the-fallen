@@ -521,7 +521,7 @@ assert "RestoreSanctuaryProfile()" in crypt
 assert "vitalityPoints=vitalityPoints,powerPoints=powerPoints" in crypt
 assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
-assert "public int vitalityPoints,powerPoints,agilityPoints;" in data
+assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in data
 assert 'PlayerSettings.bundleVersion = "0.9.0";' in builder
 assert 'PlayerSettings.bundleVersion="0.9.0";' in win_builder
