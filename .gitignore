@@ -5,3 +5,8 @@ local.properties
 .idea/
 *.iml
 .DS_Store
+
+# Generated CI signing inputs: never commit private keys or credentials.
+unity/.android-preview.keystore
+unity/.android-release.keystore
+unity/.android-build-settings.json

@@ -49,6 +49,32 @@ jobs:
             -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null
           echo "Signing keystore is valid; private key will not be published."
 
+      - name: Prepare protected Unity release settings
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          config = {
+              "mode": "release",
+              "previewRunNumber": 0,
+              "keystorePassword": os.environ["ANDROID_KEYSTORE_PASSWORD"],
+              "keyAlias": os.environ["ANDROID_KEY_ALIAS"],
+              "keyPassword": os.environ["ANDROID_KEY_PASSWORD"],
+          }
+          dest = Path("unity/.android-build-settings.json")
+          dest.write_text(json.dumps(config), encoding="utf-8")
+          dest.chmod(0o600)
+          print("Protected Unity release settings prepared (no secret values logged).")
+          PY
+
       - name: Free disk space
         uses: jlumbroso/free-disk-space@main
         with:
@@ -66,10 +92,8 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-          NECRO_ANDROID_MODE: release
-          NECRO_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          NECRO_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          NECRO_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          # Signing details are loaded inside Docker from the protected
+          # project-root JSON, not from non-forwarded workflow env vars.
         with:
           projectPath: unity
           buildMethod: Necromancer.EditorTools.NecromancerAndroidBuild.BuildAndroid
@@ -88,4 +112,4 @@ jobs:
 
       - name: Remove ephemeral signing file
         if: always()
-        run: rm -f unity/.android-release.keystore
+        run: rm -f unity/.android-release.keystore unity/.android-build-settings.json

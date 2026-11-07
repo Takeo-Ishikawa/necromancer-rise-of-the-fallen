@@ -386,16 +386,33 @@ assert 'uses: actions/upload-artifact@v7' in preview_workflow
 assert 'archive: false' in preview_workflow
 assert 'path: build/Android/necromancer-unity.apk' in preview_workflow
 for token in ('PREVIEW_KEYSTORE_BASE64', 'PREVIEW_KEYSTORE_PASSWORD',
-              'unity/.android-preview.keystore', 'NECRO_PREVIEW_BUILD_NUMBER:',
+              'unity/.android-preview.keystore', 'PREVIEW_RUN_NUMBER:',
               'necromancer-preview', 'Verify stable preview signing identity'):
     assert token in preview_workflow, 'Missing preview workflow setting: '+token
 for token in ('NECRO_PREVIEW_BUILD_NUMBER', '10000 + previewBuildNumber',
               'if(release || preview)', 'preview?".android-preview.keystore"',
-              'PlayerSettings.Android.useCustomKeystore=true'):
+              'PlayerSettings.Android.useCustomKeystore=true',
+              'LoadCiBuildSettings()', '.android-build-settings.json',
+              'ci.previewRunNumber', 'ci.keystorePassword', 'ci.keyAlias'):
     assert token in builder, 'Missing stable APK upgrade logic: '+token
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert 'PlayerSettings.Android.useCustomKeystore=false' not in builder
 assert (root/'docs/ANDROID_SIGNING.md').is_file()
+
+# GameCI Docker ignores arbitrary env variables: required protected bridge.
+assert 'name: Prepare protected Unity build settings' in preview_workflow
+assert 'dest = Path("unity/.android-build-settings.json")' in preview_workflow
+assert '"previewRunNumber": run_number' in preview_workflow
+assert '"mode": "preview"' in preview_workflow
+assert 'unity/.android-preview.keystore unity/.android-build-settings.json' in preview_workflow
+release_workflow=(root/".github/workflows/unity-release.yml").read_text()
+assert 'name: Prepare protected Unity release settings' in release_workflow
+assert '"mode": "release"' in release_workflow
+assert 'unity/.android-release.keystore unity/.android-build-settings.json' in release_workflow
+gitignore=(root/".gitignore").read_text()
+assert 'unity/.android-build-settings.json' in gitignore
+assert 'unity/.android-preview.keystore' in gitignore
+assert 'unity/.android-release.keystore' in gitignore
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "

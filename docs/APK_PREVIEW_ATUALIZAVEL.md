@@ -44,3 +44,10 @@ Versões oficiais usam outro ID e outro fluxo, `unity-release.yml`, com credenci
 3. Não sobrescrever `NECRO_PREVIEW_BUILD_NUMBER` com um número fixo; toda execução nova precisa ser instalável por cima.
 4. Continuar a publicar o APK com `archive: false` e evitar distribuir somente ZIP.
 5. Monitorar `tests/check_unity_project.py` e o status da compilação Unity; confirmar instalação e atualização no aparelho após mudanças de build.
+
+
+## Correção de compilação (07/11/2026)
+
+A execução GitHub Actions 42335563579 validou a chave de preview, porém falhou dentro da Unity porque a variável `NECRO_PREVIEW_BUILD_NUMBER` não atravessou o contêiner do GameCI v4. O workflow corrigido gera temporariamente um arquivo de configuração JSON privado **fora de `Assets`**, em `unity/.android-build-settings.json`, com modo, número da execução e dados de assinatura. Este arquivo é ignorado pelo Git, tem permissão restrita e é apagado ao final, inclusive se o build falhar. A Unity carrega esse arquivo e utiliza o número crescente para versionCode e a mesma assinatura persistente.
+
+Para builds de produção, o workflow `unity-release.yml` segue o mesmo padrão com modo `release` e credenciais oficiais, sem misturá-las com a preview. **Nunca versionar nem compartilhar o JSON temporário, o keystore ou suas senhas**. A compilação deve preservar o upload do APK direto (sem ZIP) após o sucesso.

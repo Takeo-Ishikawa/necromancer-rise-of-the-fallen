@@ -51,6 +51,35 @@ jobs:
             -storepass "$PREVIEW_KEYSTORE_PASSWORD" -alias necromancer-preview > /dev/null
           echo "Stable preview signing key loaded; alias validated."
 
+      - name: Prepare protected Unity build settings
+        shell: bash
+        env:
+          PREVIEW_KEYSTORE_PASSWORD: ${{ secrets.PREVIEW_KEYSTORE_PASSWORD }}
+          PREVIEW_RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          secret = os.environ["PREVIEW_KEYSTORE_PASSWORD"]
+          run_number = int(os.environ["PREVIEW_RUN_NUMBER"])
+          if not secret or run_number <= 0:
+              raise SystemExit("Missing preview key password or build number")
+          config = {
+              "mode": "preview",
+              "previewRunNumber": run_number,
+              "keystorePassword": secret,
+              "keyAlias": "necromancer-preview",
+              "keyPassword": secret,
+          }
+          dest = Path("unity/.android-build-settings.json")
+          dest.write_text(json.dumps(config), encoding="utf-8")
+          dest.chmod(0o600)
+          print("Protected Unity build settings prepared (no secret values logged).")
+          PY
+
       - name: Free disk space
         uses: jlumbroso/free-disk-space@main
         with:
@@ -67,11 +96,8 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-          NECRO_ANDROID_MODE: preview
-          NECRO_KEYSTORE_PASSWORD: ${{ secrets.PREVIEW_KEYSTORE_PASSWORD }}
-          NECRO_KEY_ALIAS: necromancer-preview
-          NECRO_KEY_PASSWORD: ${{ secrets.PREVIEW_KEYSTORE_PASSWORD }}
-          NECRO_PREVIEW_BUILD_NUMBER: ${{ github.run_number }}
+          # Build mode, version code and passwords are read from the protected
+          # project-root file (GameCI v4 drops custom workflow env variables).
         with:
           projectPath: unity
           buildMethod: Necromancer.EditorTools.NecromancerAndroidBuild.BuildAndroid
@@ -93,6 +119,6 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Remove temporary preview keystore
+      - name: Remove temporary preview credentials
         if: always()
-        run: rm -f unity/.android-preview.keystore
+        run: rm -f unity/.android-preview.keystore unity/.android-build-settings.json
