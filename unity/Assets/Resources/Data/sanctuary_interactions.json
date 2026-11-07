@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "notes": "Walkable interaction points kept outside furniture collision. Fountain buff + wardrobe gear upgrades; add future stations by JSON id/kind. No additional art resources.",
+  "version": 3,
+  "notes": "Walkable points for fountain, wardrobe, and meditation altar. No new art assets.",
   "stations": [
     {
       "id": "fountain",
@@ -23,6 +23,20 @@
       "x": 5.12,
       "y": 12.25,
       "radius": 1.58,
+      "durationSeconds": 0,
+      "cooldownSeconds": 0,
+      "damageMultiplier": 1,
+      "speedMultiplier": 1,
+      "effectX": 0,
+      "effectY": 0
+    },
+    {
+      "id": "meditation",
+      "kind": "meditation",
+      "label": "MEDITAR",
+      "x": 10.72,
+      "y": 8.9,
+      "radius": 1.62,
       "durationSeconds": 0,
       "cooldownSeconds": 0,
       "damageMultiplier": 1,
