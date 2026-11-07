@@ -55,3 +55,7 @@ A primeira etapa de recursos gráficos estáticos PNG foi adicionada ao Unity: c
 ### Padrão de otimização mobile (0.7.6)
 
 Antes de adicionar novos cenários, monstros, efeitos ou sprites, consultar o [guia permanente de recursos e otimização Android](docs/PADRAO_OTIMIZACAO_ANDROID.md). O projeto aplica compressão ETC2 no refúgio e impede que fundos antigos voltem à pasta `Resources` por meio dos testes automáticos.
+
+### APK direto e atualização contínua
+
+As próximas previews Unity usam sempre o mesmo identificador Android e uma assinatura de testes permanente. O workflow publica o arquivo APK diretamente, sem ZIP. Para realizar a configuração inicial segura da chave de testes (apenas uma vez), siga [APK de teste atualizável](docs/APK_PREVIEW_ATUALIZAVEL.md). A versão antiga com assinatura temporária pode exigir uma única migração.

@@ -379,6 +379,24 @@ assert "FountainSpeedMultiplier*dt" in core
 assert "FountainDamageMultiplier" in gameplay
 assert "PlayerSettings.Android.bundleVersionCode = 20;" in builder
 
+
+# Direct APK download + stable signing: regression checks for future sessions.
+preview_workflow=(root/".github/workflows/unity-android.yml").read_text()
+assert 'uses: actions/upload-artifact@v7' in preview_workflow
+assert 'archive: false' in preview_workflow
+assert 'path: build/Android/necromancer-unity.apk' in preview_workflow
+for token in ('PREVIEW_KEYSTORE_BASE64', 'PREVIEW_KEYSTORE_PASSWORD',
+              'unity/.android-preview.keystore', 'NECRO_PREVIEW_BUILD_NUMBER:',
+              'necromancer-preview', 'Verify stable preview signing identity'):
+    assert token in preview_workflow, 'Missing preview workflow setting: '+token
+for token in ('NECRO_PREVIEW_BUILD_NUMBER', '10000 + previewBuildNumber',
+              'if(release || preview)', 'preview?".android-preview.keystore"',
+              'PlayerSettings.Android.useCustomKeystore=true'):
+    assert token in builder, 'Missing stable APK upgrade logic: '+token
+assert '"com.takeo.necromancer.unity.preview080"' in builder
+assert 'PlayerSettings.Android.useCustomKeystore=false' not in builder
+assert (root/'docs/ANDROID_SIGNING.md').is_file()
+
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
       "Unity Editor build and device validation remain necessary.")

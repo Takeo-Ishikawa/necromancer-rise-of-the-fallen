@@ -19,3 +19,7 @@ No Unity Hub, instale Unity 2022.3.62f2 com Android Build Support, SDK, NDK e Op
 Sprites e fundos procedurais originais sao usados quando `Assets/Resources/Sprites/<nome>.png` e `Assets/Resources/Backgrounds/<nome>.png` nao existem. A bruxa foi redesenhada como sprite legivel, mas a ilustracao definitiva precisara de sprites transparentes e animacoes em direcoes.
 
 A implementacao Java/Canvas em `app/` continua disponivel para comparacao.
+
+### Prévia contínua: APK sem ZIP
+
+A partir do novo padrão, o workflow `unity-android.yml` usa `actions/upload-artifact@v7` com `archive: false`, disponibilizando o APK diretamente. A assinatura é persistente e o versionCode cresce com cada execução. **Antes do primeiro build dessa modalidade, configure os dois Secrets de preview** conforme [APK de teste atualizável](APK_PREVIEW_ATUALIZAVEL.md). Não reinstale versões antigas sem antes considerar os salvamentos.

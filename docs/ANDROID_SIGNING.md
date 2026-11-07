@@ -67,3 +67,8 @@ A nova chave persistente também **não será igual** à assinatura da 0.5; port
 Abra `unity/` no Unity 2022.3.62f2 e importe o Android Build Support. O código de build escolhe `preview` por padrão, e só usa o identificador oficial com `NECRO_ANDROID_MODE=release` e a chave privada válida. O APK da prévia é destinado apenas a testes.
 
 Em ambos os casos, os controles, as quatro regiões, a Cripta e o formato de save permanecem iguais.
+
+
+## Prévia contínua — atualização por cima da instalação (novo padrão)
+
+Consulte [o procedimento completo de instalação e assinatura estável](APK_PREVIEW_ATUALIZAVEL.md). As previews anteriores utilizavam debug keys temporárias e nomes de pacote por versão. Para as previews futuras, o identificador `com.takeo.necromancer.unity.preview080` permanecerá fixo e o `versionCode` aumentará a cada execução. A assinatura passará a ser uma chave independente de testes guardada nos Secrets `PREVIEW_KEYSTORE_BASE64` e `PREVIEW_KEYSTORE_PASSWORD`, criada uma única vez pelo desenvolvedor. O usuário deverá migrar uma última vez do APK antigo incompatível; futuras atualizações terão assinatura consistente.
