@@ -214,7 +214,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.8.1\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.8.2\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -443,6 +443,19 @@ assert 'NecroLevels.At(levels[stage],levels[stage].startX,levels[stage].startY)'
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert '10000 + previewBuildNumber' in builder
 assert 'LoadCiBuildSettings()' in builder
+
+
+# 0.8.2: fully readable mobile wardrobe without any new textures.
+for token in ("WardrobeBackground", "new Color(.095f,.069f,.134f,.97f)",
+              "WardrobeCardBackground", "new Color(.071f,.052f,.102f,.975f)",
+              "WardrobeShade", "DrawWardrobeSurface(", "DrawWardrobeGearCard(",
+              "WardrobeActionButton(", "EnsureWardrobeStyles()",
+              "wardrobeInactiveButtonText", "GUIStyle.none",
+              "FillUi(new Rect(0f,0f,width,height),WardrobeShade)"):
+    assert token in wardrobe_source, "Missing 0.8.2 visual treatment: "+token
+assert 'GUI.Box(panel,GUIContent.none)' not in wardrobe_source
+assert "Texture2D(" not in wardrobe_source
+assert "Resources.Load" not in wardrobe_source
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
