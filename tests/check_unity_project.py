@@ -447,7 +447,8 @@ assert 'DrawSanctuaryWardrobePanel(Screen.width/scale,Screen.height/scale);' in 
 assert 'if(wardrobeOpen)' in core
 assert 'if(inSanctuary)SaveCompanions();' in crypt
 assert 'playerX=checkpoint.x,playerY=checkpoint.y' in crypt
-assert 'NecroLevels.At(levels[stage],levels[stage].startX,levels[stage].startY)' in crypt
+assert 'NecroLevels.At(levels[checkpointStage],' in crypt
+assert 'levels[checkpointStage].startX,levels[checkpointStage].startY)' in crypt
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert '10000 + previewBuildNumber' in builder
 assert 'LoadCiBuildSettings()' in builder
