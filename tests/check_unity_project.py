@@ -522,7 +522,7 @@ assert "vitalityPoints=vitalityPoints,powerPoints=powerPoints" in crypt
 assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert "public const int Version=1;" in data
+assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert 'PlayerSettings.bundleVersion = "0.9.0";' in builder
 assert 'PlayerSettings.bundleVersion="0.9.0";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
