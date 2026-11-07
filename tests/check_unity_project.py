@@ -518,6 +518,11 @@ assert "RestoreSanctuaryProfile();" in core
 assert "if(meditationOpen)" in ui
 assert "DrawSanctuaryMeditationPanel(Screen.width/scale,Screen.height/scale);" in ui
 assert "RestoreSanctuaryProfile()" in crypt
+assert "previousStageSnapshots=saved.stages;" in crypt
+assert "previousCheckpointStage=Mathf.Clamp(saved.stage,0,levels.Length-1);" in crypt
+assert "previousStageSnapshots[i] : RecordStage(null)" in crypt
+assert "previousCheckpointStage=save.stage;" in crypt
+assert "vault.Clear();" in crypt
 assert "vitalityPoints=vitalityPoints,powerPoints=powerPoints" in crypt
 assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt

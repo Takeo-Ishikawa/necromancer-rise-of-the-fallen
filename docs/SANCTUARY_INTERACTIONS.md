@@ -64,3 +64,8 @@ Três atributos: **Vitalidade** concede +12 de vida máxima e recupera até 12 d
 O arquivo `necro-save-v1.json` continua na mesma versão, incluindo três campos **opcionais** `vitalityPoints`, `powerPoints` e `agilityPoints` (zerados automaticamente em saves antigos). Ao iniciar no refúgio, o jogo lê agora a experiência, o nível, os equipamentos, os atributos, a vida, a ânima, os rituais e os fragmentos do arquivo existente; o sistema de companheiros permanece em PlayerPrefs. O preview ainda começa no refúgio, sem recriar automaticamente os inimigos e as regiões guardadas no snapshot anterior. Essa restauração integral será uma evolução posterior.
 
 Testes: (1) matar criaturas e atingir o próximo nível; (2) voltar ao refúgio e abrir o altar; (3) conferir pontos restantes e bônus; (4) reiniciar e confirmar persistência dos investimentos; (5) testar cap de atributo, falta de pontos, voltar do altar, e interação com fonte/guarda-roupa. Android e Windows compartilham o sistema mas mantêm salvamentos locais separados. Os workflows de compilação seguem **manuais** e independentes.
+
+
+### Proteção dos checkpoints anteriores
+
+Enquanto o preview inicia na câmara segura, o novo carregamento de atributos mantém também o checkpoint de combate, registros de áreas ainda não abertas e os servos guardados na Cripta. Um investimento no altar ou armário não deve apagar essas informações. Os registros de estágio só são substituídos quando o respectivo estágio realmente está carregado. O teste automatizado verifica esta proteção.
