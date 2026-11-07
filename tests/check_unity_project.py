@@ -430,7 +430,7 @@ for token in ("bool wardrobeOpen", "OpenSanctuaryWardrobe()",
               "staffTier++;", "mantleTier++;",
               "player.maxHp += 18f", "player.hp = Mathf.Min("):
     assert token in wardrobe_source, "Missing wardrobe action: "+token
-assert '"Assets/Scripts/NecroSanctuaryWardrobe.cs"' in str(required)
+assert (unity/"Assets/Scripts/NecroSanctuaryWardrobe.cs").is_file()
 assert 'if(station.kind == "wardrobe")' in interactions
 assert 'OpenSanctuaryWardrobe();' in interactions
 assert 'station.kind == "wardrobe" ? "GUARDA-ROUPA' in interactions
