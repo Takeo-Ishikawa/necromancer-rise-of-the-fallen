@@ -108,6 +108,7 @@ namespace Necromancer
             InitializeHeroAnimation();
             EnterSanctuary();
             spellUnlocked=true;
+            RestoreSanctuaryProfile();
             LoadCompanions();
             PlaceTravelCompanions();
         }
@@ -252,6 +253,11 @@ namespace Necromancer
                 if(Input.GetKeyDown(KeyCode.Escape))CloseSanctuaryWardrobe();
                 return;
             }
+            if(meditationOpen)
+            {
+                if(Input.GetKeyDown(KeyCode.Escape))CloseSanctuaryMeditation();
+                return;
+            }
             float dt=Mathf.Min(.045f,Time.deltaTime);
             Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
             float hudScale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
@@ -262,7 +268,7 @@ namespace Necromancer
             if(heroineWalking)
             {
                 facing=control.normalized;
-                Move(player,control*player.speed*FountainSpeedMultiplier*dt);
+                Move(player,control*player.speed*(1f+agilityPoints*.06f)*FountainSpeedMultiplier*dt);
             }
             if(inSanctuary)ReadSanctuaryInteractionKey();
             if(!inSanctuary)ReadManualAttack(hudScale);

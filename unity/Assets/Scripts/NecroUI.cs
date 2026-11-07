@@ -157,6 +157,11 @@ namespace Necromancer
                 DrawSanctuaryWardrobePanel(Screen.width/scale,Screen.height/scale);
                 return;
             }
+            if(meditationOpen)
+            {
+                DrawSanctuaryMeditationPanel(Screen.width/scale,Screen.height/scale);
+                return;
+            }
             if(DrawRoster(Screen.width/scale,Screen.height/scale))return;
             DrawSanctuaryNavigation(scale);
             DrawSanctuaryInteractionUi(scale);
@@ -165,6 +170,11 @@ namespace Necromancer
             if(wardrobeOpen)
             {
                 DrawSanctuaryWardrobePanel(Screen.width/scale,Screen.height/scale);
+                return;
+            }
+            if(meditationOpen)
+            {
+                DrawSanctuaryMeditationPanel(Screen.width/scale,Screen.height/scale);
                 return;
             }
             if(pearl==null)pearl=Resources.Load<Texture2D>("HUD/pearl");

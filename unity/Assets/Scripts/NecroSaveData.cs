@@ -13,6 +13,8 @@ namespace Necromancer
         public int version=1;
         public int stage,level,experience,mana,maxMana,shards,kills,gathered;
         public int staffTier,mantleTier,lifeRitual,vaultRitual,spiritRitual;
+        // Optional 0.9.0 attributes: prior v1 save JSON loads these as zero.
+        public int vitalityPoints,powerPoints,agilityPoints;
         public bool spellUnlocked,huntOrder,completed;
         public float hp,maxHp,playerX,playerY;
         public string[] rankKinds=new string[0];

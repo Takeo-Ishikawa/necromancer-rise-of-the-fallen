@@ -27,7 +27,8 @@ namespace Necromancer
         }
         static int ExperienceValue(string kind)
         {
-            return IsBoss(kind)?150:kind=="skeleton"?29:kind=="wisp"?25:
+            return IsBoss(kind)?150:kind=="rotboar"?38:
+                kind=="grave_pup"?18:kind=="skeleton"?29:kind=="wisp"?25:
                 kind=="slime"?20:kind=="bat"?17:14;
         }
         int ExperienceThreshold() {return 28+playerLevel*18;}
@@ -362,6 +363,8 @@ namespace Necromancer
             }
             else if(victim.kind=="rotboar")StartCoroutine(FallRotboar(victim));
             else Destroy(victim.body.gameObject);
+            // Defeated hostiles award XP exactly once, including servant kills.
+            if(!victim.ally)AwardMeditationExperience(victim.kind);
         }
         Actor servantOrder;
 
@@ -471,7 +474,7 @@ namespace Necromancer
             {
                 heroineStrikePulse=.53f;
                 castCooldown=Time.time+.47f;
-                Damage(target,(26+staffTier*5+(playerLevel-1)*2)*FountainDamageMultiplier);
+                Damage(target,(26+staffTier*5+(playerLevel-1)*2+powerPoints*2)*FountainDamageMultiplier);
                 return;
             }
             castAim=((Vector2)(target.body.position-player.body.position)).normalized;
@@ -514,7 +517,7 @@ namespace Necromancer
                         Actor enemy=current.enemies[j];
                         if(Vector2.Distance(bolt.body.position,enemy.body.position)<enemy.radius+.15f)
                         {
-                            Damage(enemy,(34+staffTier*8+(playerLevel-1)*3)*FountainDamageMultiplier);
+                            Damage(enemy,(34+staffTier*8+(playerLevel-1)*3+powerPoints*4)*FountainDamageMultiplier);
                             finished=true;break;
                         }
                     }

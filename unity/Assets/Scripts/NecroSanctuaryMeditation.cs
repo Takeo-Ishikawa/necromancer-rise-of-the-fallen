@@ -108,7 +108,7 @@ namespace Necromancer
             GUI.Label(new Rect(left+availableWidth*.60f,area.y+4f,
                 availableWidth*.40f,22f),
                 "GRAU "+rank+"/"+MeditationAttributeCap,wardrobeGradeStyle);
-            GUI.Label(new Rect(left,area.y+25f,availableWidth,20f),
+            GUI.Label(new Rect(left,area.y+24f,availableWidth,18f),
                 description,wardrobeBodyStyle);
             bool canInvest=rank<MeditationAttributeCap &&
                 MeditationPointsAvailable()>0;
@@ -140,7 +140,7 @@ namespace Necromancer
             FillUi(new Rect(x+17f,y+75f,w-34f,1f),
                 new Color(.70f,.57f,.73f,.68f));
 
-            float cardHeight=(h-172f)/3f;
+            float cardHeight=(h-183f)/3f;
             float cardTop=y+85f;
             DrawMeditationAttributeCard(
                 new Rect(x+15f,cardTop,w-30f,cardHeight),
@@ -156,7 +156,7 @@ namespace Necromancer
                 "AGILIDADE",agilityPoints,
                 "+6% movimento por ponto",2);
 
-            GUI.Label(new Rect(x+14f,y+h-77f,w-28f,23f),
+            GUI.Label(new Rect(x+14f,y+h-75f,w-28f,20f),
                 "Ganhe pontos subindo de nivel na caverna.",
                 wardrobeNoteStyle);
             FillUi(new Rect(x+17f,y+h-51f,w-34f,1f),

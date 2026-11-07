@@ -180,6 +180,39 @@ namespace Necromancer
             return state;
         }
 
+        // The preview always begins at the refuge. The old snapshot is used
+        // to restore permanent hero progression without jumping to the cave;
+        // companion placement still follows PlayerPrefs as before.
+        bool RestoreSanctuaryProfile()
+        {
+            NecroSaveData saved;
+            if(!NecroSaveStore.TryLoad(out saved))return false;
+            playerLevel=Mathf.Clamp(saved.level,1,100);
+            experience=Mathf.Clamp(saved.experience,0,100000);
+            maxMana=Mathf.Clamp(saved.maxMana,55,3000);
+            mana=Mathf.Clamp(saved.mana,0,maxMana);
+            shards=Mathf.Clamp(saved.shards,0,100000);
+            kills=Mathf.Clamp(saved.kills,0,100000);
+            gathered=Mathf.Clamp(saved.gathered,0,100000);
+            staffTier=Mathf.Clamp(saved.staffTier,0,3);
+            mantleTier=Mathf.Clamp(saved.mantleTier,0,3);
+            lifeRitual=Mathf.Clamp(saved.lifeRitual,0,5);
+            vaultRitual=Mathf.Clamp(saved.vaultRitual,0,2);
+            spiritRitual=Mathf.Clamp(saved.spiritRitual,0,3);
+            player.maxHp=Mathf.Clamp(saved.maxHp,115f,10000f);
+            player.hp=Mathf.Clamp(saved.hp,1f,player.maxHp);
+            RestoreMeditationAllocations(saved);
+            speciesRanks.Clear();
+            if(saved.rankKinds!=null && saved.rankValues!=null)
+            {
+                for(int i=0;i<Mathf.Min(saved.rankKinds.Length,saved.rankValues.Length);i++)
+                    if(!string.IsNullOrEmpty(saved.rankKinds[i]))
+                        speciesRanks[saved.rankKinds[i]]=Mathf.Clamp(saved.rankValues[i],0,3);
+            }
+            Announce("Progresso da necromante restaurado.");
+            return true;
+        }
+
         bool SaveProgress()
         {
             if(restoring || player==null || current==null || gameOver)return false;
@@ -195,6 +228,8 @@ namespace Necromancer
                 stage=stage,level=playerLevel,experience=experience,
                 mana=mana,maxMana=maxMana,shards=shards,kills=kills,
                 gathered=gathered,staffTier=staffTier,mantleTier=mantleTier,
+                vitalityPoints=vitalityPoints,powerPoints=powerPoints,
+                agilityPoints=agilityPoints,
                 lifeRitual=lifeRitual,vaultRitual=vaultRitual,spiritRitual=spiritRitual,
                 spellUnlocked=spellUnlocked,huntOrder=huntOrder,completed=completed,
                 hp=player.hp,maxHp=player.maxHp,
@@ -231,6 +266,7 @@ namespace Necromancer
                 gathered=Mathf.Clamp(save.gathered,0,100000);
                 staffTier=Mathf.Clamp(save.staffTier,0,3);
                 mantleTier=Mathf.Clamp(save.mantleTier,0,3);
+                RestoreMeditationAllocations(save);
                 lifeRitual=Mathf.Clamp(save.lifeRitual,0,5);
                 vaultRitual=Mathf.Clamp(save.vaultRitual,0,2);
                 spiritRitual=Mathf.Clamp(save.spiritRitual,0,3);
