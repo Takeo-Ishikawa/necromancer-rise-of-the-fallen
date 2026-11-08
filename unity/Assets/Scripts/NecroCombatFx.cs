@@ -30,7 +30,7 @@ namespace Necromancer
             fx.rotationSpeed=type==3?105f:type==0?90f:type==1?75f:-52f;
             fx.drift=type==3 ? Vector2.zero :
                 type==0 ? new Vector2(.04f,.13f) : new Vector2(0,.25f);
-            fx.size=type==3 ? new Vector3(5.5f,5.5f,1f) :
+            fx.size=type==3 ? new Vector3(4.0f,4.0f,1f) :
                 type==0 ? new Vector3(.38f,.38f,1f) :
                 type==1 ? new Vector3(1.0f,.68f,1f) :
                 new Vector3(1.5f,1.1f,1f);
