@@ -34,6 +34,7 @@ required = [
     "Assets/Editor/NecroVisualEditorCheck.cs",
     "Assets/Scripts/NecroCharacterAnimation.cs",
     "Assets/Scripts/NecroHeroCombatPolish.cs",
+    "Assets/Scripts/NecroHeroSurvival.cs",
     "Assets/Scripts/NecroSanctuaryInteractions.cs",
     "Assets/Scripts/NecroSanctuaryWardrobe.cs",
     "Assets/Scripts/NecroSanctuaryMeditation.cs",
@@ -224,7 +225,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.10\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.11\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -264,7 +265,8 @@ for required in ("frames.Frame(", "currentPose", "currentDirection", "FrameCount
     assert required in (creature_anim+frame_library), required
 assert "NecroFrameLibrary.Get(kind,original.sprite)" in creature_anim
 assert "heroineStrikePulse=.53f;" in gameplay
-assert "heroineHitPulse=.27f;" in gameplay
+assert "ApplyHeroDamage(amount);" in gameplay
+assert "heroineHitPulse=.34f;" in (unity/"Assets/Scripts/NecroHeroSurvival.cs").read_text()
 assert "VerifySet(\"necromante\",true);" in frame_editor
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroVisualEditorCheck.Verify();" in builder
@@ -537,8 +539,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.11";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.11";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -627,8 +629,8 @@ assert "new Vector3(4.0f,4.0f,1f)" in fx_source
 assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "mana" not in cast_body  # Basic attack stays free.
-assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.11";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.11";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -669,8 +671,8 @@ assert "new Vector3(1.75f,1.75f,1f)" in fx_source
 assert "new Color(.33f,.95f,.76f,.74f)" in fx_source
 assert 282-78 > 195 and 195-78 > 108, "Spell touch controls overlap"
 assert '"com.takeo.necromancer.unity.preview080"' in builder
-assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.11";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.11";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -705,8 +707,8 @@ assert "ToggleServantTactics);" in hud
 assert "huntOrder=saved.huntOrder;" in crypt
 assert "huntOrder=save.huntOrder;" in crypt
 assert "spellUnlocked=spellUnlocked,huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.11";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.11";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -751,8 +753,8 @@ assert "else if(friendly)FollowNecromancer(self,dt);" in gameplay
 assert "FindServantTarget(self)" in gameplay
 assert "FindServantTarget(boar)" in boar_source
 assert "NecroSaveStore" in crypt and "huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.11";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.11";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -790,8 +792,8 @@ assert "type==5 || type==6 ? .82f" in fx_polish
 assert "type==5 || type==6 ? 10" in fx_polish
 assert "victim.ally);" in gameplay
 assert "const int Capacity=30;" in fx_polish
-assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.11";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.11";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 assert (root/"docs/POLIMENTO_COMBATE_0_9_7.md").is_file()
@@ -855,8 +857,8 @@ assert "type==7 ? new Vector2(0f,.65f)" in fx_source
 assert "type==0 || type==7 || type==8 || type==10?" in fx_source
 assert "const int Capacity=30;" in fx_source
 assert "NecroCombatFx.Emit(victim.body.position,current.root.transform,7," in gameplay
-assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.11";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.11";' in win_builder
 assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
@@ -955,12 +957,63 @@ assert "CreateRestoredActor(record.kind," in crypt_audit
 assert "CreateRestoredActor(item.kind," in crypt_audit
 assert crypt_audit.count("CreateRestoredActor(record.kind,")>=2
 assert "if(!inSanctuary)SaveCompanions();" in crypt_audit
-assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.11";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.11";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 assert (root/"docs/REVISAO_INTEGRADA_COMBATE_0_9_10.md").is_file()
+
+
+# 0.9.11: fatal damage, transient hit protection and a safe recovery loop.
+survival_source=(unity/"Assets/Scripts/NecroHeroSurvival.cs").read_text()
+for token in ("HeroHitInvulnerabilitySeconds=1.10f",
+              "HeroArrivalGraceSeconds=1.10f",
+              "float heroDamageImmuneUntil;",
+              "void ApplyHeroDamage(float damage)",
+              "player.hp=Mathf.Max(0f,player.hp-amount);",
+              "Time.time<heroDamageImmuneUntil",
+              "heroDamageImmuneUntil=Time.time+HeroHitInvulnerabilitySeconds",
+              "if(player.hp<=0f)",
+              "BeginHeroDefeat();",
+              "void BeginHeroDefeat()",
+              "gameOver=true;",
+              "manualQueued=false;",
+              "releasePending=false;",
+              "castTarget=null;",
+              "void DrawHeroDefeatPanel(float width,float height)",
+              "RETORNAR AO REFUGIO",
+              "GUI.Button(action,GUIContent.none,GUIStyle.none)",
+              "KeyCode.Return", "KeyCode.KeypadEnter", "KeyCode.Space",
+              "RecoverAfterDeath();"):
+    assert token in survival_source, "Hero survival missing: "+token
+assert "if(victim==player)" in gameplay
+assert "ApplyHeroDamage(amount);" in gameplay
+assert "if(gameOver)return;" in gameplay.split("void UpdateActors(",1)[1].split(
+    "Actor ClosestPartyMember(",1)[0]
+assert "heroDamageImmuneUntil=Time.time+HeroArrivalGraceSeconds;" in core
+assert "if(gameOver)return;" in core.split("void Update()",1)[1].split(
+    "bool NearSeal()",1)[0]
+assert "if(player==null || level==null || gameOver || inventoryOpen)return;" in core
+assert "DrawHeroDefeatPanel(Screen.width/scale,Screen.height/scale);" in ui
+assert ui.index("if(gameOver)\n            {\n                DrawHeroDefeatPanel") < (
+    ui.index("if(DrawRoster(")), "Death modal must take precedence over roster"
+assert "Time.time<heroDamageImmuneUntil" in animation
+death_recovery=crypt.split("void RecoverAfterDeath()",1)[1].split(
+    "\n        }\n",1)[0]
+for token in ("if(!gameOver || player==null", "Mathf.Min(2,Mathf.Max(0,shards))",
+              "shards-=lost;", "player.hp=Mathf.Max(1f,player.maxHp*.65f);",
+              "mana=maxMana;", "gameOver=false;", "EnterSanctuary();",
+              "SaveCompanions();", "SaveProgress();"):
+    assert token in death_recovery, "Safe death recovery missing: "+token
+assert "LoadStage(" not in death_recovery, "Death must return to the refuge"
+assert 'PlayerSettings.bundleVersion = "0.9.11";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.11";' in win_builder
+assert '"com.takeo.necromancer.unity.preview080"' in builder
+assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
+assert (root/"docs/VIDA_DERROTA_RECUPERACAO_0_9_11.md").is_file()
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "

@@ -84,7 +84,7 @@ namespace Necromancer.EditorTools
                     "com.takeo.necromancer.unity");
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
-            PlayerSettings.bundleVersion = "0.9.10";
+            PlayerSettings.bundleVersion = "0.9.11";
             PlayerSettings.Android.bundleVersionCode = 20;
             if(preview)
             {

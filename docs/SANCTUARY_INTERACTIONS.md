@@ -186,3 +186,8 @@ Os temporizadores de ataque físico e invocação passaram a controlar animaçõ
 ## 0.9.10 — Revisão integrada e estabilidade
 
 Após o teste inicial bem-sucedido da 0.9.9 no Windows, foi feita uma auditoria das interações entre combate, servos, reanimação e salvamento. Corrigidos: (1) limite de comando ao chamar servos recolhidos; (2) salvamento periódico agendado a cada 15 segundos e em suspensão/saída; (3) restauração de Rotboars usando sua fábrica especializada. Sem alterações de dano, custo, animações ou arte. Ver [revisão integrada 0.9.10](REVISAO_INTEGRADA_COMBATE_0_9_10.md) para cobertura, testes e a questão de invulnerabilidade da protagonista, mantida intencionalmente até existir um fluxo de derrota seguro.
+
+
+## 0.9.11 — Vida, derrota e recuperação
+
+Os inimigos agora reduzem a vida da necromante; cada impacto concede 1,1 segundo de invulnerabilidade temporária. Ao chegar a 0 HP, o combate para e abre uma tela de derrota com botão RETORNAR AO REFÚGIO (clique, toque, Enter ou Espaço). A recuperação restaura 65% da vida, 100% da ânima e desconta até 2 fragmentos, preservando servos e progressão. Veja [guia de vida e derrota](VIDA_DERROTA_RECUPERACAO_0_9_11.md). O save v1 e os workflows manuais continuam os mesmos.

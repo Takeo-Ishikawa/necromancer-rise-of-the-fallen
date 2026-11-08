@@ -74,3 +74,8 @@ As animações e os efeitos da necromante são compartilhados pelos builds Windo
 ### 0.9.10 — Estabilização antes da próxima compilação
 
 A revisão acrescentou salvamento periódico agendado (15 s), gravação de progresso ao suspender ou sair, proteção do limite de comando em Meus servos e fábrica correta para restaurar Rotboars. A assinatura/ID Android e o formato de save v1 não foram alterados. A versão 0.9.10 deve ser testada manualmente no workflow da plataforma escolhida; nenhum workflow automático de build foi introduzido.
+
+
+### 0.9.11 — Teste de vida e derrota
+
+Para validar o novo risco de combate, compile manualmente Windows x64 ou Android e teste danos, proteção após acertos, tela de derrota e retorno à câmara segura. Não há novos recursos gráficos, mudança de save, assinatura, pacote Android nem gatilhos automáticos de build.
