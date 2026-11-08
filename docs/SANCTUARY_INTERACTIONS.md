@@ -143,3 +143,16 @@ Um círculo ritual esverdeado aparece brevemente na necromante e em até oito se
 6. Confirme a funcionalidade por **R** e clique no Windows e por toque no Android. Teste também Pulso Necrótico e ataque básico, que continuam independentes.
 
 O código foi atualizado e exige **compilação manual e teste em Unity** antes de considerar a versão validada em runtime.
+
+
+## 0.9.5 — Posturas táticas dos servos: Caça e Defesa
+
+A interface de combate agora oferece o botão **POSTURA: DEFESA / POSTURA: CAÇA** acima dos botões ORDEM, PULSO e ATACAR, sem cobrir suas áreas de toque. É possível alternar a postura pela tecla **T** no Windows, pelo mouse ou por toque no Android. O joystick ignora os toques sobre o botão, e a mudança só acontece em combate, sem nenhum custo de ânima. O modo é salvo imediatamente no campo `huntOrder` que já existia no `necro-save-v1.json`; se a gravação falhar, a postura anterior é restaurada.
+
+**DEFESA (padrão)**: os servos atacam automaticamente hostis próximos à necromante (até 3,8 unidades do jogador e 3,6 unidades do próprio servo), voltando à formação quando não há ameaça válida. **CAÇA**: procuram inimigos num raio maior (6,3 unidades da necromante e 5,6 unidades do servo), mantendo a linha de visão e sem se afastar indefinidamente. Em ambos os modos, um servo a mais de 6,5 unidades da necromante abandona a perseguição e tenta retornar à formação. Obstáculos continuam bloqueando movimento e linha de visão.
+
+O novo método `FindServantTarget` é compartilhado por **Grave Pups, Rotboars e servos genéricos**. Isso permite aos dois tipos especiais participar do combate automático sem depender sempre de um alvo marcado pelo ataque manual. A **Ordem dos Mortos** ainda tem prioridade enquanto seu alvo for válido, seguida do alvo manual da necromante e depois da busca automática de Caça/Defesa. Depois da recarga/duração, o foco do comando não substitui a ordem manual. Um alvo morto é descartado sem apagar as ordens dos demais servos. O modo escolhido permanece ativo após trocar de região, voltar ao refúgio e reiniciar o jogo.
+
+**Compatibilidade:** o sistema não adiciona campos de save, sprites ou texturas. Os bônus e custos das habilidades 0.9.3 e 0.9.4 foram mantidos. A versão visível passa a **0.9.5**, preservando o package ID, os Secrets de assinatura Android e os workflows de compilação separados e manuais.
+
+**Testes sugeridos:** alternar entre Caça e Defesa com T/clique/toque; testar Grave Pups e Rotboars ao lado de inimigos sem atacar manualmente; aproximar-se e afastar-se para conferir alcance da perseguição; verificar obstruções e retorno à formação; confirmar a prioridade da Ordem dos Mortos e do ataque manual; fechar e reabrir o jogo e conferir se a postura continua selecionada; testar cliques sobre os três botões de combate sem movimentar o joystick. A compilação Unity e o teste de jogabilidade devem ser feitos manualmente antes de tratar a 0.9.5 como validada.

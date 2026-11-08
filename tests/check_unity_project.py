@@ -38,6 +38,7 @@ required = [
     "Assets/Scripts/NecroSkillTree.cs",
     "Assets/Scripts/NecroSoulPulse.cs",
     "Assets/Scripts/NecroGraveCommand.cs",
+    "Assets/Scripts/NecroServantTactics.cs",
     "Assets/Scripts/NecroProgressHud.cs",
     "Assets/Resources/Data/sanctuary_interactions.json",
     "Assets/Resources/Sprites/necromante.png",
@@ -220,7 +221,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.4\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.5\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -533,8 +534,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.4";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.4";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.5";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.5";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -621,8 +622,8 @@ assert "new Vector3(4.0f,4.0f,1f)" in fx_source
 assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "mana" not in cast_body  # Basic attack stays free.
-assert 'PlayerSettings.bundleVersion = "0.9.4";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.4";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.5";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.5";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -652,19 +653,55 @@ assert "ReadGraveCommandInput(scale);" in pulse_source
 assert "graveCommandUntil=0f;" in pulse_source
 assert "graveCommandTarget=null;" in pulse_source
 assert "GraveCommandSpeedMultiplier(actor)" in gameplay
-assert "GraveCommandActive && graveCommandTarget!=null" in gameplay
+assert "FindServantTarget(self)" in gameplay
 assert "GraveCommandDamageMultiplier" in skill_source
 assert "GraveCommandButtonRect(scale).Contains(gui)" in ui
 assert "DrawGraveCommandButton(scale);" in ui
 boar_source=(unity/"Assets/Scripts/NecroRotboar.cs").read_text()
-assert "GraveCommandActive && graveCommandTarget!=null" in boar_source
+assert "FindServantTarget(boar)" in boar_source
 assert 'type==4?"Order of the Dead"' in fx_source
 assert "new Vector3(1.75f,1.75f,1f)" in fx_source
 assert "new Color(.33f,.95f,.76f,.74f)" in fx_source
 assert 282-78 > 195 and 195-78 > 108, "Spell touch controls overlap"
 assert '"com.takeo.necromancer.unity.preview080"' in builder
-assert 'PlayerSettings.bundleVersion = "0.9.4";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.4";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.5";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.5";' in win_builder
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
+
+
+# 0.9.5: shared companion targeting and persistent Hunt / Defend stance.
+tactics_source=(unity/"Assets/Scripts/NecroServantTactics.cs").read_text()
+for token in ("ServantLeashDistance=6.5f",
+              "HuntPlayerRange=6.3f", "DefensePlayerRange=3.8f",
+              "HuntServantRange=5.6f", "DefenseServantRange=3.6f",
+              "IsCompanionTargetValid(Actor ally,Actor enemy,",
+              "Actor FindServantTarget(Actor ally)", "!enemy.ally",
+              "Visible(ally.body.position,enemy.body.position)",
+              "GraveCommandActive &&", "servantOrder,6.3f,6.2f",
+              "TacticModeButtonRect(float scale)",
+              "CanChangeTacticMode()", "ToggleServantTactics()",
+              "ReadServantTacticsInput(float scale)",
+              "DrawServantTacticsButton(float scale)",
+              "Input.GetKeyDown(KeyCode.T)", "TouchPhase.Began",
+              "Input.GetMouseButtonDown(0)", "huntOrder=!huntOrder;",
+              "if(!SaveProgress())", "huntOrder=previous;"):
+    assert token in tactics_source, "Tactics integration incomplete: "+token
+assert "FindServantTarget(self)" in gameplay
+assert "FindServantTarget(boar)" in boar_source
+assert "else if(friendly)FollowNecromancer(self,dt);" in gameplay
+assert "Actor prey=friendly?FindServantTarget(self)" in gameplay
+assert "servantOrder=null;" not in gameplay.split(
+    "void UpdateActors(",1)[1].split("void Damage(",1)[0], "Pup AI must not clear manual orders"
+assert "ReadServantTacticsInput(scale);" in pulse_source
+assert "TacticModeButtonRect(scale).Contains(gui)" in ui
+assert "DrawServantTacticsButton(scale);" in ui
+assert "ToggleServantTactics);" in hud
+assert "huntOrder=saved.huntOrder;" in crypt
+assert "huntOrder=save.huntOrder;" in crypt
+assert "spellUnlocked=spellUnlocked,huntOrder=huntOrder" in crypt
+assert 'PlayerSettings.bundleVersion = "0.9.5";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.5";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 

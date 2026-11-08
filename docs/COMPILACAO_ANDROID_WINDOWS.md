@@ -54,3 +54,8 @@ A nova habilidade ativa utiliza **Q** no Windows e um botão na interface Androi
 ### 0.9.4 — Ordem dos Mortos
 
 O comando temporário para servos é compartilhado entre Windows (tecla R / clique) e Android (botão ORDEM). Os dois workflows permanecem **manuais e independentes**. A versão de exibição foi atualizada para 0.9.4 e a assinatura/identificador da prévia Android não mudaram. O estado temporário do comando não altera o formato do save.
+
+
+### 0.9.5 — Controle tático do exército
+
+O modo Caça/Defesa tem tecla **T** no Windows e botão dedicado no Android, usa o mesmo save v1 e os mesmos assets da Unity. A seleção da plataforma permanece manual na aba Actions: nenhuma compilação automática foi adicionada.
