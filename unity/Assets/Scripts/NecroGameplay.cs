@@ -208,6 +208,8 @@ namespace Necromancer
                 if(self.hp<=0)continue;
                 self.cooldown=Mathf.Max(0,self.cooldown-dt);
                 self.flash=Mathf.Max(0,self.flash-dt);
+                // Visual emergence must complete before newly bound souls fight.
+                if(friendly && Time.time<self.reanimationUntil)continue;
                 if(self.kind=="rotboar")
                 {
                     UpdateRotboar(self,dt);
@@ -337,7 +339,13 @@ namespace Necromancer
                 if(!victim.ally)current.fallenPups.Add(victim.view);
             }
             else if(victim.kind=="rotboar")StartCoroutine(FallRotboar(victim));
-            else Destroy(victim.body.gameObject);
+            else if(victim.ally)
+            {
+                // Summoned creatures dissipate; they cannot be resurrected.
+                if(victim.view!=null)victim.view.FallToCorpse(0f);
+                else Destroy(victim.body.gameObject);
+            }
+            else SpawnRecoverableCorpse(victim);
             // Defeated hostiles award XP exactly once, including servant kills.
             if(!victim.ally)AwardMeditationExperience(victim.kind);
         }
@@ -386,40 +394,65 @@ namespace Necromancer
 
         bool CanBindNearby()
         {
-            return NearbyFallenPup()!=null || NearbyFallenBoar()!=null;
+            return NearbyCorpse()!=null || NearbyFallenPup()!=null ||
+                NearbyFallenBoar()!=null;
         }
 
         void BindNearbyCreature()
         {
+            var corpse=NearbyCorpse();
             var boar=NearbyFallenBoar();
             var pup=NearbyFallenPup();
-            if(boar==null || (pup!=null &&
-                Vector2.Distance(player.body.position,pup.transform.position)<
-                Vector2.Distance(player.body.position,boar.body.position)))
+            float cd=corpse!=null ?
+                Vector2.Distance(player.body.position,corpse.body.position):
+                float.MaxValue;
+            float bd=boar!=null ?
+                Vector2.Distance(player.body.position,boar.body.position):
+                float.MaxValue;
+            float pd=pup!=null ?
+                Vector2.Distance(player.body.position,pup.transform.position):
+                float.MaxValue;
+            if(corpse!=null && cd<=bd && cd<=pd)
+            {
+                Raise();
+                return;
+            }
+            if(pup!=null && pd<=bd)
             {
                 BindNearbyPup();
                 return;
             }
+            if(boar==null)return;
+            if(CommandUsed()+CommandCost(boar.kind)>CommandLimit)
+            {
+                Announce("Comando cheio. Dispense um servo.");return;
+            }
             Vector2 at=boar.body.position;
-            servants.Add(CreateRotboar(at,persistentRoot.transform,true));
+            Actor servant=CreateRotboar(at,persistentRoot.transform,true);
+            servants.Add(servant);
             current.fallenBoars.Remove(boar);
             Destroy(boar.body.gameObject);
-            NecroCombatFx.Emit(at,current.root.transform,1);
-            heroineRaisePulse=.92f;
+            AnimateReanimation(servant,at);
             SaveCompanions();
+            SaveProgress();
         }
 
         void BindNearbyPup()
         {
             var pup=NearbyFallenPup();
             if(pup==null)return;
+            if(CommandUsed()+CommandCost("grave_pup")>CommandLimit)
+            {
+                Announce("Comando cheio. Dispense um servo.");return;
+            }
             Vector2 at=pup.transform.position;
-            servants.Add(Create("grave_pup",at,true,persistentRoot.transform));
+            Actor servant=Create("grave_pup",at,true,persistentRoot.transform);
+            servants.Add(servant);
             current.fallenPups.Remove(pup);
             Destroy(pup.gameObject);
-            NecroCombatFx.Emit(at,current.root.transform,1);
-            heroineRaisePulse=.92f;
+            AnimateReanimation(servant,at);
             SaveCompanions();
+            SaveProgress();
         }
 
         Actor Closest(float maxDistance)
@@ -509,25 +542,26 @@ namespace Necromancer
             for(int i=current.corpses.Count-1;i>=0;i--)
             {
                 Corpse body=current.corpses[i];
+                if(body==null || body.body==null)
+                {
+                    current.corpses.RemoveAt(i);
+                    continue;
+                }
                 body.time-=dt;
-                if(body.time<=0)
+                if(body.time<=0f)
                 {
                     Destroy(body.body.gameObject);
                     current.corpses.RemoveAt(i);
                 }
+                else if(body.view!=null)
+                    body.view.SetCorpseRemaining(body.time);
             }
             hitFlash=Mathf.Max(0,hitFlash-dt);
         }
         void Raise()
         {
             if(player.hp<=0 || upgradeOpen)return;
-            Corpse nearest=null;
-            float best=1.3f;
-            foreach(Corpse body in current.corpses)
-            {
-                float d=Vector2.Distance(body.body.position,player.body.position);
-                if(d<best){best=d;nearest=body;}
-            }
+            Corpse nearest=NearbyCorpse();
             if(nearest==null){Announce("Aproxime-se de um cadaver.");return;}
             int cost=SkillRaiseManaCost(nearest.kind),command=CommandCost(nearest.kind);
             if(CommandUsed()+command>CommandLimit)
@@ -536,10 +570,10 @@ namespace Necromancer
             }
             if(mana<cost){Announce("Anima insuficiente para ressuscitar.");return;}
             mana-=cost;
-            Actor servant=Create(nearest.kind,nearest.body.position,true,persistentRoot.transform);
+            Vector2 at=nearest.body.position;
+            Actor servant=Create(nearest.kind,at,true,persistentRoot.transform);
             servants.Add(servant);
-            heroineRaisePulse=.92f;
-            NecroCombatFx.Emit(nearest.body.position,current.root.transform,1);
+            AnimateReanimation(servant,at);
             if(IsBoss(nearest.kind))current.bossBound=true;
             Destroy(nearest.body.gameObject);
             current.corpses.Remove(nearest);

@@ -24,6 +24,7 @@ namespace Necromancer
             public bool pupHit,catchingUp;
             public float followStragglerSeconds;
             public bool ally;
+            public float reanimationUntil;
             public NecroCreatureView view;
         }
         class Corpse
@@ -31,6 +32,7 @@ namespace Necromancer
             public string kind;
             public Transform body;
             public float time;
+            public NecroCreatureView view;
         }
         class Projectile
         {
@@ -281,6 +283,7 @@ namespace Necromancer
             }
             if(!inSanctuary)UpdateActors(current.enemies,dt,false);
             UpdateActors(servants,dt,true);
+            if(!inSanctuary)TickCorpses(dt);
             if(!inSanctuary)UpdateProjectiles(dt);
             if(!inSanctuary)TickRespawns(dt);
             AnimateHeroVisual(dt);
