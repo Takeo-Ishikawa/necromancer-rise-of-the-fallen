@@ -272,7 +272,11 @@ namespace Necromancer
             }
             if(inSanctuary)ReadSanctuaryInteractionKey();
             Regenerate(dt);
-            if(!inSanctuary)ReadManualAttack(hudScale);
+            if(!inSanctuary)
+            {
+                ReadActiveSkillInput(hudScale);
+                ReadManualAttack(hudScale);
+            }
             if(!inSanctuary)UpdateActors(current.enemies,dt,false);
             UpdateActors(servants,dt,true);
             if(!inSanctuary)UpdateProjectiles(dt);

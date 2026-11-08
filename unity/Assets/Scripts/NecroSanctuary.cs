@@ -42,6 +42,7 @@ namespace Necromancer
         void ResetTravelCombat()
         {
             manualQueued=false;
+            ResetActiveSkillInput();
             releasePending=false;
             castTarget=null;
             servantOrder=null;

@@ -36,6 +36,7 @@ namespace Necromancer
         {
             Vector2 gui=new Vector2(point.x,Screen.height-point.y)/scale;
             if(SanctuaryTravelAvailable() && SanctuaryTravelRect(scale).Contains(gui))return false;
+            if(!inSanctuary && SoulPulseButtonRect(scale).Contains(gui))return false;
             if(NearbySanctuaryStation()!=null &&
                SanctuaryInteractionButtonRect(scale).Contains(gui))return false;
             return !RosterButton.Contains(gui) && point.x<Screen.width*.65f &&
@@ -180,8 +181,12 @@ namespace Necromancer
             DrawProgressOverlay(Screen.width/scale,Screen.height/scale);
             if(pearl==null)pearl=Resources.Load<Texture2D>("HUD/pearl");
             Rect button=AttackRect(scale);
-            if(!inSanctuary)DrawAction(button,false,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",
-                Time.time>=castCooldown);
+            if(!inSanctuary)
+            {
+                DrawAction(button,false,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",
+                    Time.time>=castCooldown);
+                DrawSoulPulseButton(scale);
+            }
             if(!inSanctuary && CanBindNearby())DrawAction(BindRect(scale),true,"ERGUER",true);
             if(joystickFingerId!=-1)
             {
