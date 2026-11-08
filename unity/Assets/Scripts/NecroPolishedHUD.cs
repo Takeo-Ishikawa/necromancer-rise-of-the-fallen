@@ -296,6 +296,10 @@ namespace Necromancer
                 "FOCO ARCANO    GRAU "+staffTier+"/3",hudValue);
             GUI.Label(new Rect(r.x+15,r.y+91,r.width-30,30),
                 "MANTO    GRAU "+mantleTier+"/3",hudValue);
+            GUI.Label(new Rect(r.x+15,r.y+122,r.width-30,20),
+                "+"+(mantleTier*18)+" HP | -"+
+                Mathf.RoundToInt(MantleDamageReduction()*100f)+
+                "% dano recebido",hudSmall);
             if(GUI.Button(new Rect(r.x+35,r.y+144,r.width-70,39),
                 "FECHAR",buttonStyle))gearInspect=false;
         }

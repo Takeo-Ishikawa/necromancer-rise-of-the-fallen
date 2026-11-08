@@ -63,3 +63,7 @@ As próximas previews Unity usam sempre o mesmo identificador Android e uma assi
 ### Compilações seletivas Windows/Android
 
 Agora você escolhe a plataforma na aba Actions: [Unity Android Preview APK](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/unity-android.yml) ou [Unity Windows x64 Preview](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/workflows/unity-windows.yml). **Ambos são manuais**, não executam no mesmo commit. Guia: [Compilação Android e Windows](docs/COMPILACAO_ANDROID_WINDOWS.md).
+
+### 0.9.13 — Defesa e recuperação
+
+O manto reduz 6% do dano recebido por grau, até 18%, além dos bônus de vida existentes. A fonte arcana passa a recuperar 30% da vida máxima por acionamento (mínimo de 18 HP), respeitando sua recarga. Saves, ID da preview e workflows manuais são preservados. [Regras e verificações](docs/DEFESA_E_RECUPERACAO_0_9_13.md).

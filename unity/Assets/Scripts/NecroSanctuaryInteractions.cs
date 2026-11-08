@@ -123,9 +123,13 @@ namespace Necromancer
             fountainSpeedBonus = Mathf.Clamp(station.speedMultiplier, 1f, 2f);
             fountainBuffUntil = Time.time + duration;
             stationCooldowns[station.id] = Time.time + cooldown;
+            // Proximity and cooldown are checked before granting this heal.
+            float healed=RecoverFountainHealth();
             NecroCombatFx.Emit(player.body.position, sanctuary.root.transform, 1);
-            Announce("Bencao arcana: +dano e +velocidade durante " +
-                Mathf.CeilToInt(duration) + "s.");
+            Announce("Bencao arcana: +dano e +velocidade por " +
+                Mathf.CeilToInt(duration) + "s; +" +
+                Mathf.CeilToInt(healed) + " vida.");
+            SaveProgress();
             UpdateSanctuaryInteractionVisual();
         }
 
@@ -179,7 +183,7 @@ namespace Necromancer
                     button.width + 4f, 24f),
                 station.kind == "wardrobe" ? "GUARDA-ROUPA  |  EQUIPAMENTOS" :
                 station.kind == "meditation" ? "ALTAR  |  ATRIBUTOS PERMANENTES" :
-                "FONTE ARCANA  |  +25% DANO  +20% VELOCIDADE", smallStyle);
+                "FONTE ARCANA  |  CURA + BENCAO TEMPORARIA", smallStyle);
             GUI.enabled = !active && cooldown <= 0f && !gameOver;
             if(GUI.Button(button, caption, buttonStyle))
                 ActivateSanctuaryStation(station);

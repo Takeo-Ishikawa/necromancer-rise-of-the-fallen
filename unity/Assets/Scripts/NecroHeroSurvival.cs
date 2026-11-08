@@ -17,7 +17,8 @@ namespace Necromancer
         {
             if(inSanctuary || gameOver || player==null ||
                 player.hp<=0f || Time.time<heroDamageImmuneUntil)return;
-            float amount=Mathf.Max(1f,damage*IncomingHeroDamageMultiplier());
+            float scaledDamage=damage*IncomingHeroDamageMultiplier();
+            float amount=Mathf.Max(1f,MitigateHeroDamage(scaledDamage));
             float before=player.hp;
             player.hp=Mathf.Max(0f,player.hp-amount);
             if(before>player.maxHp*.25f && player.hp>0f &&

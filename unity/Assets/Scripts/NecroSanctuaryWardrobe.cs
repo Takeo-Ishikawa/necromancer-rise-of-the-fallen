@@ -214,7 +214,9 @@ namespace Necromancer
                 (staffTier*8)+" projetil",FocusUpgradeCost(),true);
             DrawWardrobeGearCard(new Rect(x+15f,y+226f,w-30f,122f),
                 "MANTO",mantleTier,
-                "Bonus: +"+(mantleTier*18)+" vida maxima",
+                "Bonus: +"+(mantleTier*18)+" vida | -"+
+                Mathf.RoundToInt(MantleDamageReduction()*100f)+
+                "% dano recebido",
                 MantleUpgradeCost(),false);
 
             GUI.Label(new Rect(x+16f,y+357f,w-32f,25f),
