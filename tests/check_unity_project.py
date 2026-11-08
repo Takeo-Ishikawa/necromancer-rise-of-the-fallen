@@ -23,6 +23,7 @@ required = [
     "Assets/Scripts/NecroPolishedHUD.cs",
     "Assets/Scripts/NecroCreatureArt.cs",
     "Assets/Scripts/NecroCreatureView.cs",
+    "Assets/Scripts/NecroCorpseRitual.cs",
     "Assets/Scripts/NecroFrameLibrary.cs",
     "Assets/Scripts/NecroHeroSheetBuilder.cs",
     "Assets/Scripts/NecroHeroPaintedSource.cs",
@@ -222,7 +223,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.7\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.8\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -535,8 +536,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -624,8 +625,8 @@ assert "new Vector3(4.0f,4.0f,1f)" in fx_source
 assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "mana" not in cast_body  # Basic attack stays free.
-assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -666,8 +667,8 @@ assert "new Vector3(1.75f,1.75f,1f)" in fx_source
 assert "new Color(.33f,.95f,.76f,.74f)" in fx_source
 assert 282-78 > 195 and 195-78 > 108, "Spell touch controls overlap"
 assert '"com.takeo.necromancer.unity.preview080"' in builder
-assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -702,8 +703,8 @@ assert "ToggleServantTactics);" in hud
 assert "huntOrder=saved.huntOrder;" in crypt
 assert "huntOrder=save.huntOrder;" in crypt
 assert "spellUnlocked=spellUnlocked,huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -748,8 +749,8 @@ assert "else if(friendly)FollowNecromancer(self,dt);" in gameplay
 assert "FindServantTarget(self)" in gameplay
 assert "FindServantTarget(boar)" in boar_source
 assert "NecroSaveStore" in crypt and "huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -787,11 +788,78 @@ assert "type==5 || type==6 ? .82f" in fx_polish
 assert "type==5 || type==6 ? 10" in fx_polish
 assert "victim.ally);" in gameplay
 assert "const int Capacity=30;" in fx_polish
-assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 assert (root/"docs/POLIMENTO_COMBATE_0_9_7.md").is_file()
+
+
+# 0.9.8: ordinary enemies become boundable corpses. Reanimation and
+# compatible saves must work across combat, mobile touch and Windows E.
+corpse_source=(unity/"Assets/Scripts/NecroCorpseRitual.cs").read_text()
+creature_v=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
+roster_source=(unity/"Assets/Scripts/NecroRoster.cs").read_text()
+boar_source=(unity/"Assets/Scripts/NecroRotboar.cs").read_text()
+fx_source=(unity/"Assets/Scripts/NecroCombatFx.cs").read_text()
+for token in ("OrdinaryCorpseLifetime=14f", "OrdinaryCorpseLimit=16",
+              "void SpawnRecoverableCorpse(Actor victim)",
+              "victim.view.FallToCorpse(OrdinaryCorpseLifetime);",
+              "current.corpses.Add(new Corpse{", "Corpse NearbyCorpse()",
+              "Visible(player.body.position,entry.body.position)",
+              "void AnimateReanimation(Actor servant,Vector2 at)",
+              "servant.reanimationUntil=Time.time+SoulReanimationDuration",
+              "servant.view.Reanimate()", "StartCoroutine(ReanimateRotboar(servant))",
+              "IEnumerator ReanimateRotboar(Actor boar)"):
+    assert token in corpse_source, "Corpse ritual missing: "+token
+for token in ("public void FallToCorpse(float remaining,bool restored=false)",
+              "public void SetCorpseRemaining(float remaining)",
+              "public void Reanimate()", "void AnimateOrdinaryCorpse(float dt)",
+              "void ApplyReanimationVisual(float dt)",
+              "corpseAutoCleanup", "if(corpseMode)",
+              "artRenderer.sprite=frames.Frame(NecroPose.Hurt,",
+              "ApplyReanimationVisual(dt);"):
+    assert token in creature_v, "Death/awakening animation missing: "+token
+assert "else SpawnRecoverableCorpse(victim);" in gameplay
+assert "else if(victim.ally)" in gameplay
+assert "TickCorpses(dt);" in core
+assert "if(!inSanctuary)TickCorpses(dt);" in core
+assert "body.view.SetCorpseRemaining(body.time);" in gameplay
+assert "if(friendly && Time.time<self.reanimationUntil)continue;" in gameplay
+assert "public float reanimationUntil;" in core
+assert "public NecroCreatureView view;" in core
+assert "return NearbyCorpse()!=null || NearbyFallenPup()!=null" in gameplay
+assert "if(corpse!=null && cd<=bd && cd<=pd)" in gameplay
+assert "Corpse nearest=NearbyCorpse();" in gameplay
+assert "Actor servant=nearest.kind==\"rotboar\"" in gameplay
+assert "AnimateReanimation(servant,at);" in gameplay
+assert "Input.GetKeyDown(KeyCode.E) && CanBindNearby()" in ui
+assert 'CanBindNearby())DrawAction(BindRect(scale),true,"ERGUER",true)' in ui
+assert "foreach(Corpse previous in current.corpses)" in crypt
+assert "current.corpses.Clear();" in crypt
+assert "shell.view.FallToCorpse(remaining,true);" in crypt
+assert "body.time=remaining" in crypt or "time=remaining" in crypt
+assert "state.corpses=corpses.ToArray();" in crypt
+assert "if(record.kind==\"necromante\")" not in roster_source
+assert "record.kind==\"necromante\")continue;" in roster_source
+assert "CommandUsed()+CommandCost(a.kind)<=CommandLimit" in roster_source
+assert "NecroArt.Get(a.kind)" in roster_source
+assert "SaveCompanions();" in gameplay.split("void Raise()",1)[1].split("void Dismiss()",1)[0]
+assert "SaveCompanions();" in gameplay.split("void Dismiss()",1)[1].split("void SpawnDrop(",1)[0]
+assert "float remaining=3f;" in boar_source
+assert "Mathf.Clamp01(remaining/.72f)" in boar_source
+assert 'type==7?"Departing Soul"' in fx_source
+assert "type==7 ? new Vector2(0f,.65f)" in fx_source
+assert "type==0 || type==7?" in fx_source
+assert "const int Capacity=30;" in fx_source
+assert "NecroCombatFx.Emit(victim.body.position,current.root.transform,7," in gameplay
+assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
+assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
+assert '"com.takeo.necromancer.unity.preview080"' in builder
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
+assert (root/"docs/POLIMENTO_MORTE_REANIMACAO_0_9_8.md").is_file()
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
