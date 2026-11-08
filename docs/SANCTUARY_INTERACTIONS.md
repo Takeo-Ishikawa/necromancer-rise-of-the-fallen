@@ -93,3 +93,14 @@ Teste sugerido: derrotar criaturas até nível 3, abrir o altar, escolher HABILI
 
 
 **Correção adicional de combate (0.9.1):** a função de regeneração já estava definida mas não era chamada por `Update`. Agora `Regenerate(dt)` roda regularmente; ao atingir a ânima máxima, limpa o acumulador fracionário para impedir que ela fique estocada invisivelmente e se recupere instantaneamente depois de um gasto. Fluxo de Ânima amplia a taxa de regeneração já ativa.
+
+
+## 0.9.2 — Progresso legível e redistribuição de habilidades
+
+O altar exibe agora o **nível, pontos disponíveis de atributos e habilidades, XP atual e barra de progresso**. A aba selecionada recebe um destaque discreto e as habilidades aprendidas aparecem com linha superior esverdeada; habilidades disponíveis e bloqueadas possuem estados visuais diferentes. O conteúdo continua rolável e não usa imagens extras.
+
+No final da aba HABILIDADES existe **REORGANIZAR PONTOS**, disponível após aprender pelo menos uma habilidade. A operação custa **8 + 4 fragmentos por habilidade aprendida**, exige uma confirmação explícita e devolve todos os pontos de habilidade, preservando os pontos e os graus de Vitalidade, Poder e Agilidade. O custo e o estado da árvore são gravados juntos; se o salvamento falhar, os recursos e habilidades originais são restaurados. O comando só funciona dentro da câmara segura.
+
+A interface do jogo também passa a mostrar uma barra compacta de XP na caverna, o total de pontos pendentes para o altar e os avisos temporários de combate/subida de nível. Antes, o código gerava alguns avisos que não apareciam quando o HUD antigo não era desenhado. A implementação usa exclusivamente a interface IMGUI e as cores já presentes no jogo.
+
+**Compatibilidade:** o save v1 e os seis bits da árvore permanecem iguais. A versão de exibição é 0.9.2; o identificador/assinatura Android e os workflows manuais de Windows e Android não mudaram. Para testar, subir de nível, verificar XP e avisos, comprar duas habilidades, reorganizar com confirmação e reiniciar para conferir o save. Nenhuma compilação foi executada automaticamente.

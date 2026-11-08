@@ -177,6 +177,7 @@ namespace Necromancer
                 DrawSanctuaryMeditationPanel(Screen.width/scale,Screen.height/scale);
                 return;
             }
+            DrawProgressOverlay(Screen.width/scale,Screen.height/scale);
             if(pearl==null)pearl=Resources.Load<Texture2D>("HUD/pearl");
             Rect button=AttackRect(scale);
             if(!inSanctuary)DrawAction(button,false,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",

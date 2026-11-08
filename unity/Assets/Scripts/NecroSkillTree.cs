@@ -11,7 +11,7 @@ namespace Necromancer
     {
         const int SkillTreeNodeCount=6;
         int learnedSkillMask;
-        bool meditationSkillsTab;
+        bool meditationSkillsTab,skillRespecConfirm;
         Vector2 meditationAttributeScroll,meditationSkillScroll;
 
         static readonly int[] SkillPrerequisite={-1,0,-1,2,-1,4};
@@ -90,6 +90,41 @@ namespace Necromancer
             return baseDamage*(SkillUnlocked(4)?1.12f:1f);
         }
 
+        int SkillRespecCost()
+        {
+            // A moderate fragment sink makes experimenting with builds viable
+            // without granting free resets during boss encounters.
+            return 8+4*LearnedSkillCount();
+        }
+
+        void ResetLearnedSkills()
+        {
+            if(!inSanctuary || !meditationOpen || !meditationSkillsTab ||
+                !skillRespecConfirm || gameOver || LearnedSkillCount()==0)return;
+            int price=SkillRespecCost();
+            if(shards<price)
+            {
+                skillRespecConfirm=false;
+                Announce("Fragmentos insuficientes para redistribuir.");
+                return;
+            }
+            int previousMask=learnedSkillMask,previousShards=shards;
+            learnedSkillMask=0;
+            shards-=price;
+            // Roll back if permanent storage fails: no resources should be
+            // consumed by a failed save operation.
+            if(!SaveProgress())
+            {
+                learnedSkillMask=previousMask;
+                shards=previousShards;
+                skillRespecConfirm=false;
+                Announce("Nao foi possivel salvar a redistribuicao.");
+                return;
+            }
+            skillRespecConfirm=false;
+            Announce("Habilidades redistribuidas; pontos devolvidos.");
+        }
+
         void UnlockSkillTreeNode(int index)
         {
             if(!inSanctuary || !meditationOpen || !meditationSkillsTab ||
@@ -110,6 +145,11 @@ namespace Necromancer
             bool available=!unlocked && prerequisiteMet && AvailableSkillPoints()>0;
             DrawWardrobeSurface(area,WardrobeCardBackground,
                 unlocked?WardrobeEdge:WardrobeMutedEdge);
+            FillUi(new Rect(area.x+2f,area.y+2f,
+                area.width-4f,3f),unlocked ?
+                    new Color(.67f,.88f,.73f,.9f) :
+                    prerequisiteMet ? new Color(.77f,.61f,.92f,.7f) :
+                    new Color(.40f,.35f,.47f,.55f));
             float pad=8f;
             GUI.Label(new Rect(area.x+pad,area.y+4f,area.width-pad*2f,24f),
                 SkillNames[id],wardrobeSectionStyle);
@@ -126,7 +166,7 @@ namespace Necromancer
         void DrawSkillTreeContent(Rect view)
         {
             const float rowHeight=151f;
-            const float totalHeight=463f;
+            const float totalHeight=560f;
             float innerWidth=Mathf.Max(220f,view.width-20f);
             meditationSkillScroll=GUI.BeginScrollView(view,meditationSkillScroll,
                 new Rect(0f,0f,innerWidth,totalHeight),false,true);
@@ -143,6 +183,27 @@ namespace Necromancer
                     SkillUnlocked(branch*2) ? WardrobeEdge:WardrobeMutedEdge);
                 DrawSkillTreeNode(new Rect(left,top+25f,cardWidth,116f),branch*2);
                 DrawSkillTreeNode(new Rect(right,top+25f,cardWidth,116f),branch*2+1);
+            }
+            if(LearnedSkillCount()>0)
+            {
+                float top=461f;
+                GUI.Label(new Rect(6f,top,innerWidth-12f,23f),
+                    "REDISTRIBUIR HABILIDADES - "+
+                    SkillRespecCost()+" FRAGMENTOS",wardrobeResourceStyle);
+                if(skillRespecConfirm)
+                {
+                    float half=(innerWidth-23f)*.5f;
+                    if(WardrobeActionButton(new Rect(6f,top+30f,half,36f),
+                        "CONFIRMAR",shards>=SkillRespecCost()))
+                        ResetLearnedSkills();
+                    if(WardrobeActionButton(new Rect(17f+half,top+30f,
+                        half,36f),"CANCELAR",true))
+                        skillRespecConfirm=false;
+                }
+                else if(WardrobeActionButton(new Rect(6f,top+30f,
+                    innerWidth-12f,36f),"REORGANIZAR PONTOS",
+                    shards>=SkillRespecCost()))
+                    skillRespecConfirm=true;
             }
             GUI.EndScrollView();
         }

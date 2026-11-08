@@ -59,6 +59,7 @@ namespace Necromancer
             if(!inSanctuary || inventoryOpen || wardrobeOpen ||
                 gameOver || player==null)return;
             meditationOpen=true;
+            skillRespecConfirm=false;
             touchMove=Vector2.zero;
             joystickFingerId=-1;
             Announce("Altar: distribua seus pontos de atributo.");
@@ -67,6 +68,7 @@ namespace Necromancer
         void CloseSanctuaryMeditation()
         {
             meditationOpen=false;
+            skillRespecConfirm=false;
             touchMove=Vector2.zero;
             joystickFingerId=-1;
         }
@@ -135,23 +137,39 @@ namespace Necromancer
                 new Color(.56f,.38f,.62f,.12f));
             GUI.Label(new Rect(x+14f,y+8f,w-28f,32f),
                 "ALTAR DE MEDITACAO",wardrobeTitleStyle);
-            GUI.Label(new Rect(x+12f,y+45f,w-24f,25f),
-                "NIVEL "+playerLevel+"  |  PONTOS LIVRES: "+
-                (meditationSkillsTab?AvailableSkillPoints():MeditationPointsAvailable()),
-                wardrobeResourceStyle);
-            FillUi(new Rect(x+17f,y+75f,w-34f,1f),
-                new Color(.70f,.57f,.73f,.68f));
+            GUI.Label(new Rect(x+12f,y+44f,w-24f,23f),
+                "NIVEL "+playerLevel+"   ATRIBUTOS "+
+                MeditationPointsAvailable()+"   HABILIDADES "+
+                AvailableSkillPoints(),wardrobeResourceStyle);
+            GUI.Label(new Rect(x+17f,y+67f,w-34f,14f),
+                "EXPERIENCIA "+experience+"/"+ExperienceThreshold(),
+                wardrobeNoteStyle);
+            FillUi(new Rect(x+18f,y+83f,w-36f,3f),
+                new Color(.23f,.19f,.28f,.93f));
+            FillUi(new Rect(x+18f,y+83f,
+                (w-36f)*Mathf.Clamp01((float)experience/
+                    Mathf.Max(1,ExperienceThreshold())),3f),
+                new Color(.78f,.63f,.92f,.95f));
 
             float tabWidth=(w-42f)*.5f;
-            if(WardrobeActionButton(new Rect(x+15f,y+85f,tabWidth,33f),
+            if(WardrobeActionButton(new Rect(x+15f,y+91f,tabWidth,33f),
                 "ATRIBUTOS",true))
+            {
                 meditationSkillsTab=false;
-            if(WardrobeActionButton(new Rect(x+27f+tabWidth,y+85f,
+                skillRespecConfirm=false;
+            }
+            if(WardrobeActionButton(new Rect(x+27f+tabWidth,y+91f,
                 tabWidth,33f),"HABILIDADES",true))
+            {
                 meditationSkillsTab=true;
+                skillRespecConfirm=false;
+            }
+            FillUi(new Rect(x+15f+(meditationSkillsTab?tabWidth+12f:0f),
+                y+126f,tabWidth,2f),
+                new Color(.87f,.76f,.97f,.9f));
 
-            Rect viewport=new Rect(x+14f,y+127f,w-28f,
-                Mathf.Max(55f,h-207f));
+            Rect viewport=new Rect(x+14f,y+133f,w-28f,
+                Mathf.Max(55f,h-213f));
             if(meditationSkillsTab)DrawSkillTreeContent(viewport);
             else DrawMeditationAttributesContent(viewport);
 

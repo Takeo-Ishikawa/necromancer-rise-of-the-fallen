@@ -36,6 +36,7 @@ required = [
     "Assets/Scripts/NecroSanctuaryWardrobe.cs",
     "Assets/Scripts/NecroSanctuaryMeditation.cs",
     "Assets/Scripts/NecroSkillTree.cs",
+    "Assets/Scripts/NecroProgressHud.cs",
     "Assets/Resources/Data/sanctuary_interactions.json",
     "Assets/Resources/Sprites/necromante.png",
     "Assets/Scripts/NecroCrypt.cs",
@@ -217,7 +218,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.1\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.2\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -530,8 +531,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.1";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.1";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.2";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.2";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -566,6 +567,29 @@ assert "if(mana>=maxMana){manaFraction=0f;return;}" in core
 assert "0.9.1" in (root/"docs/SANCTUARY_INTERACTIONS.md").read_text()
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
+
+
+# 0.9.2: progression UI, notifications and refundable skill allocation.
+progress_hud=(unity/"Assets/Scripts/NecroProgressHud.cs").read_text()
+assert "void DrawProgressOverlay(" in progress_hud
+assert "Time.time<noticeUntil" in progress_hud
+assert "MeditationPointsAvailable()" in progress_hud
+assert "AvailableSkillPoints()" in progress_hud
+assert "Mathf.Clamp01((float)experience/" in progress_hud
+assert "DrawProgressOverlay(Screen.width/scale,Screen.height/scale);" in ui
+assert 'public int learnedSkills;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
+for token in ("bool meditationSkillsTab,skillRespecConfirm",
+              "SkillRespecCost()", "ResetLearnedSkills()",
+              "if(!SaveProgress())", "learnedSkillMask=previousMask;",
+              "shards=previousShards;", "learnedSkillMask=0;",
+              "skillRespecConfirm=true;",
+              "skillRespecConfirm=false;",
+              "Mathf.Clamp01"):
+    assert token in skill_source + meditation_source, "0.9.2 missing: "+token
+assert '"EXPERIENCIA "+experience+"/"+ExperienceThreshold()' in meditation_source
+assert "WardrobeActionButton" in skill_source
+assert "GUI.BeginScrollView" in skill_source
+assert "0.9.2" in (root/"docs/SANCTUARY_INTERACTIONS.md").read_text()
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
