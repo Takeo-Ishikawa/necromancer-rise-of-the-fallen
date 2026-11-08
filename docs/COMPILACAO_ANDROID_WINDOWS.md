@@ -45,3 +45,7 @@ O painel de meditação e o sistema de atributos são compartilhados pelo build 
 ### Skill tree 0.9.1
 
 A árvore de seis habilidades utiliza um único módulo Unity e é incluída automaticamente nos builds **manuais** Android e Windows, sem criar um workflow adicional. Ambas as plataformas usam saves próprios; ambos aceitam arquivos da versão 0.9.0. Para testar, execute somente o workflow da plataforma pretendida.
+
+### 0.9.3 — Pulso Necrótico
+
+A nova habilidade ativa utiliza **Q** no Windows e um botão na interface Android, sem sprites extras. Para verificar o novo recurso, compile somente o workflow da plataforma que você vai testar; nenhuma compilação automática dos workflows Unity foi introduzida.

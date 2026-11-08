@@ -77,6 +77,7 @@ namespace Necromancer
                 return false;
             }
 
+            int levelBefore=playerLevel;
             mana-=SoulPulseManaCost;
             soulPulseCooldownUntil=Time.time+SoulPulseCooldownSeconds;
             // Reuse an existing ritual-circle sprite for a fast, bounded
@@ -89,21 +90,28 @@ namespace Necromancer
             float amount=(25f+3f*(playerLevel-1)+powerPoints*3f+
                 staffTier*4f)*FountainDamageMultiplier;
             pulseAwardBatch=true;
-            for(int i=current.enemies.Count-1;i>=0;i--)
+            try
             {
-                Actor enemy=current.enemies[i];
-                if(enemy==null || enemy.hp<=0f || enemy.body==null)continue;
-                if(Vector2.Distance(center,enemy.body.position)>
-                    SoulPulseRadius+enemy.radius)continue;
-                if(!Visible(center,enemy.body.position))continue;
-                Damage(enemy,amount);
+                for(int i=current.enemies.Count-1;i>=0;i--)
+                {
+                    Actor enemy=current.enemies[i];
+                    if(enemy==null || enemy.hp<=0f || enemy.body==null)continue;
+                    if(Vector2.Distance(center,enemy.body.position)>
+                        SoulPulseRadius+enemy.radius)continue;
+                    if(!Visible(center,enemy.body.position))continue;
+                    Damage(enemy,amount);
+                }
             }
-            pulseAwardBatch=false;
+            finally { pulseAwardBatch=false; }
             // One snapshot for the whole pulse; prevent expensive repeated
             // file writes for area-of-effect multi-kills.
             SaveProgress();
-            Announce("Pulso Necrotico! "+targets+
-                (targets==1?" alvo atingido.":" alvos atingidos."));
+            if(playerLevel>levelBefore)
+                Announce("NIVEL "+playerLevel+
+                    "! Visite o altar para distribuir pontos.");
+            else
+                Announce("Pulso Necrotico! "+targets+
+                    (targets==1?" alvo atingido.":" alvos atingidos."));
             return true;
         }
 

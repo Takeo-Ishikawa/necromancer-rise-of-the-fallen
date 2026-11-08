@@ -36,6 +36,7 @@ required = [
     "Assets/Scripts/NecroSanctuaryWardrobe.cs",
     "Assets/Scripts/NecroSanctuaryMeditation.cs",
     "Assets/Scripts/NecroSkillTree.cs",
+    "Assets/Scripts/NecroSoulPulse.cs",
     "Assets/Scripts/NecroProgressHud.cs",
     "Assets/Resources/Data/sanctuary_interactions.json",
     "Assets/Resources/Sprites/necromante.png",
@@ -218,7 +219,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.2\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.3\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -531,8 +532,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.2";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.2";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.3";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.3";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -590,6 +591,40 @@ assert '"EXPERIENCIA "+experience+"/"+ExperienceThreshold()' in meditation_sourc
 assert "WardrobeActionButton" in skill_source
 assert "GUI.BeginScrollView" in skill_source
 assert "0.9.2" in (root/"docs/SANCTUARY_INTERACTIONS.md").read_text()
+
+
+# 0.9.3: first active combat ability, shared Windows Q / Android touch.
+pulse_source=(unity/"Assets/Scripts/NecroSoulPulse.cs").read_text()
+fx_source=(unity/"Assets/Scripts/NecroCombatFx.cs").read_text()
+for token in ("SoulPulseManaCost=18", "SoulPulseRadius=2.7f",
+              "SoulPulseCooldownSeconds=9f", "TryCastSoulPulse()",
+              "ReadActiveSkillInput(float scale)", "Input.GetKeyDown(KeyCode.Q)",
+              "TouchPhase.Began", "Input.GetMouseButtonDown(0)",
+              "SoulPulseButtonRect(float scale)", "DrawSoulPulseButton(float scale)",
+              "Vector2.Distance(center,enemy.body.position)",
+              "Visible(center,enemy.body.position)", "if(targets==0)",
+              "mana-=SoulPulseManaCost", "Damage(enemy,amount)",
+              "soulPulseCooldownUntil=Time.time+SoulPulseCooldownSeconds",
+              "pulseAwardBatch=true;", "finally { pulseAwardBatch=false; }",
+              "SaveProgress();", "if(playerLevel>levelBefore)",
+              "heroineRaisePulse=.40f", "NecroCombatFx.Emit(center,current.root.transform,3)"):
+    assert token in pulse_source, "Soul pulse incomplete: "+token
+assert "ReadActiveSkillInput(hudScale);" in core
+assert "SoulPulseButtonRect(scale).Contains(gui)" in ui
+assert "DrawSoulPulseButton(scale);" in ui
+assert "ResetActiveSkillInput();" in (unity/"Assets/Scripts/NecroSanctuary.cs").read_text()
+assert "if(!pulseAwardBatch)SaveProgress();" in meditation_source
+assert 'type==3?"Necrotic Soul Pulse"' in fx_source
+assert "fx.sprite.sortingOrder=type==3?11:18;" in fx_source
+assert "new Vector3(5.5f,5.5f,1f)" in fx_source
+assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
+assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
+assert "mana" not in cast_body  # Basic attack stays free.
+assert 'PlayerSettings.bundleVersion = "0.9.3";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.3";' in win_builder
+assert '"com.takeo.necromancer.unity.preview080"' in builder
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "

@@ -104,3 +104,16 @@ No final da aba HABILIDADES existe **REORGANIZAR PONTOS**, disponível após apr
 A interface do jogo também passa a mostrar uma barra compacta de XP na caverna, o total de pontos pendentes para o altar e os avisos temporários de combate/subida de nível. Antes, o código gerava alguns avisos que não apareciam quando o HUD antigo não era desenhado. A implementação usa exclusivamente a interface IMGUI e as cores já presentes no jogo.
 
 **Compatibilidade:** o save v1 e os seis bits da árvore permanecem iguais. A versão de exibição é 0.9.2; o identificador/assinatura Android e os workflows manuais de Windows e Android não mudaram. Para testar, subir de nível, verificar XP e avisos, comprar duas habilidades, reorganizar com confirmação e reiniciar para conferir o save. Nenhuma compilação foi executada automaticamente.
+
+
+## 0.9.3 — Primeira habilidade ativa: Pulso Necrótico
+
+O combate recebeu **Pulso Necrótico**, uma habilidade ativa básica da necromante. É usada pelo botão **PULSO** (à esquerda de ATACAR) no Android ou pela tecla **Q** no Windows; clicar no botão com o mouse no Windows também funciona. O botão mostra o custo de ânima e o tempo de recarga. O movimento por joystick não captura o toque usado no botão, e os controles básicos de ataque/ressurreição permanecem independentes.
+
+**Mecânica:** consome **18 de ânima**, causa dano imediato em área de **raio 2,7 unidades** ao redor da necromante (ajustado pelo raio físico do inimigo) e entra em **recarga de 9 segundos**. O dano base é `25 + 3 × (nível−1) + 3 × Poder + 4 × grau do foco`, multiplicado pelo bônus ativo da fonte. Afeta somente hostis vivos com linha de visão livre; o próprio personagem e os servos não sofrem dano. Não pode ser usado no refúgio ou com painéis modais abertos. Se não houver alvos alcançáveis ou a ânima for insuficiente, a habilidade não consome ânima nem inicia recarga. A ânima se regenera normalmente depois do uso. O ataque básico continua sem custo de ânima.
+
+**Visual e desempenho:** reutiliza o círculo ritual pré-existente (`NecroArt.RitualCircle`) e o objeto `NecroCombatFx`, agora com tipo 3 (pulso roxo temporário abaixo dos personagens). Não adiciona PNGs, shaders ou efeitos pesados. Ao derrotar vários inimigos ao mesmo tempo, o ganho de XP funciona por criatura, mas o salvamento é realizado uma única vez após a sequência de dano; o aviso de subida de nível tem prioridade sobre a mensagem do pulso.
+
+**Persistência e compatibilidade:** nenhum novo campo foi necessário no `necro-save-v1.json`. Ânima atual, XP, mortes e demais progressos são persistidos com os dados existentes. A recarga não é salva: o efeito é instantâneo e limitado por sessão, com a recarga mantida ao entrar e sair da câmara durante a partida. As builds Android e Windows seguem independentes, manuais e com o mesmo ID/assinatura da preview Android. Versão de exibição 0.9.3.
+
+**Roteiro de teste:** (1) Em combate, pressionar Q ou PULSO longe dos monstros, sem gastar ânima; (2) entrar no alcance e ativar, conferir vários alvos, impacto e recarga; (3) tentar novamente antes de 9s; (4) usar ao lado de servos, conferir que eles não recebem dano; (5) testar com menos de 18 de ânima; (6) conferir XP e nível ao abater vários inimigos; (7) voltar à câmara, onde não existe botão de pulso. Verificar a versão compilada pela Unity antes de distribuir a testers.

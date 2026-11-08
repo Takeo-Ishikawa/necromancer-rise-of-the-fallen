@@ -51,7 +51,7 @@ namespace Necromancer
                     Announce("NIVEL "+playerLevel+
                         "! Novo ponto disponivel no altar.");
             }
-            SaveProgress();
+            if(!pulseAwardBatch)SaveProgress();
         }
 
         void OpenSanctuaryMeditation()
