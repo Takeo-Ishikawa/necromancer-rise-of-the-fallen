@@ -28,3 +28,5 @@ Facilitar a leitura das ações dos servos e dos inimigos sem alterar dano, cust
 ## Compatibilidade
 
 Versão de exibição: **0.9.7**. O arquivo de salvamento v1 e seus campos não mudaram. Também não mudaram a assinatura, o package ID Android, os controles nem os workflows separados e manuais de compilação. Os testes automatizados são estruturais; a compilação Unity e o teste visual em Windows/Android ainda precisam ser executados manualmente.
+
+**Revisão final de estados:** ao cair, o Grave Pup restaura imediatamente o tamanho e o círculo de chão antes de iniciar seus quadros de cadáver. Durante ataques de criaturas sem atlas, mudanças de direção decorrentes do movimento não substituem o espelhamento escolhido para a direção do golpe.

@@ -765,7 +765,9 @@ for token in ("public void Strike(Vector2 direction)",
               "bool bracing=pupAction==2", "bool lunging=pupAction==3",
               "float hurtSquash=impactTimer>0f",
               "haloRenderer.color=bracing ?",
-              "if(moving && attackTimer<=0f)"):
+              "if(moving && attackTimer<=0f)",
+              "art.localScale=Vector3.one;",
+              "if(attackTimer<=0f)"):
     assert token in creature_view, "Creature animation polish missing: "+token
 assert "self.view.Strike(target.body.position-self.body.position);" in gameplay
 assert "new float[]{35,-35,70,-70,105,-105}" not in gameplay

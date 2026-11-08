@@ -57,6 +57,10 @@ namespace Necromancer
             fallen=true;
             fallenAt=Time.time;
             art.localPosition=Vector3.zero;
+            art.localScale=Vector3.one;
+            art.localRotation=Quaternion.identity;
+            // Clear attack telegraph visuals before starting corpse frames.
+            haloRenderer.color=new Color(.05f,.07f,.09f,.38f);
             artRenderer.sprite=fallenPupFrames[0];
             artRenderer.color=Color.white;
             // Draw the body beneath living actors and their shadows.
@@ -237,8 +241,11 @@ namespace Necromancer
                 art.localRotation=Quaternion.Euler(0,0,
                     swing+(attackTimer>0f?Mathf.Sin(attackTimer*30f)*8f:0f));
                 art.localPosition=new Vector3(attackTimer > 0f ? .07f : 0f,bob,0);
-                if(delta.x>.0001f)artRenderer.flipX=false;
-                else if(delta.x<-.0001f)artRenderer.flipX=true;
+                if(attackTimer<=0f)
+                {
+                    if(delta.x>.0001f)artRenderer.flipX=false;
+                    else if(delta.x<-.0001f)artRenderer.flipX=true;
+                }
             }
 
             float attackScale=attackTimer>0f ? .045f : 0f;
