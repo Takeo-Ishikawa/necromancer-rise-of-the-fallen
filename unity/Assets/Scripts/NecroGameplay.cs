@@ -210,39 +210,21 @@ namespace Necromancer
                 }
                 if(self.kind=="grave_pup")
                 {
-                    Actor prey=friendly?
-                        (GraveCommandActive && graveCommandTarget!=null &&
-                         graveCommandTarget.hp>0f ? graveCommandTarget : servantOrder)
-                        :ClosestPartyMember(self);
+                    Actor prey=friendly?FindServantTarget(self):
+                        ClosestPartyMember(self);
                     if(prey!=null && prey.hp>0)
                         UpdatePup(self,prey,dt);
                     else if(friendly)
                     {
-                        servantOrder=null;
                         self.pupAttackTime=0;
                         self.view.SetPupAction(0,Vector2.zero);
                         FollowNecromancer(self,dt);
                     }
                     continue;
                 }
-                Actor target=null;
-                float closest=friendly?(huntOrder?5.6f:3.2f):4.1f;
-                if(friendly)
-                {
-                    if(GraveCommandActive && graveCommandTarget!=null &&
-                       graveCommandTarget.hp>0f && graveCommandTarget.body!=null &&
-                       Vector2.Distance(self.body.position,
-                           graveCommandTarget.body.position)<7.2f &&
-                       Visible(self.body.position,graveCommandTarget.body.position))
-                        target=graveCommandTarget;
-                    if(target==null)foreach(Actor enemy in current.enemies)
-                    {
-                        float distance=Vector2.Distance(self.body.position,enemy.body.position);
-                        if(enemy.hp>0 && distance<closest){closest=distance;target=enemy;}
-                    }
-                    if(Vector2.Distance(self.body.position,player.body.position)>6)target=null;
-                }
-                else
+                Actor target=friendly?FindServantTarget(self):null;
+                float closest=4.1f;
+                if(!friendly)
                 {
                     float distance=Vector2.Distance(self.body.position,player.body.position);
                     if(player.hp>0 && distance<closest){closest=distance;target=player;}
@@ -265,14 +247,7 @@ namespace Necromancer
                         Damage(target,friendly?SkillServantDamage(self.attack):self.attack);
                     }
                 }
-                else if(friendly)
-                {
-                    float theta=i*2.399963f;
-                    Vector2 desired=(Vector2)player.body.position+
-                        new Vector2(Mathf.Cos(theta),Mathf.Sin(theta))*.95f;
-                    if(Vector2.Distance(self.body.position,desired)>.32f)
-                        MoveToward(self,desired,dt);
-                }
+                else if(friendly)FollowNecromancer(self,dt);
             }
         }
         // The companion can linger until the player leaves its comfort range.

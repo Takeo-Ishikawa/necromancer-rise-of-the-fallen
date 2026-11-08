@@ -227,7 +227,7 @@ namespace Necromancer
             DrawIconUi(new Rect(right,top,68,68),"☠","REVIVER",Raise);
             DrawIconUi(new Rect(right+78,top,68,68),
                 huntOrder?"⚔":"◇",huntOrder?"CAÇA":"DEFESA",
-                ()=>huntOrder=!huntOrder);
+                ToggleServantTactics);
             DrawIconUi(new Rect(right+39,top+80,68,68),
                 "✧","EVOLUIR",()=>{touchMove=Vector2.zero;upgradeOpen=true;});
 

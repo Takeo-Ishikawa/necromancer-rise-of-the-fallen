@@ -142,6 +142,7 @@ namespace Necromancer
             }
             if(pressed)TryCastSoulPulse();
             ReadGraveCommandInput(scale);
+            ReadServantTacticsInput(scale);
         }
 
         void DrawSoulPulseButton(float scale)

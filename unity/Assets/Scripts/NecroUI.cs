@@ -38,6 +38,7 @@ namespace Necromancer
             if(SanctuaryTravelAvailable() && SanctuaryTravelRect(scale).Contains(gui))return false;
             if(!inSanctuary && SoulPulseButtonRect(scale).Contains(gui))return false;
             if(!inSanctuary && GraveCommandButtonRect(scale).Contains(gui))return false;
+            if(!inSanctuary && TacticModeButtonRect(scale).Contains(gui))return false;
             if(NearbySanctuaryStation()!=null &&
                SanctuaryInteractionButtonRect(scale).Contains(gui))return false;
             return !RosterButton.Contains(gui) && point.x<Screen.width*.65f &&
@@ -188,6 +189,7 @@ namespace Necromancer
                     Time.time>=castCooldown);
                 DrawSoulPulseButton(scale);
                 DrawGraveCommandButton(scale);
+                DrawServantTacticsButton(scale);
             }
             if(!inSanctuary && CanBindNearby())DrawAction(BindRect(scale),true,"ERGUER",true);
             if(joystickFingerId!=-1)

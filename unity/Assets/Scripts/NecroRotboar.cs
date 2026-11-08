@@ -93,13 +93,10 @@ namespace Necromancer
                 return;
             }
             if(boar.cooldown>0)return;
-            Actor target=boar.ally?
-                (GraveCommandActive && graveCommandTarget!=null &&
-                 graveCommandTarget.hp>0f ? graveCommandTarget : servantOrder)
-                :ClosestPartyMember(boar);
+            Actor target=boar.ally?FindServantTarget(boar):
+                ClosestPartyMember(boar);
             if(boar.ally && (target==null || target.hp<=0))
             {
-                servantOrder=null;
                 FollowNecromancer(boar,dt);
                 Vector2 movement=(Vector2)boar.body.position-at;
                 if(Mathf.Abs(movement.x)>.001f)boar.boarArt.flipX=movement.x<0;
