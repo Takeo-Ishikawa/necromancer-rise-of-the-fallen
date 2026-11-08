@@ -27,29 +27,45 @@ namespace Necromancer
                 type==5?"Rotboar Charge Warning":
                 type==6?"Allied Rotboar Charge Warning":
                 type==7?"Departing Soul":
+                type==8?"Spectral Muzzle":
+                type==9?"Spectral Impact":
+                type==10?"Unarmed Strike":
                 alliedHit?"Servant Hit":"Hit");
             if(parent!=null)obj.transform.SetParent(parent,false);
             obj.transform.position=new Vector3(position.x,position.y,0);
             NecroCombatFx fx=obj.AddComponent<NecroCombatFx>();
-            fx.duration=type==7 ? .60f :
+            fx.duration=type==8 ? .25f :
+                type==9 ? .33f :
+                type==10 ? .25f :
+                type==7 ? .60f :
                 type==5 || type==6 ? .82f :
                 type==4 ? .85f : type==3 ? .52f :
                 type == 1 ? .76f : type == 2 ? 1.1f : .30f;
             fx.remaining=fx.duration;
-            fx.rotationSpeed=type==5?40f:type==6?-40f:
+            fx.rotationSpeed=type==8?90f:type==9?-72f:type==10?36f:
+                type==5?40f:type==6?-40f:
                 type==4?-88f:type==3?105f:type==0?90f:type==1?75f:-52f;
-            fx.drift=type==7 ? new Vector2(0f,.65f) :
+            fx.drift=type==8 ? new Vector2(0f,.12f) :
+                type==9 ? Vector2.zero :
+                type==10 ? new Vector2(.04f,.08f) :
+                type==7 ? new Vector2(0f,.65f) :
                 type==5 || type==6 || type==4 || type==3 ?
                 Vector2.zero :
                 type==0 ? new Vector2(.04f,.13f) : new Vector2(0,.25f);
-            fx.size=type==7 ? new Vector3(.61f,.61f,1f) :
+            fx.size=type==8 ? new Vector3(.55f,.55f,1f) :
+                type==9 ? new Vector3(.85f,.85f,1f) :
+                type==10 ? new Vector3(.60f,.60f,1f) :
+                type==7 ? new Vector3(.61f,.61f,1f) :
                 type==5 || type==6 ? new Vector3(1.75f,1.12f,1f) :
                 type==4 ? new Vector3(1.75f,1.75f,1f) :
                 type==3 ? new Vector3(4.0f,4.0f,1f) :
                 type==0 ? new Vector3(.38f,.38f,1f) :
                 type==1 ? new Vector3(1.0f,.68f,1f) :
                 new Vector3(1.5f,1.1f,1f);
-            fx.tint=type==7 ?
+            fx.tint=type==8 ? new Color(.53f,1f,.85f,.85f) :
+                type==9 ? new Color(.77f,.65f,1f,.88f) :
+                type==10 ? new Color(1f,.78f,.62f,.83f) :
+                type==7 ?
                     (alliedHit?new Color(.47f,.95f,.78f,.80f):
                         new Color(.76f,.60f,.95f,.83f)) :
                 type==5 ? new Color(.99f,.41f,.33f,.70f) :
@@ -62,9 +78,11 @@ namespace Necromancer
                 type==1 ? new Color(.55f,.97f,.86f,.85f) :
                 new Color(.71f,.65f,.97f,.85f);
             fx.sprite=obj.AddComponent<SpriteRenderer>();
-            fx.sprite.sprite=type==0 || type==7?
+            fx.sprite.sprite=type==0 || type==7 || type==8 || type==10?
                 NecroArt.Effect():NecroArt.RitualCircle();
-            fx.sprite.sortingOrder=type==7 ? 16 :
+            fx.sprite.sortingOrder=type==8 ? 21 :
+                type==9 || type==10 ? 18 :
+                type==7 ? 16 :
                 type==5 || type==6 ? 10 :
                 type==3?11:type==4?14:18;
             fx.sprite.color=fx.tint;
