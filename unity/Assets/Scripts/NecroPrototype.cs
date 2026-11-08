@@ -39,6 +39,8 @@ namespace Necromancer
             public Transform body;
             public Vector2 direction;
             public float time;
+            public float age;
+            public SpriteRenderer renderer;
         }
         class Drop
         {

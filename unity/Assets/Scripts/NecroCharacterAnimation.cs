@@ -6,6 +6,8 @@ namespace Necromancer
     {
         const float CastDuration=.62f;
         const float CastRelease=.28f;
+        const float StrikeVisualDuration=.53f;
+        const float RaiseVisualDuration=.92f;
         readonly Sprite[] heroSprites=new Sprite[32];
         SpriteRenderer witchArtRenderer;
         Sprite skullSprite;
@@ -76,7 +78,9 @@ namespace Necromancer
 
         void AnimateHeroVisual(float dt)
         {
-            heroineHitPulse=Mathf.Max(0,heroineHitPulse-dt);
+            heroineHitPulse=Mathf.Max(0f,heroineHitPulse-dt);
+            heroineStrikePulse=Mathf.Max(0f,heroineStrikePulse-dt);
+            heroineRaisePulse=Mathf.Max(0f,heroineRaisePulse-dt);
             if(heroineWalking)
             {
                 walkDirection=DirectionFrom(facing);
@@ -86,6 +90,9 @@ namespace Necromancer
 
             int frame;
             bool flip;
+            float strikeElapsed=StrikeVisualDuration-heroineStrikePulse;
+            float raiseElapsed=RaiseVisualDuration-heroineRaisePulse;
+            float visualLean=0f;
             if(heroineCastPulse>0)
             {
                 heroineCastPulse=Mathf.Max(0,heroineCastPulse-dt);
@@ -97,6 +104,27 @@ namespace Necromancer
                 }
                 frame=elapsed<.13f?8:elapsed<CastRelease?9:elapsed<.45f?10:11;
                 flip=castAim.x<0;
+                visualLean=Mathf.Sin(Mathf.Clamp01(elapsed/CastDuration)*Mathf.PI)*.035f;
+            }
+            else if(heroineRaisePulse>0f)
+            {
+                // Reuse the approved spectral casting poses for a distinct
+                // necromancy gesture; animation only, no gameplay lock.
+                frame=raiseElapsed<.18f?8:
+                    raiseElapsed<.43f?9:raiseElapsed<.68f?10:11;
+                flip=facing.x<-.12f;
+                visualLean=-.025f*Mathf.Sin(
+                    Mathf.Clamp01(raiseElapsed/RaiseVisualDuration)*Mathf.PI);
+            }
+            else if(heroineStrikePulse>0f)
+            {
+                // A short forward lunge, then recoil. Strike damage remains
+                // instant and the existing 0.47 second cooldown is unchanged.
+                float phase=Mathf.Clamp01(strikeElapsed/StrikeVisualDuration);
+                frame=phase<.28f?24+walkDirection:
+                    phase<.72f?16+walkDirection:24+walkDirection;
+                flip=false;
+                visualLean=.095f*Mathf.Sin(phase*Mathf.PI);
             }
             else if(!heroineWalking)
             {
@@ -112,7 +140,14 @@ namespace Necromancer
             }
             witchArtRenderer.sprite=heroSprites[frame];
             witchArtRenderer.flipX=flip;
-            witchArtRenderer.color=heroineHitPulse>0?new Color(1,.83f,.87f):Color.white;
+            witchArtRenderer.color=heroineHitPulse>0?
+                new Color(1f,.83f,.87f):Color.white;
+            // Move only the drawn layer, preserving the gameplay collider,
+            // contact shadow, camera and the sanctuary's visual-only scale.
+            Vector3 pose=witchArtRenderer.transform.localPosition;
+            pose.x=visualLean*(facing.x<0f?-1f:1f);
+            pose.y=-HeroPaintedFootOffset/player.body.lossyScale.y;
+            witchArtRenderer.transform.localPosition=pose;
         }
     }
 }

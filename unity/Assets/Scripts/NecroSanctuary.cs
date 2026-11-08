@@ -47,6 +47,8 @@ namespace Necromancer
             castTarget=null;
             servantOrder=null;
             heroineCastPulse=0;
+            heroineStrikePulse=0f;
+            heroineRaisePulse=0f;
             foreach(Projectile orb in projectiles)
                 if(orb.body!=null)Destroy(orb.body.gameObject);
             projectiles.Clear();

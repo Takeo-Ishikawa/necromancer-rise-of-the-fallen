@@ -485,11 +485,20 @@ namespace Necromancer
             {
                 heroineStrikePulse=.53f;
                 castCooldown=Time.time+.47f;
+                // Face the opponent before showing the unarmed strike pose.
+                Vector2 strikeDelta=target.body.position-player.body.position;
+                if(strikeDelta.sqrMagnitude>.0001f)
+                {
+                    facing=strikeDelta.normalized;
+                    walkDirection=DirectionFrom(facing);
+                }
                 Damage(target,(26+staffTier*5+(playerLevel-1)*2+powerPoints*2)*FountainDamageMultiplier);
+                NecroCombatFx.Emit(target.body.position,current.root.transform,10);
                 return;
             }
             castAim=((Vector2)(target.body.position-player.body.position)).normalized;
             if(castAim.sqrMagnitude<.01f)castAim=facing;
+            facing=castAim; // The cast pose should face the actual target.
             castTarget=target;
             releasePending=true;
             heroineCastPulse=CastDuration;
@@ -511,30 +520,53 @@ namespace Necromancer
             SpriteRenderer orb=Visual("Caveira espectral",hands,skullSprite,20,current.root.transform);
             orb.flipY=direction.x<0;
             orb.transform.rotation=Quaternion.Euler(0,0,Mathf.Atan2(direction.y,direction.x)*Mathf.Rad2Deg);
-            projectiles.Add(new Projectile{body=orb.transform,direction=direction,time=.9f});
+            projectiles.Add(new Projectile{
+                body=orb.transform,renderer=orb,direction=direction,time=.9f
+            });
+            NecroCombatFx.Emit(hands,current.root.transform,8);
         }
         void UpdateProjectiles(float dt)
         {
             for(int i=projectiles.Count-1;i>=0;i--)
             {
                 Projectile bolt=projectiles[i];
-                bolt.body.position+=(Vector3)(bolt.direction*(dt*7));
+                if(bolt.body==null)
+                {
+                    projectiles.RemoveAt(i);
+                    continue;
+                }
+                Vector2 before=bolt.body.position;
+                Vector2 after=before+bolt.direction*(dt*7f);
+                bolt.body.position=after;
                 bolt.time-=dt;
-                bool finished=bolt.time<=0 || Blocked(bolt.body.position,.05f);
+                bolt.age+=dt;
+                UpdateSpectralProjectileVisual(bolt);
+                bool terrain=Blocked(after,.05f) || !Visible(before,after);
+                bool finished=bolt.time<=0f || terrain;
+                bool impact=terrain;
                 if(!finished)
                 {
                     for(int j=current.enemies.Count-1;j>=0;j--)
                     {
                         Actor enemy=current.enemies[j];
-                        if(Vector2.Distance(bolt.body.position,enemy.body.position)<enemy.radius+.15f)
+                        if(enemy==null || enemy.hp<=0f || enemy.body==null)
+                            continue;
+                        if(SpectralSegmentHit(before,after,enemy.body.position,
+                            enemy.radius+.15f))
                         {
-                            Damage(enemy,SkillSpectralDamage(34+staffTier*8+(playerLevel-1)*3+powerPoints*4)*FountainDamageMultiplier);
-                            finished=true;break;
+                            Damage(enemy,SkillSpectralDamage(
+                                34+staffTier*8+(playerLevel-1)*3+
+                                powerPoints*4)*FountainDamageMultiplier);
+                            finished=true;
+                            impact=true;
+                            break;
                         }
                     }
                 }
                 if(finished)
                 {
+                    if(impact)
+                        NecroCombatFx.Emit(after,current.root.transform,9);
                     Destroy(bolt.body.gameObject);
                     projectiles.RemoveAt(i);
                 }
