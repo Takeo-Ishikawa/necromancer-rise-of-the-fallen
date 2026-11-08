@@ -175,14 +175,18 @@ namespace Necromancer
             actor.body.position=new Vector3(at.x,at.y,0);
             return contact;
         }
-        void MoveToward(Actor actor,Vector2 destination,float dt)
+        void MoveToward(Actor actor,Vector2 destination,float dt,
+            float followBoost=1f)
         {
             Vector2 at=actor.body.position;
             Vector2 delta=destination-at;
             if(delta.sqrMagnitude<.005f)return;
             Vector2 normal=delta.normalized;
-            float travelSpeed=actor.speed*GraveCommandSpeedMultiplier(actor);
-            Vector2 direct=normal*travelSpeed*dt;
+            float travelSpeed=actor.speed*GraveCommandSpeedMultiplier(actor)*
+                Mathf.Max(1f,followBoost);
+            // Clamp the step to avoid oscillation around formation slots.
+            float distance=Mathf.Min(delta.magnitude,travelSpeed*dt);
+            Vector2 direct=normal*distance;
             Vector2 prior=actor.body.position;
             Move(actor,direct);
             if(Vector2.Distance(prior,actor.body.position)>.02f*dt)return;
@@ -190,7 +194,7 @@ namespace Necromancer
             foreach(float angle in new float[]{35,-35,70,-70,105,-105})
             {
                 Vector2 candidate=Quaternion.Euler(0,0,angle)*normal;
-                Move(actor,candidate*travelSpeed*dt);
+                Move(actor,candidate*distance);
                 if(Vector2.Distance(prior,actor.body.position)>.02f*dt)break;
             }
         }
@@ -263,24 +267,7 @@ namespace Necromancer
             return nearest;
         }
 
-        Vector2 PartyPosition(int slot)
-        {
-            int ring=1;
-            while(slot>=ring*6){slot-=ring*6;ring++;}
-            float angle=slot*Mathf.PI/(3f*ring);
-            return (Vector2)player.body.position+
-                new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*(1.65f*ring);
-        }
-
-        void FollowNecromancer(Actor ally,float dt)
-        {
-            Vector2 destination=PartyPosition(servants.IndexOf(ally));
-            if(Blocked(destination,ally.radius))destination=player.body.position;
-            float distance=Vector2.Distance(ally.body.position,destination);
-            if(distance>1.45f)ally.catchingUp=true;
-            if(distance<.40f)ally.catchingUp=false;
-            if(ally.catchingUp)MoveToward(ally,destination,dt);
-        }
+        // Formation and catch-up logic lives in NecroServantFormation.cs.
 
         void UpdatePup(Actor pup,Actor prey,float dt)
         {

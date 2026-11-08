@@ -54,6 +54,7 @@ namespace Necromancer
             {
                 ally.pupAttackTime=0;
                 ally.catchingUp=false;
+                ally.followStragglerSeconds=0f;
                 if(ally.kind=="rotboar")SetBoarPose(ally,BoarPose.Idle,0);
                 if(ally.kind=="grave_pup" && ally.view!=null)ally.view.SetPupAction(0,Vector2.zero);
             }
@@ -61,17 +62,30 @@ namespace Necromancer
 
         void PlaceTravelCompanions()
         {
-            foreach(Actor ally in servants)ally.body.position=new Vector2(-1000,-1000);
             foreach(Actor ally in servants)
             {
+                ally.body.position=new Vector2(-1000,-1000);
+                ally.catchingUp=false;
+                ally.followStragglerSeconds=0f;
+            }
+            for(int index=0;index<servants.Count;index++)
+            {
+                Actor ally=servants[index];
+                Vector2 at;
+                if(TryFindFormationSpot(ally,index,out at))
+                {
+                    ally.body.position=at;
+                    continue;
+                }
+                // Retain a radial fallback for very narrow entryways.
                 bool placed=false;
                 for(int ring=1;ring<=16 && !placed;ring++)
                     for(int slot=0;slot<ring*12;slot++)
                     {
                         float angle=slot*Mathf.PI*2/(ring*12);
-                        Vector2 at=(Vector2)player.body.position+
+                        at=(Vector2)player.body.position+
                             new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*(ring*.75f);
-                        if(Blocked(at,ally.radius) || ActorAt(ally,at,at)!=null)continue;
+                        if(!FormationSpotOpen(ally,at))continue;
                         ally.body.position=at;
                         placed=true;
                         break;

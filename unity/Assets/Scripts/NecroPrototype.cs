@@ -21,6 +21,7 @@ namespace Necromancer
             public float pupAttackTime;
             public Vector2 pupHeading;
             public bool pupHit,catchingUp;
+            public float followStragglerSeconds;
             public bool ally;
             public NecroCreatureView view;
         }

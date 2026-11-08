@@ -43,8 +43,7 @@ namespace Necromancer
         {
             for(int i=0;i<Mathf.Max(72,servants.Count*3);i++)
             {
-                position=PartyPosition(i);
-                if(!Blocked(position,mover.radius) && ActorAt(mover,position,position)==null)return true;
+                if(TryFindFormationSpot(mover,i,out position))return true;
             }
             position=player.body.position;
             return false;
