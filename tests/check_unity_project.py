@@ -616,7 +616,7 @@ assert "DrawSoulPulseButton(scale);" in ui
 assert "ResetActiveSkillInput();" in (unity/"Assets/Scripts/NecroSanctuary.cs").read_text()
 assert "if(!pulseAwardBatch)SaveProgress();" in meditation_source
 assert 'type==3?"Necrotic Soul Pulse"' in fx_source
-assert "fx.sprite.sortingOrder=type==3?11:18;" in fx_source
+assert "fx.sprite.sortingOrder=type==3?11:type==4?14:18;" in fx_source
 assert "new Vector3(4.0f,4.0f,1f)" in fx_source
 assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
