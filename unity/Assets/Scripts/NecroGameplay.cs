@@ -574,13 +574,16 @@ namespace Necromancer
             if(mana<cost){Announce("Anima insuficiente para ressuscitar.");return;}
             mana-=cost;
             Vector2 at=nearest.body.position;
-            Actor servant=Create(nearest.kind,at,true,persistentRoot.transform);
+            Actor servant=nearest.kind=="rotboar" ?
+                CreateRotboar(at,persistentRoot.transform,true) :
+                Create(nearest.kind,at,true,persistentRoot.transform);
             servants.Add(servant);
             AnimateReanimation(servant,at);
             if(IsBoss(nearest.kind))current.bossBound=true;
             Destroy(nearest.body.gameObject);
             current.corpses.Remove(nearest);
             Announce("Alma vinculada: "+servant.kind+".");
+            SaveCompanions();
             SaveProgress();
         }
         void Dismiss()
@@ -595,6 +598,7 @@ namespace Necromancer
             servants.Remove(target);
             Destroy(target.body.gameObject);
             Announce("Servo dispensado. Pontos de comando liberados.");
+            SaveCompanions();
             SaveProgress();
         }
         void SpawnDrop(Vector2 position,int slot,int tier)

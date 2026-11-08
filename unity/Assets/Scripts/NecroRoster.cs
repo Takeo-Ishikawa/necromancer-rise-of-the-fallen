@@ -64,12 +64,14 @@ namespace Necromancer
             foreach(var record in records)
             {
                 if(record==null || record.hp<=0 ||
-                    (record.kind!="rotboar" && record.kind!="grave_pup"))continue;
+                    string.IsNullOrEmpty(record.kind) ||
+                    record.kind=="necromante")continue;
                 var root=persistentRoot.transform;
                 Actor a=record.kind=="rotboar"?CreateRotboar(player.body.position,root,true):
                     Create(record.kind,player.body.position,true,root);
                 a.maxHp=record.maxHp;a.hp=record.hp;a.attack=record.attack;
-                if(active && FindPartySpace(a,out Vector2 position))
+                if(active && CommandUsed()+CommandCost(a.kind)<=CommandLimit &&
+                    FindPartySpace(a,out Vector2 position))
                 {
                     a.body.position=position;
                     servants.Add(a);
@@ -108,7 +110,12 @@ namespace Necromancer
 
         static string CompanionName(Actor a)
         {
-            return a.kind=="rotboar"?"Rotboar":"Grave Pup";
+            if(a.kind=="rotboar")return "Rotboar";
+            if(a.kind=="grave_pup")return "Grave Pup";
+            string readable=a.kind.Replace('_',' ');
+            return readable.Length>0 ?
+                char.ToUpperInvariant(readable[0])+readable.Substring(1):
+                "Servo";
         }
 
         static Texture2D PanelPaint(Color fill,Color rim)
@@ -154,7 +161,10 @@ namespace Necromancer
 
         void Portrait(Actor a,Rect rect)
         {
-            Sprite sprite=a.kind=="rotboar"?alliedBoarFrames[0]:NecroCreatureView.PupIdle(true);
+            Sprite sprite=a.kind=="rotboar"?alliedBoarFrames[0]:
+                a.kind=="grave_pup"?NecroCreatureView.PupIdle(true):
+                NecroArt.Get(a.kind);
+            if(sprite==null)return;
             Rect uv=sprite.rect; Texture2D texture=sprite.texture;
             GUI.DrawTextureWithTexCoords(rect,texture,new Rect(uv.x/texture.width,
                 uv.y/texture.height,uv.width/texture.width,uv.height/texture.height));
