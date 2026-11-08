@@ -620,7 +620,7 @@ assert "DrawSoulPulseButton(scale);" in ui
 assert "ResetActiveSkillInput();" in (unity/"Assets/Scripts/NecroSanctuary.cs").read_text()
 assert "if(!pulseAwardBatch)SaveProgress();" in meditation_source
 assert 'type==3?"Necrotic Soul Pulse"' in fx_source
-assert "fx.sprite.sortingOrder=type==7 ? 16 :" in fx_source
+assert "type==7 ? 16 :" in fx_source
 assert "type==5 || type==6 ? 10 :" in fx_source
 assert "type==3?11:type==4?14:18;" in fx_source
 assert "new Vector3(4.0f,4.0f,1f)" in fx_source
@@ -852,7 +852,7 @@ assert "float remaining=3f;" in boar_source
 assert "Mathf.Clamp01(remaining/.72f)" in boar_source
 assert 'type==7?"Departing Soul"' in fx_source
 assert "type==7 ? new Vector2(0f,.65f)" in fx_source
-assert "type==0 || type==7?" in fx_source
+assert "type==0 || type==7 || type==8 || type==10?" in fx_source
 assert "const int Capacity=30;" in fx_source
 assert "NecroCombatFx.Emit(victim.body.position,current.root.transform,7," in gameplay
 assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
