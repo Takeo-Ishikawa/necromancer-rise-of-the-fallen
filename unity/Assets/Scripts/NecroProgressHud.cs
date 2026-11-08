@@ -15,7 +15,7 @@ namespace Necromancer
             if(!inSanctuary)
             {
                 float x=124f, w=Mathf.Max(120f,width-138f);
-                Rect panel=new Rect(x,12f,w,48f);
+                Rect panel=new Rect(x,12f,w,54f);
                 DrawWardrobeSurface(panel,
                     new Color(.09f,.065f,.13f,.94f),WardrobeMutedEdge);
                 GUI.Label(new Rect(x+7f,15f,w-14f,20f),
@@ -39,7 +39,8 @@ namespace Necromancer
             {
                 // Keep transient combat/level notifications clear of travel
                 // navigation and fountain buff status near the screen top.
-                float y=inSanctuary ? 156f : 94f;
+                float y=inSanctuary ? 156f :
+                    SanctuaryTravelAvailable() ? 120f : 94f;
                 Rect banner=new Rect(15f,y,width-30f,37f);
                 DrawWardrobeSurface(banner,
                     new Color(.095f,.069f,.134f,.96f),WardrobeEdge);
