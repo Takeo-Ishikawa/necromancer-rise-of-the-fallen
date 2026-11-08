@@ -561,6 +561,8 @@ assert "pup.ally?SkillServantDamage(pup.attack):pup.attack" in gameplay
 boar_source=(unity/"Assets/Scripts/NecroRotboar.cs").read_text()
 assert "boar.ally?SkillServantDamage(boar.attack):boar.attack" in boar_source
 assert "(SkillUnlocked(2)?1.5f:0f)" in core
+assert "Regenerate(dt);" in core, "Anima regen must run from gameplay Update"
+assert "if(mana>=maxMana){manaFraction=0f;return;}" in core
 assert "0.9.1" in (root/"docs/SANCTUARY_INTERACTIONS.md").read_text()
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]

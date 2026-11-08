@@ -271,6 +271,7 @@ namespace Necromancer
                 Move(player,control*player.speed*(1f+agilityPoints*.06f)*FountainSpeedMultiplier*dt);
             }
             if(inSanctuary)ReadSanctuaryInteractionKey();
+            Regenerate(dt);
             if(!inSanctuary)ReadManualAttack(hudScale);
             if(!inSanctuary)UpdateActors(current.enemies,dt,false);
             UpdateActors(servants,dt,true);
@@ -327,6 +328,8 @@ namespace Necromancer
 
         void Regenerate(float dt)
         {
+            // Never accumulate a hidden regeneration bank at full anima.
+            if(mana>=maxMana){manaFraction=0f;return;}
             manaFraction+=dt*(3.5f+(playerLevel-1)*.4f+spiritRitual*.65f+(SkillUnlocked(2)?1.5f:0f));
             if(manaFraction>=1 && mana<maxMana)
             {
