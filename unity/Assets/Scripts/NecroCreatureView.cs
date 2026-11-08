@@ -27,6 +27,10 @@ namespace Necromancer
         int pupAction;
         bool fallen;
         float fallenAt;
+        bool corpseMode,corpseAutoCleanup;
+        float corpseAge,corpseRemaining,revivalClock;
+        const float CorpseSettleSeconds=.56f;
+        const float ReanimationSeconds=.70f;
 
         static Sprite[] LoadPupFrames(string path)
         {
@@ -84,6 +88,76 @@ namespace Necromancer
             Color shadow=haloRenderer.color;
             shadow.a=.38f*(1f-progress);
             haloRenderer.color=shadow;
+        }
+
+        // Ordinary enemies keep their original illustration, with a short
+        // collapse and a subdued body left behind for a real Raise ritual.
+        // Summoned allies fade away instead of leaving recyclable corpses.
+        public void FallToCorpse(float remaining,bool restored=false)
+        {
+            if(fallen || corpseMode)return;
+            corpseMode=true;
+            corpseAutoCleanup=remaining<=0f;
+            corpseRemaining=remaining;
+            corpseAge=restored?CorpseSettleSeconds:0f;
+            attackTimer=0f;
+            impactTimer=0f;
+            revivalClock=0f;
+            artRenderer.sortingOrder=2;
+            haloRenderer.sortingOrder=1;
+        }
+
+        public void SetCorpseRemaining(float remaining)
+        {
+            corpseRemaining=Mathf.Max(0f,remaining);
+        }
+
+        public void Reanimate()
+        {
+            if(fallen || corpseMode)return;
+            revivalClock=ReanimationSeconds;
+        }
+
+        void AnimateOrdinaryCorpse(float dt)
+        {
+            corpseAge+=dt;
+            float ratio=Mathf.Clamp01(corpseAge/CorpseSettleSeconds);
+            float ease=ratio*ratio*(3f-2f*ratio);
+            if(frames!=null)
+                artRenderer.sprite=frames.Frame(NecroPose.Hurt,
+                    currentDirection,Mathf.Min(corpseAge,.18f),false);
+            float angle=currentDirection==NecroDirection.Left?-54f:54f;
+            art.localRotation=Quaternion.Euler(0f,0f,angle*ease);
+            art.localPosition=new Vector3(0f,-.17f*ease,0f);
+            art.localScale=new Vector3(
+                animationScale.x*(1f+.10f*ease),
+                animationScale.y*(1f-.46f*ease),1f);
+            float alpha=corpseAutoCleanup ?
+                Mathf.Clamp01((.95f-corpseAge)/.40f) :
+                Mathf.Clamp01(corpseRemaining/.85f);
+            Color tone=Color.Lerp(baseTint,
+                new Color(.54f,.53f,.62f,1f),ease);
+            tone.a=alpha;
+            artRenderer.color=tone;
+            haloRenderer.color=new Color(.06f,.07f,.09f,
+                .34f*(1f-.45f*ease)*alpha);
+            if(corpseAutoCleanup && corpseAge>=.95f)
+                Destroy(gameObject);
+        }
+
+        void ApplyReanimationVisual(float dt)
+        {
+            if(revivalClock<=0f)return;
+            float ratio=1f-Mathf.Clamp01(revivalClock/ReanimationSeconds);
+            float ease=ratio*ratio*(3f-2f*ratio);
+            art.localScale*=Mathf.Lerp(.68f,1f,ease);
+            Color before=artRenderer.color;
+            artRenderer.color=Color.Lerp(
+                new Color(.40f,.99f,.82f,.48f),before,ease);
+            Color haloTint=haloRenderer.color;
+            haloTint.a=Mathf.Max(haloTint.a,.66f*(1f-ease));
+            haloRenderer.color=haloTint;
+            revivalClock=Mathf.Max(0f,revivalClock-dt);
         }
 
         public void SetPupAction(int pose,Vector2 heading)
@@ -172,6 +246,11 @@ namespace Necromancer
                 return;
             }
             float dt=Time.deltaTime;
+            if(corpseMode)
+            {
+                AnimateOrdinaryCorpse(dt);
+                return;
+            }
             impactTimer=Mathf.Max(0,impactTimer-dt);
             attackTimer=Mathf.Max(0,attackTimer-dt);
             float t=Time.time+phase;
@@ -209,6 +288,7 @@ namespace Necromancer
                     (friendly?new Color(.50f,.91f,.80f,ringAlpha):
                         new Color(.05f,.07f,.09f,ringAlpha));
                 if(friendly)halo.localRotation=Quaternion.Euler(0f,0f,t*18f);
+                ApplyReanimationVisual(dt);
                 return;
             }
             if(moving && attackTimer<=0f)
@@ -265,6 +345,7 @@ namespace Necromancer
                 halo.localRotation=Quaternion.Euler(0,0,t*18f);
             }
             if(flying)halo.localScale=new Vector3(1.05f,.25f,1);
+            ApplyReanimationVisual(dt);
         }
 
         static NecroDirection Direction(Vector2 movement,NecroDirection previous)
