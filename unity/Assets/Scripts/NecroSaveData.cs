@@ -15,6 +15,8 @@ namespace Necromancer
         public int staffTier,mantleTier,lifeRitual,vaultRitual,spiritRitual;
         // Optional 0.9.0 attributes: prior v1 save JSON loads these as zero.
         public int vitalityPoints,powerPoints,agilityPoints;
+        // 0.9.1: six unlocks, each stored as a bit; missing in older saves.
+        public int learnedSkills;
         public bool spellUnlocked,huntOrder,completed;
         public float hp,maxHp,playerX,playerY;
         public string[] rankKinds=new string[0];

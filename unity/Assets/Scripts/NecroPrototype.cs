@@ -327,7 +327,7 @@ namespace Necromancer
 
         void Regenerate(float dt)
         {
-            manaFraction+=dt*(3.5f+(playerLevel-1)*.4f+spiritRitual*.65f);
+            manaFraction+=dt*(3.5f+(playerLevel-1)*.4f+spiritRitual*.65f+(SkillUnlocked(2)?1.5f:0f));
             if(manaFraction>=1 && mana<maxMana)
             {
                 int regenerated=(int)manaFraction;

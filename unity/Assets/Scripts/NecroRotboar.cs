@@ -87,7 +87,7 @@ namespace Necromancer
                 Actor hit=Move(boar,next-at,false);
                 bool stopped=Vector2.Distance(boar.body.position,next)>.001f;
                 if(hit!=null && hit.ally!=boar.ally)
-                    Damage(hit,boar.attack);
+                    Damage(hit,boar.ally?SkillServantDamage(boar.attack):boar.attack);
                 if(hit!=null || stopped)
                     SetBoarPose(boar,BoarPose.Idle,1.25f);
                 return;

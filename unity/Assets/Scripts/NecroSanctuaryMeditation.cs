@@ -36,6 +36,7 @@ namespace Necromancer
         void AwardMeditationExperience(string kind)
         {
             kills++;
+            if(SkillUnlocked(3))mana=Mathf.Min(maxMana,mana+4);
             if(playerLevel<100)
             {
                 experience+=ExperienceValue(kind);
@@ -123,7 +124,7 @@ namespace Necromancer
         {
             EnsureWardrobeStyles();
             float w=Mathf.Min(width-24f,390f);
-            float h=Mathf.Min(height-24f,456f);
+            float h=Mathf.Min(height-24f,540f);
             float x=(width-w)*.5f,y=(height-h)*.5f;
             FillUi(new Rect(0f,0f,width,height),WardrobeShade);
             FillUi(new Rect(x+5f,y+7f,w,h),
@@ -136,28 +137,28 @@ namespace Necromancer
                 "ALTAR DE MEDITACAO",wardrobeTitleStyle);
             GUI.Label(new Rect(x+12f,y+45f,w-24f,25f),
                 "NIVEL "+playerLevel+"  |  PONTOS LIVRES: "+
-                MeditationPointsAvailable(),wardrobeResourceStyle);
+                (meditationSkillsTab?AvailableSkillPoints():MeditationPointsAvailable()),
+                wardrobeResourceStyle);
             FillUi(new Rect(x+17f,y+75f,w-34f,1f),
                 new Color(.70f,.57f,.73f,.68f));
 
-            float cardHeight=(h-183f)/3f;
-            float cardTop=y+85f;
-            DrawMeditationAttributeCard(
-                new Rect(x+15f,cardTop,w-30f,cardHeight),
-                "VITALIDADE",vitalityPoints,
-                "+12 vida maxima por ponto",0);
-            DrawMeditationAttributeCard(
-                new Rect(x+15f,cardTop+cardHeight+8f,w-30f,cardHeight),
-                "PODER",powerPoints,
-                "+2 golpe e +4 projetil por ponto",1);
-            DrawMeditationAttributeCard(
-                new Rect(x+15f,cardTop+(cardHeight+8f)*2f,
-                    w-30f,cardHeight),
-                "AGILIDADE",agilityPoints,
-                "+6% movimento por ponto",2);
+            float tabWidth=(w-42f)*.5f;
+            if(WardrobeActionButton(new Rect(x+15f,y+85f,tabWidth,33f),
+                "ATRIBUTOS",true))
+                meditationSkillsTab=false;
+            if(WardrobeActionButton(new Rect(x+27f+tabWidth,y+85f,
+                tabWidth,33f),"HABILIDADES",true))
+                meditationSkillsTab=true;
+
+            Rect viewport=new Rect(x+14f,y+127f,w-28f,
+                Mathf.Max(55f,h-207f));
+            if(meditationSkillsTab)DrawSkillTreeContent(viewport);
+            else DrawMeditationAttributesContent(viewport);
 
             GUI.Label(new Rect(x+14f,y+h-75f,w-28f,20f),
-                "Ganhe pontos subindo de nivel na caverna.",
+                meditationSkillsTab ?
+                    "1 ponto de habilidade a cada 2 niveis, desde o nivel 3." :
+                    "Ganhe 1 ponto de atributo a cada nivel.",
                 wardrobeNoteStyle);
             FillUi(new Rect(x+17f,y+h-51f,w-34f,1f),
                 new Color(.70f,.57f,.73f,.49f));

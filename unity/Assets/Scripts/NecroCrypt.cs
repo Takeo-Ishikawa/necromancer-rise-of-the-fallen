@@ -215,6 +215,7 @@ namespace Necromancer
             player.maxHp=Mathf.Clamp(saved.maxHp,115f,10000f);
             player.hp=Mathf.Clamp(saved.hp,1f,player.maxHp);
             RestoreMeditationAllocations(saved);
+            RestoreSkillTree(saved);
             speciesRanks.Clear();
             if(saved.rankKinds!=null && saved.rankValues!=null)
             {
@@ -244,7 +245,7 @@ namespace Necromancer
                 mana=mana,maxMana=maxMana,shards=shards,kills=kills,
                 gathered=gathered,staffTier=staffTier,mantleTier=mantleTier,
                 vitalityPoints=vitalityPoints,powerPoints=powerPoints,
-                agilityPoints=agilityPoints,
+                agilityPoints=agilityPoints,learnedSkills=learnedSkillMask,
                 lifeRitual=lifeRitual,vaultRitual=vaultRitual,spiritRitual=spiritRitual,
                 spellUnlocked=spellUnlocked,huntOrder=huntOrder,completed=completed,
                 hp=player.hp,maxHp=player.maxHp,
@@ -294,6 +295,7 @@ namespace Necromancer
                 staffTier=Mathf.Clamp(save.staffTier,0,3);
                 mantleTier=Mathf.Clamp(save.mantleTier,0,3);
                 RestoreMeditationAllocations(save);
+                RestoreSkillTree(save);
                 lifeRitual=Mathf.Clamp(save.lifeRitual,0,5);
                 vaultRitual=Mathf.Clamp(save.vaultRitual,0,2);
                 spiritRitual=Mathf.Clamp(save.spiritRitual,0,3);

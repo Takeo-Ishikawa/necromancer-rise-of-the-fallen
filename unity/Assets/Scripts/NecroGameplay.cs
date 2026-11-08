@@ -252,7 +252,7 @@ namespace Necromancer
                     {
                         self.cooldown=IsBoss(self.kind)?1.55f:1.18f;
                         if(self.view!=null)self.view.Strike();
-                        Damage(target,self.attack);
+                        Damage(target,friendly?SkillServantDamage(self.attack):self.attack);
                     }
                 }
                 else if(friendly)
@@ -325,7 +325,7 @@ namespace Necromancer
                 if(!pup.pupHit && (contact==prey || Vector2.Distance(prey.body.position,pup.body.position)<=pup.radius+prey.radius+.04f) &&
                     Visible(pup.body.position,prey.body.position))
                 {
-                    Damage(prey,pup.attack);
+                    Damage(prey,pup.ally?SkillServantDamage(pup.attack):pup.attack);
                     pup.pupHit=true;
                 }
             }
@@ -482,7 +482,7 @@ namespace Necromancer
             castTarget=target;
             releasePending=true;
             heroineCastPulse=CastDuration;
-            castCooldown=Time.time+.72f;
+            castCooldown=Time.time+(SkillUnlocked(5)?.60f:.72f);
         }
 
         void ReleaseSkull()
@@ -517,7 +517,7 @@ namespace Necromancer
                         Actor enemy=current.enemies[j];
                         if(Vector2.Distance(bolt.body.position,enemy.body.position)<enemy.radius+.15f)
                         {
-                            Damage(enemy,(34+staffTier*8+(playerLevel-1)*3+powerPoints*4)*FountainDamageMultiplier);
+                            Damage(enemy,SkillSpectralDamage(34+staffTier*8+(playerLevel-1)*3+powerPoints*4)*FountainDamageMultiplier);
                             finished=true;break;
                         }
                     }
@@ -554,7 +554,7 @@ namespace Necromancer
                 if(d<best){best=d;nearest=body;}
             }
             if(nearest==null){Announce("Aproxime-se de um cadaver.");return;}
-            int cost=ManaCost(nearest.kind),command=CommandCost(nearest.kind);
+            int cost=SkillRaiseManaCost(nearest.kind),command=CommandCost(nearest.kind);
             if(CommandUsed()+command>CommandLimit)
             {
                 Announce("Comando cheio. Dispense um servo.");return;
