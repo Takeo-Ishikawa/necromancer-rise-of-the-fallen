@@ -561,7 +561,7 @@ assert "public int learnedSkills;" in (unity/"Assets/Scripts/NecroSaveData.cs").
 assert "learnedSkills=learnedSkillMask" in crypt
 assert "RestoreSkillTree(saved);" in crypt and "RestoreSkillTree(save);" in crypt
 assert "SkillRaiseManaCost(nearest.kind)" in gameplay
-assert "SkillSpectralDamage(34+staffTier*8" in gameplay
+assert "SkillSpectralDamage(" in gameplay and "staffTier*8+(playerLevel-1)*3+" in gameplay
 assert "SkillUnlocked(5) ? .60f : .72f" in gameplay
 assert "friendly?SkillServantDamage(self.attack):self.attack" in gameplay
 assert "pup.ally?SkillServantDamage(pup.attack):pup.attack" in gameplay
