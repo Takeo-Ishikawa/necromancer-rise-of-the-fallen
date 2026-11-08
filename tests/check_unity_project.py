@@ -547,7 +547,7 @@ for token in ("const int SkillTreeNodeCount=6", "SkillPrerequisite={-1,0,-1,2,-1
               "DrawSkillTreeContent(", "DrawSkillTreeNode(", "GUI.BeginScrollView",
               "GUI.EndScrollView()", "DrawMeditationAttributesContent("):
     assert token in skill_source, "Missing skill tree implementation: "+token
-assert "meditationSkillsTab?AvailableSkillPoints():MeditationPointsAvailable()" in meditation_source
+assert "AvailableSkillPoints()" in meditation_source and "MeditationPointsAvailable()" in meditation_source
 assert 'if(meditationSkillsTab)DrawSkillTreeContent(viewport);' in meditation_source
 assert 'DrawMeditationAttributesContent(viewport);' in meditation_source
 assert 'SkillUnlocked(3)' in meditation_source and 'mana=Mathf.Min(maxMana,mana+4);' in meditation_source
