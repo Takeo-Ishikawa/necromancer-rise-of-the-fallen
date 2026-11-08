@@ -34,9 +34,24 @@ namespace Necromancer
             PlayerPrefs.Save();
         }
 
+        void SaveOnSuspendOrExit()
+        {
+            if(player==null || current==null || restoring)return;
+            SaveCompanions();
+            // Keep level, XP, resources and checkpoint consistent with
+            // companions when the app is suspended or closed.
+            if(!gameOver && !SaveProgress())
+                Debug.LogWarning("Necromancer: session save was not written.");
+        }
+
         void OnApplicationPause(bool paused)
         {
-            if(paused && player!=null && current!=null)SaveCompanions();
+            if(paused)SaveOnSuspendOrExit();
+        }
+
+        void OnApplicationQuit()
+        {
+            SaveOnSuspendOrExit();
         }
 
         bool FindPartySpace(Actor mover,out Vector2 position)
@@ -87,6 +102,8 @@ namespace Necromancer
         void TransferSelected()
         {
             Actor a=selectedCompanion;
+            if(a==null || (!servants.Contains(a) && !resting.Contains(a)))
+                return;
             if(servants.Remove(a))
             {
                 a.pupAttackTime=0f;
@@ -97,6 +114,11 @@ namespace Necromancer
             }
             else
             {
+                if(CommandUsed()+CommandCost(a.kind)>CommandLimit)
+                {
+                    rosterNotice="Comando cheio. Recolha outro servo.";
+                    return;
+                }
                 if(!FindPartySpace(a,out Vector2 position))
                 {rosterNotice="Procure uma área livre para chamar este servo.";return;}
                 resting.Remove(a);
@@ -106,6 +128,7 @@ namespace Necromancer
             }
             rosterNotice="";
             SaveCompanions();
+            SaveProgress();
         }
 
         static string CompanionName(Actor a)
@@ -249,7 +272,8 @@ namespace Necromancer
                     {
                         servants.Remove(selectedCompanion);resting.Remove(selectedCompanion);
                         Destroy(selectedCompanion.body.gameObject);
-                        selectedCompanion=null;confirmRelease=false;SaveCompanions();
+                        selectedCompanion=null;confirmRelease=false;
+                        SaveCompanions();SaveProgress();
                     }
                 }
                 else

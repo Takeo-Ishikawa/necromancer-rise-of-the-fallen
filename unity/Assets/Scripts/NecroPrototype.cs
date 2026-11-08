@@ -117,6 +117,9 @@ namespace Necromancer
             RestoreSanctuaryProfile();
             LoadCompanions();
             PlaceTravelCompanions();
+            // Fifteen-second scheduler: saving never runs on every Update frame.
+            // The Unity scheduler pauses naturally with the roster time scale.
+            InvokeRepeating(nameof(PeriodicAutosave),15f,15f);
         }
 
         SpriteRenderer Visual(string label,Vector2 at,Sprite sprite,int order,Transform parent)

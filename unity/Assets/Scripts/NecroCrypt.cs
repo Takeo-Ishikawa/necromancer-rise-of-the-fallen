@@ -84,7 +84,8 @@ namespace Necromancer
             {
                 Announce("Comando insuficiente. Guarde outro servo.");return false;
             }
-            Actor actor=Create(record.kind,(Vector2)player.body.position+new Vector2(.8f,0),
+            Actor actor=CreateRestoredActor(record.kind,
+                (Vector2)player.body.position+new Vector2(.8f,0),
                 true,persistentRoot.transform);
             RestoreActorStats(actor,record);
             actor.hp=Mathf.Max(1,actor.hp);
@@ -132,6 +133,15 @@ namespace Necromancer
                 hp=actor.hp,maxHp=actor.maxHp,attack=actor.attack,cooldown=actor.cooldown
             };
         }
+        // Rotboars use their own animated actor factory; the generic Create()
+        // would silently restore a boar without its charge sprites or AI.
+        Actor CreateRestoredActor(string kind,Vector2 at,bool ally,
+            Transform parent)
+        {
+            return kind=="rotboar"?CreateRotboar(at,parent,ally):
+                Create(kind,at,ally,parent);
+        }
+
         void RestoreActorStats(Actor actor,NecroActorRecord record)
         {
             if(record.maxHp>0 && record.maxHp<100000)actor.maxHp=record.maxHp;
@@ -337,8 +347,9 @@ namespace Necromancer
                     if(item==null || string.IsNullOrEmpty(item.kind))continue;
                     int cost=CommandCost(item.kind);
                     if(budget+cost>CommandLimit)continue;
-                    Actor restored=Create(item.kind,player.body.position+
-                        new Vector3(.6f+.12f*servants.Count,0,0),
+                    Actor restored=CreateRestoredActor(item.kind,
+                        (Vector2)player.body.position+
+                            new Vector2(.6f+.12f*servants.Count,0f),
                         true,persistentRoot.transform);
                     RestoreActorStats(restored,item);
                     servants.Add(restored);
@@ -363,7 +374,8 @@ namespace Necromancer
             if(saved.enemies!=null)foreach(NecroActorRecord record in saved.enemies)
             {
                 if(record==null || string.IsNullOrEmpty(record.kind))continue;
-                Actor enemy=Create(record.kind,new Vector2(record.x,record.y),
+                Actor enemy=CreateRestoredActor(record.kind,
+                    new Vector2(record.x,record.y),
                     false,current.root.transform);
                 RestoreActorStats(enemy,record);
                 current.enemies.Add(enemy);
@@ -428,12 +440,21 @@ namespace Necromancer
             }
         }
 
+        private void PeriodicAutosave()
+        {
+            Autosave(15f);
+        }
+
         private void Autosave(float dt)
         {
-            if(restoring || gameOver || upgradeOpen || cryptOpen)return;
+            if(restoring || gameOver || inventoryOpen || wardrobeOpen ||
+                meditationOpen || upgradeOpen || cryptOpen ||
+                player==null || current==null)return;
             autoSaveClock+=dt;
             if(autoSaveClock<15f)return;
-            autoSaveClock=0;
+            autoSaveClock=0f;
+            // The JSON snapshot and the PlayerPrefs resting army must agree.
+            if(!inSanctuary)SaveCompanions();
             SaveProgress();
         }
 
