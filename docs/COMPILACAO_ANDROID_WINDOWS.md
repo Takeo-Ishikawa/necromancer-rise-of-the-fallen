@@ -40,3 +40,8 @@ O fluxo Windows ainda exige a primeira compilação de validação e teste no co
 ## 0.9.0 e versões seguintes
 
 O painel de meditação e o sistema de atributos são compartilhados pelo build Windows e pelo Android. Ambas as plataformas continuam com workflows **manuais**; modificar scripts Unity não dispara automaticamente o build. O identificador e a assinatura da prévia Android permanecem estáveis, e o versionCode continua sendo incrementado pelo número da execução. Arquivos de save local do Windows e do Android são independentes.
+
+
+### Skill tree 0.9.1
+
+A árvore de seis habilidades utiliza um único módulo Unity e é incluída automaticamente nos builds **manuais** Android e Windows, sem criar um workflow adicional. Ambas as plataformas usam saves próprios; ambos aceitam arquivos da versão 0.9.0. Para testar, execute somente o workflow da plataforma pretendida.

@@ -35,6 +35,7 @@ required = [
     "Assets/Scripts/NecroSanctuaryInteractions.cs",
     "Assets/Scripts/NecroSanctuaryWardrobe.cs",
     "Assets/Scripts/NecroSanctuaryMeditation.cs",
+    "Assets/Scripts/NecroSkillTree.cs",
     "Assets/Resources/Data/sanctuary_interactions.json",
     "Assets/Resources/Sprites/necromante.png",
     "Assets/Scripts/NecroCrypt.cs",
@@ -110,7 +111,7 @@ assert "mana<9" not in gameplay
 assert "mana" not in cast_body, "Basic attack must be independent of anima"
 assert "mana" not in respawn, "Autoattack must not depend on anima"
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
-assert "ManaCost(nearest.kind)" in raise_body
+assert "SkillRaiseManaCost(nearest.kind)" in raise_body
 assert "respawnTimer=RespawnInterval" in core
 for feature in ("TickRespawns(float dt)", "IsBoss(entry.kind)",
                 "MaxLivingEnemies=4", "SpawnMinDistance=3.4f",
@@ -216,7 +217,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.0\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.1\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -529,9 +530,40 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.0";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.0";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.1";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.1";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
+
+
+# 0.9.1: six persistent nodes across three skill branches. Skills share no
+# budget with attributes, require predecessor nodes, and affect real gameplay.
+skill_source=(unity/"Assets/Scripts/NecroSkillTree.cs").read_text()
+for token in ("const int SkillTreeNodeCount=6", "SkillPrerequisite={-1,0,-1,2,-1,4}",
+              "SkillRaiseManaCost(", "SkillServantDamage(", "SkillSpectralDamage(",
+              "RestoreSkillTree(NecroSaveData saved)", "UnlockSkillTreeNode(",
+              "(playerLevel-1)/2-LearnedSkillCount()", "SkillUnlocked(prerequisite)",
+              "learnedSkillMask|=1<<index", "SaveProgress();",
+              "DrawSkillTreeContent(", "DrawSkillTreeNode(", "GUI.BeginScrollView",
+              "GUI.EndScrollView()", "DrawMeditationAttributesContent("):
+    assert token in skill_source, "Missing skill tree implementation: "+token
+assert "meditationSkillsTab?AvailableSkillPoints():MeditationPointsAvailable()" in meditation_source
+assert 'if(meditationSkillsTab)DrawSkillTreeContent(viewport);' in meditation_source
+assert 'DrawMeditationAttributesContent(viewport);' in meditation_source
+assert 'SkillUnlocked(3)' in meditation_source and 'mana=Mathf.Min(maxMana,mana+4);' in meditation_source
+assert "public int learnedSkills;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
+assert "learnedSkills=learnedSkillMask" in crypt
+assert "RestoreSkillTree(saved);" in crypt and "RestoreSkillTree(save);" in crypt
+assert "SkillRaiseManaCost(nearest.kind)" in gameplay
+assert "SkillSpectralDamage(34+staffTier*8" in gameplay
+assert "SkillUnlocked(5) ? .60f : .72f" in gameplay
+assert "friendly?SkillServantDamage(self.attack):self.attack" in gameplay
+assert "pup.ally?SkillServantDamage(pup.attack):pup.attack" in gameplay
+boar_source=(unity/"Assets/Scripts/NecroRotboar.cs").read_text()
+assert "boar.ally?SkillServantDamage(boar.attack):boar.attack" in boar_source
+assert "(SkillUnlocked(2)?1.5f:0f)" in core
+assert "0.9.1" in (root/"docs/SANCTUARY_INTERACTIONS.md").read_text()
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "

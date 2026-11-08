@@ -69,3 +69,24 @@ Testes: (1) matar criaturas e atingir o próximo nível; (2) voltar ao refúgio 
 ### Proteção dos checkpoints anteriores
 
 Enquanto o preview inicia na câmara segura, o novo carregamento de atributos mantém também o checkpoint de combate, registros de áreas ainda não abertas e os servos guardados na Cripta. Um investimento no altar ou armário não deve apagar essas informações. Os registros de estágio só são substituídos quando o respectivo estágio realmente está carregado. O teste automatizado verifica esta proteção.
+
+
+## 0.9.1 — Primeira árvore de habilidades
+
+A estação **MEDITAR** agora possui duas abas: **ATRIBUTOS** e **HABILIDADES**. A árvore é visualizada em três caminhos paralelos, cada um com duas habilidades conectadas por uma linha que indica a dependência. A segunda habilidade exige a primeira desbloqueada. Os cartões mostram o efeito real, estado aprendido/bloqueado e botão **APRENDER**. O painel é rolável e funciona em retrato Android e em janela Windows; utiliza apenas as mesmas cores e superfícies da interface do guarda-roupa, sem texturas extras.
+
+O orçamento é **independente** dos pontos de atributos: ganha-se 1 ponto de habilidade a cada 2 níveis, começando no **nível 3** (níveis 3, 5, 7, 9, 11 e 13). Os pontos não usados permanecem livres para escolher qualquer ramo e não podem ser gastos duas vezes. Total inicial da árvore: 6 nós.
+
+| Ramo | Primeira habilidade | Segunda habilidade (requer a primeira) |
+|---|---|---|
+| Necromancia | **Laço Sombrio:** ressuscitar criaturas custa 3 de ânima a menos, mínimo 1 | **Servo Voraz:** servos causam +15% de dano, incluindo grave pups e rotboar aliados |
+| Essência | **Fluxo de Ânima:** +1,5 ânima por segundo de regeneração | **Ceifa de Almas:** recupera 4 de ânima ao derrotar hostis, com o limite da reserva máxima |
+| Magia Espectral | **Eco Espectral:** +12% de dano do projétil da necromante | **Ritmo Profano:** reduz a recarga do lançamento espectral de 0,72 para 0,60 segundo |
+
+A recuperação na Ceifa acontece também quando o golpe final é de um servo. O desconto de Laço Sombrio afeta a ressurreição convencional por cadáver; as interações de vínculo livre do grave pup e rotboar não cobram ânima e permanecem assim. Servo Voraz é aplicado **no cálculo do golpe**, inclusive para servos já presentes, sem alterar permanentemente os valores de ataque serializados e sem aplicar bônus aos inimigos. O ganho de Eco Espectral é exclusivo do projétil da protagonista; não afeta golpe direto nem servos.
+
+### Persistência e compatibilidade
+
+O salvamento permanece **`necro-save-v1.json` na versão 1** e recebe somente o campo opcional `learnedSkills` (máscara inteira de seis bits). Saves anteriores têm máscara zero e seguem válidos. A carga rejeita dependências inválidas e reduz pontos aprendidos acima do orçamento legítimo do nível. Os 3 atributos da versão 0.9.0 continuam intactos. A assinatura permanente, o identificador da prévia Android e os workflows **manuais e independentes** não foram modificados.
+
+Teste sugerido: derrotar criaturas até nível 3, abrir o altar, escolher HABILIDADES, aprender uma habilidade inicial, verificar o efeito no combate; avançar ao nível 5, desbloquear a segunda da mesma trilha; voltar a atributos e confirmar que seus pontos não foram consumidos; reiniciar e verificar as habilidades aprendidas. Não foi executada compilação Unity nesta etapa: a validação de runtime no Windows e Android requer disparar o workflow correspondente manualmente.

@@ -482,7 +482,7 @@ namespace Necromancer
             castTarget=target;
             releasePending=true;
             heroineCastPulse=CastDuration;
-            castCooldown=Time.time+(SkillUnlocked(5)?.60f:.72f);
+            castCooldown=Time.time+(SkillUnlocked(5) ? .60f : .72f);
         }
 
         void ReleaseSkull()
