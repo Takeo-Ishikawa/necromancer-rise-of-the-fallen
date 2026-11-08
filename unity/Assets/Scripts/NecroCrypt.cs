@@ -368,16 +368,37 @@ namespace Necromancer
                 RestoreActorStats(enemy,record);
                 current.enemies.Add(enemy);
             }
+            foreach(Corpse previous in current.corpses)
+                if(previous!=null && previous.body!=null)
+                    Destroy(previous.body.gameObject);
+            current.corpses.Clear();
             if(saved.corpses!=null)foreach(NecroCorpseRecord body in saved.corpses)
             {
-                if(body==null || string.IsNullOrEmpty(body.kind) || body.time<=0)continue;
-                SpriteRenderer marker=Visual("Cadaver: "+body.kind,
-                    new Vector2(body.x,body.y),NecroArt.Effect(),9,current.root.transform);
-                Fit(marker,.48f,.48f);
-                marker.color=new Color(.82f,.72f,.9f,.75f);
-                current.corpses.Add(new Corpse{
-                    kind=body.kind,body=marker.transform,time=body.time
-                });
+                if(body==null || string.IsNullOrEmpty(body.kind) || body.time<=0)
+                    continue;
+                float remaining=Mathf.Clamp(body.time,.1f,20f);
+                Vector2 at=new Vector2(body.x,body.y);
+                if(body.kind=="grave_pup" || body.kind=="rotboar")
+                {
+                    // Preserve compatibility with older marker-only save files.
+                    SpriteRenderer marker=Visual("Cadaver: "+body.kind,
+                        at,NecroArt.Effect(),9,current.root.transform);
+                    Fit(marker,.48f,.48f);
+                    marker.color=new Color(.82f,.72f,.9f,.75f);
+                    current.corpses.Add(new Corpse{
+                        kind=body.kind,body=marker.transform,time=remaining
+                    });
+                }
+                else
+                {
+                    Actor shell=Create(body.kind,at,false,current.root.transform);
+                    if(shell.view!=null)
+                        shell.view.FallToCorpse(remaining,true);
+                    current.corpses.Add(new Corpse{
+                        kind=body.kind,body=shell.body,time=remaining,
+                        view=shell.view
+                    });
+                }
             }
             if(saved.drops!=null)foreach(NecroItemRecord item in saved.drops)
             {

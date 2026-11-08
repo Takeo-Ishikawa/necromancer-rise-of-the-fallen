@@ -134,6 +134,10 @@ namespace Necromancer
                 pressed=button.Contains(point);
                 if(bind.Contains(point))BindNearbyCreature();
             }
+            // Keyboard parity with the existing ERGUER touch action.
+            // E is reserved for sanctuary stations outside combat.
+            if(Input.GetKeyDown(KeyCode.E) && CanBindNearby())
+                BindNearbyCreature();
             if(pressed)manualQueued=true;
             if(!manualQueued)return;
             if(Closest(ManualRange)==null)
