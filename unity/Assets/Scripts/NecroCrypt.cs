@@ -460,15 +460,23 @@ namespace Necromancer
 
         void RecoverAfterDeath()
         {
-            gameOver=false;
-            shards=Mathf.Max(0,shards-2);
-            if(stages.Length>0 && stages[0]!=null && stages[0].claimed)
-                LoadStage(0);
-            else LoadStage(stage);
-            player.hp=Mathf.Max(1,player.maxHp*.65f);
+            if(!gameOver || player==null || sanctuaryLevel==null)return;
+            // The penalty is bounded: never lose levels, equipment or souls.
+            int lost=Mathf.Min(2,Mathf.Max(0,shards));
+            shards-=lost;
+            player.hp=Mathf.Max(1f,player.maxHp*.65f);
             mana=maxMana;
-            Announce("Voce retornou ao refugio. Perdeu ate 2 fragmentos.");
-            SaveProgress();
+            manaFraction=0f;
+            gameOver=false;
+            Time.timeScale=1f;
+            EnterSanctuary();
+            heroDamageImmuneUntil=Time.time+HeroArrivalGraceSeconds;
+            // Keep the exact cave snapshot in memory and the last checkpoint
+            // on disk; the next expedition starts from the safe chamber.
+            SaveCompanions();
+            if(!SaveProgress())
+                Debug.LogWarning("Necromancer: defeat recovery save failed.");
+            Announce("Recuperado no refugio. Fragmentos perdidos: "+lost+".");
         }
     }
 }

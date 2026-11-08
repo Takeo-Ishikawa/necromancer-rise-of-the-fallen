@@ -159,6 +159,13 @@ namespace Necromancer
             EnsureHudArt();
             float scale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
             GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));
+            // Defeat is a modal, higher-priority state than every HUD panel.
+            // All gameplay controls remain hidden until recovery.
+            if(gameOver)
+            {
+                DrawHeroDefeatPanel(Screen.width/scale,Screen.height/scale);
+                return;
+            }
             if(wardrobeOpen)
             {
                 DrawSanctuaryWardrobePanel(Screen.width/scale,Screen.height/scale);

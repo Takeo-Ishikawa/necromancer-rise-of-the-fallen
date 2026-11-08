@@ -225,6 +225,8 @@ namespace Necromancer
             // All servants survive transitions with their HP and level intact.
             Vector2 start=NecroLevels.At(level,level.startX,level.startY);
             player.body.position=start;
+            // A short arrival grace period prevents portal ambushes.
+            heroDamageImmuneUntil=Time.time+HeroArrivalGraceSeconds;
             for(int i=0;i<servants.Count;i++) {
                 float angle=i*2.399963f;
                 servants[i].body.position=start+
@@ -287,6 +289,7 @@ namespace Necromancer
                 ReadManualAttack(hudScale);
             }
             if(!inSanctuary)UpdateActors(current.enemies,dt,false);
+            if(gameOver)return;
             UpdateActors(servants,dt,true);
             if(!inSanctuary)TickCorpses(dt);
             if(!inSanctuary)UpdateProjectiles(dt);

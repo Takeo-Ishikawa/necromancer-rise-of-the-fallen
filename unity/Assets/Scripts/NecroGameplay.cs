@@ -203,6 +203,8 @@ namespace Necromancer
         {
             for(int i=actors.Count-1;i>=0;i--)
             {
+                // A fatal hit must stop the remaining hostiles immediately.
+                if(gameOver)return;
                 if(i>=actors.Count)continue;
                 Actor self=actors[i];
                 if(self.hp<=0)continue;
@@ -318,7 +320,7 @@ namespace Necromancer
             if(victim.hp<=0)return;
             if(victim==player)
             {
-                heroineHitPulse=.27f;
+                ApplyHeroDamage(amount);
                 return;
             }
             victim.hp-=amount;

@@ -140,8 +140,12 @@ namespace Necromancer
             }
             witchArtRenderer.sprite=heroSprites[frame];
             witchArtRenderer.flipX=flip;
-            witchArtRenderer.color=heroineHitPulse>0?
-                new Color(1f,.83f,.87f):Color.white;
+            bool invulnerable=!inSanctuary &&
+                Time.time<heroDamageImmuneUntil;
+            bool pulseVisible=invulnerable && Mathf.Sin(Time.time*22f)>0f;
+            witchArtRenderer.color=heroineHitPulse>0f ?
+                new Color(1f,.72f,.78f) :
+                pulseVisible?new Color(1f,.82f,.90f,.82f):Color.white;
             // Move only the drawn layer, preserving the gameplay collider,
             // contact shadow, camera and the sanctuary's visual-only scale.
             Vector3 pose=witchArtRenderer.transform.localPosition;
