@@ -131,7 +131,8 @@ namespace Necromancer
             else
             {
                 boar.chargeDirection=delta.sqrMagnitude>.0001f?delta.normalized:Vector2.left;
-                SetBoarPose(boar,BoarPose.Windup,.8f);
+                SetBoarPose(boar,BoarPose.Windup,
+                    RotboarWindupDuration(boar));
             }
         }
     }

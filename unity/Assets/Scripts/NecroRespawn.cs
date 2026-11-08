@@ -10,11 +10,8 @@ namespace Necromancer
     /// </summary>
     public partial class NecroPrototype
     {
-        const float RespawnInterval=12f;
-        const float SpawnMinDistance=3.4f;
-        const float SpawnMaxDistance=4.1f;
+        const float RespawnInterval=12f; // Default for legacy stage snapshots.
         const float MinEnemySeparation=1.8f;
-        const int MaxLivingEnemies=4;
 
         void TickRespawns(float dt)
         {
@@ -23,7 +20,7 @@ namespace Necromancer
 
             current.respawnTimer-=dt;
             if(current.respawnTimer>0f)return;
-            current.respawnTimer=RespawnInterval;
+            current.respawnTimer=RespawnIntervalForStage();
 
             int commonSpawnKinds=0;
             foreach(Spawn entry in level.enemies)
@@ -35,7 +32,7 @@ namespace Necromancer
             foreach(Actor enemy in current.enemies)
                 if(enemy!=null && enemy.hp>0)alive++;
 
-            if(alive>=MaxLivingEnemies)return;
+            if(alive>=RespawnPopulationLimitForStage())return;
 
             // Rotate through the authored spawn roster, avoiding a permanent
             // bias toward whichever monster appears first in levels.json.
@@ -58,7 +55,8 @@ namespace Necromancer
             for(int attempt=0;attempt<28;attempt++)
             {
                 float angle=Random.Range(-Mathf.PI,Mathf.PI);
-                float radius=Random.Range(SpawnMinDistance,SpawnMaxDistance);
+                float radius=Random.Range(SpawnMinDistanceForStage(),
+                    SpawnMaxDistanceForStage());
                 Vector2 at=center+new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*radius;
                 if(Blocked(at,.47f))continue;
                 if(Vector2.Distance(at,gate)<2.5f ||

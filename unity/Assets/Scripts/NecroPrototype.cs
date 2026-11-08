@@ -193,6 +193,7 @@ namespace Necromancer
             level=levels[stage];
             if(stages[stage]==null) {
                 StageInstance next=new StageInstance();
+                next.respawnTimer=RespawnIntervalForStage();
                 next.root=new GameObject("Region "+(stage+1)+": "+level.title);
                 stages[stage]=next;
                 current=next;

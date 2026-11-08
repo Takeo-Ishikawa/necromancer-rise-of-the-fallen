@@ -17,8 +17,12 @@ namespace Necromancer
         {
             if(inSanctuary || gameOver || player==null ||
                 player.hp<=0f || Time.time<heroDamageImmuneUntil)return;
-            float amount=Mathf.Max(1f,damage);
+            float amount=Mathf.Max(1f,damage*IncomingHeroDamageMultiplier());
+            float before=player.hp;
             player.hp=Mathf.Max(0f,player.hp-amount);
+            if(before>player.maxHp*.25f && player.hp>0f &&
+               player.hp<=player.maxHp*.25f)
+                Announce("VIDA CRITICA! Recuar e procurar recursos.");
             heroineHitPulse=.34f;
             heroDamageImmuneUntil=Time.time+HeroHitInvulnerabilitySeconds;
             if(current!=null && current.root!=null)

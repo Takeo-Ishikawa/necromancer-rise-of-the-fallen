@@ -251,7 +251,7 @@ namespace Necromancer
                         MoveToward(self,target.body.position,dt);
                     else if(self.cooldown<=0)
                     {
-                        self.cooldown=IsBoss(self.kind)?1.55f:1.18f;
+                        self.cooldown=EnemyStrikeCooldown(self);
                         if(self.view!=null)
                             self.view.Strike(target.body.position-self.body.position);
                         Damage(target,friendly?SkillServantDamage(self.attack):self.attack);
@@ -265,9 +265,12 @@ namespace Necromancer
         {
             Actor nearest=player;
             float best=(player.body.position-enemy.body.position).sqrMagnitude;
+            float companionWeight=ServantThreatDistanceWeight();
             foreach(Actor ally in servants)
             {
-                float distance=(ally.body.position-enemy.body.position).sqrMagnitude;
+                if(ally==null || ally.hp<=0f || ally.body==null)continue;
+                float distance=(ally.body.position-enemy.body.position).sqrMagnitude*
+                    companionWeight;
                 if(distance<best){best=distance;nearest=ally;}
             }
             return nearest;
@@ -277,11 +280,13 @@ namespace Necromancer
 
         void UpdatePup(Actor pup,Actor prey,float dt)
         {
-            const float windup=.42f, leap=.24f;
+            float windup=PupWindupDuration(pup);
+            const float leap=.24f;
             Vector2 offset=prey.body.position-pup.body.position;
             if(pup.pupAttackTime<=0)
             {
-                if(!pup.ally && offset.magnitude>4.1f)return;
+                if(!pup.ally &&
+                   offset.magnitude>HostilePupDetectionDistance())return;
                 if(offset.magnitude>1.35f || !Visible(pup.body.position,prey.body.position))
                 {
                     MoveToward(pup,prey.body.position,dt);
@@ -309,7 +314,7 @@ namespace Necromancer
             }
             if(pup.pupAttackTime<=0)
             {
-                pup.cooldown=.95f;
+                pup.cooldown=PupRecoveryCooldown(pup);
                 pup.view.SetPupAction(0,pup.pupHeading);
             }
         }
@@ -681,9 +686,13 @@ namespace Necromancer
                 ResourceNode res=current.resources[i];
                 if(Vector2.Distance(player.body.position,res.body.position)>.70f)continue;
                 shards+=2;gathered++;
-                player.hp=Mathf.Min(player.maxHp,player.hp+9);
-                mana=Mathf.Min(maxMana,mana+12);
-                Announce("Recurso "+res.type+" coletado: +2 fragmentos.");
+                float healed=HealFromGatheredResource();
+                player.hp=Mathf.Min(player.maxHp,player.hp+healed);
+                int manaGained=Mathf.Min(12,Mathf.Max(0,maxMana-mana));
+                mana+=manaGained;
+                Announce("Recurso "+res.type+": +2 fragmentos, +"+
+                    Mathf.CeilToInt(healed)+" vida, +"+
+                    manaGained+" anima.");
                 Destroy(res.body.gameObject);
                 current.resources.RemoveAt(i);
                 SaveProgress();
