@@ -171,3 +171,8 @@ A formação é reutilizada também quando os companheiros entram na região e a
 **Validação em jogo:** caminhar em quatro direções com 1, 4 e 10+ servos; parar e observar se todos se estabilizam sem tremulação; passar por um corredor estreito e por móveis da câmara segura; deixar um servo longe e confirmar que alcança o grupo (ou é recuperado somente depois do atraso e fora do combate); enfrentar inimigos em Caça e Defesa e verificar que as ordens de ataque continuam prioritárias; voltar ao refúgio e reiniciar para confirmar o estado dos servos. Os testes estruturais não substituem uma build Unity real.
 
 **Corredores estreitos:** quando as posições laterais e os 12 desvios próximos estiverem bloqueados, a formação procura uma **fila única atrás da necromante**, respeitando o raio individual de cada servo. Isso evita que o grupo tente atravessar paredes apenas para ocupar uma fileira. Se nem a fila oferecer uma posição livre, o servo continua seguindo pelas regras normais de colisão até encontrar passagem.
+
+
+## 0.9.7 — Polimento visual do combate
+
+Os ataques de criaturas comuns agora se orientam para seus alvos; Grave Pups antecipam o salto com compressão corporal e cor no círculo de chão; Rotboars sinalizam investidas com um círculo temporário e exibem reação visual a impactos. Golpes sofridos por servos usam efeito azul-claro, e por hostis, rosado. Veja [documentação de polimento de combate](POLIMENTO_COMBATE_0_9_7.md). Mecânicas, salvamentos e workflows manuais permanecem inalterados.

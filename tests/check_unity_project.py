@@ -222,7 +222,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.6\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.7\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -535,8 +535,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.6";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.6";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -618,13 +618,14 @@ assert "DrawSoulPulseButton(scale);" in ui
 assert "ResetActiveSkillInput();" in (unity/"Assets/Scripts/NecroSanctuary.cs").read_text()
 assert "if(!pulseAwardBatch)SaveProgress();" in meditation_source
 assert 'type==3?"Necrotic Soul Pulse"' in fx_source
-assert "fx.sprite.sortingOrder=type==3?11:type==4?14:18;" in fx_source
+assert "fx.sprite.sortingOrder=type==5 || type==6 ? 10 :" in fx_source
+assert "type==3?11:type==4?14:18;" in fx_source
 assert "new Vector3(4.0f,4.0f,1f)" in fx_source
 assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "mana" not in cast_body  # Basic attack stays free.
-assert 'PlayerSettings.bundleVersion = "0.9.6";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.6";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -665,8 +666,8 @@ assert "new Vector3(1.75f,1.75f,1f)" in fx_source
 assert "new Color(.33f,.95f,.76f,.74f)" in fx_source
 assert 282-78 > 195 and 195-78 > 108, "Spell touch controls overlap"
 assert '"com.takeo.necromancer.unity.preview080"' in builder
-assert 'PlayerSettings.bundleVersion = "0.9.6";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.6";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -701,8 +702,8 @@ assert "ToggleServantTactics);" in hud
 assert "huntOrder=saved.huntOrder;" in crypt
 assert "huntOrder=save.huntOrder;" in crypt
 assert "spellUnlocked=spellUnlocked,huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.6";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.6";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -747,11 +748,48 @@ assert "else if(friendly)FollowNecromancer(self,dt);" in gameplay
 assert "FindServantTarget(self)" in gameplay
 assert "FindServantTarget(boar)" in boar_source
 assert "NecroSaveStore" in crypt and "huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.6";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.6";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
+
+
+# 0.9.7: attack-facing, telegraphs and distinction between allied/hostile hits.
+creature_view=(unity/"Assets/Scripts/NecroCreatureView.cs").read_text()
+rotboar_source=(unity/"Assets/Scripts/NecroRotboar.cs").read_text()
+fx_polish=(unity/"Assets/Scripts/NecroCombatFx.cs").read_text()
+for token in ("public void Strike(Vector2 direction)",
+              "currentDirection=Direction(direction,currentDirection)",
+              "frames.Duration(NecroPose.Attack)", "frameClock=0f",
+              "bool bracing=pupAction==2", "bool lunging=pupAction==3",
+              "float hurtSquash=impactTimer>0f",
+              "haloRenderer.color=bracing ?",
+              "if(moving && attackTimer<=0f)"):
+    assert token in creature_view, "Creature animation polish missing: "+token
+assert "self.view.Strike(target.body.position-self.body.position);" in gameplay
+assert "new float[]{35,-35,70,-70,105,-105}" not in gameplay
+assert "static readonly float[] AvoidanceAngles=" in gameplay
+assert "foreach(float angle in AvoidanceAngles)" in gameplay
+for token in ("boarVisualScale=art.transform.localScale",
+              "pose==BoarPose.Windup?.94f",
+              "pose==BoarPose.Charge?1.06f",
+              "boar.ally?6:5", "boar.boarArt.color=boar.flash>0f",
+              "art.color=Color.white;"):
+    assert token in rotboar_source, "Rotboar combat polish missing: "+token
+assert "public Vector3 boarVisualScale;" in core
+assert 'type==5?"Rotboar Charge Warning"' in fx_polish
+assert 'type==6?"Allied Rotboar Charge Warning"' in fx_polish
+assert "bool alliedHit=false" in fx_polish
+assert "type==5 || type==6 ? .82f" in fx_polish
+assert "type==5 || type==6 ? 10" in fx_polish
+assert "victim.ally);" in gameplay
+assert "const int Capacity=30;" in fx_polish
+assert 'PlayerSettings.bundleVersion = "0.9.7";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.7";' in win_builder
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
+assert (root/"docs/POLIMENTO_COMBATE_0_9_7.md").is_file()
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
