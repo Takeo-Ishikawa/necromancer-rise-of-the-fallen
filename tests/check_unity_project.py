@@ -1004,7 +1004,7 @@ death_recovery=crypt.split("void RecoverAfterDeath()",1)[1].split(
 for token in ("if(!gameOver || player==null", "Mathf.Min(2,Mathf.Max(0,shards))",
               "shards-=lost;", "player.hp=Mathf.Max(1f,player.maxHp*.65f);",
               "mana=maxMana;", "gameOver=false;", "EnterSanctuary();",
-              "SaveCompanions();", "SaveProgress();"):
+              "SaveCompanions();", "SaveProgress()"):
     assert token in death_recovery, "Safe death recovery missing: "+token
 assert "LoadStage(" not in death_recovery, "Death must return to the refuge"
 assert 'PlayerSettings.bundleVersion = "0.9.11";' in builder
