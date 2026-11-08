@@ -141,7 +141,22 @@ namespace Necromancer
         }
         public void Strike()
         {
-            attackTimer=.20f;
+            Strike(Vector2.zero);
+        }
+
+        public void Strike(Vector2 direction)
+        {
+            // Standing attackers should face their actual target.
+            if(direction.sqrMagnitude>.0001f)
+            {
+                currentDirection=Direction(direction,currentDirection);
+                if(frames==null && Mathf.Abs(direction.x)>.01f)
+                    artRenderer.flipX=direction.x<0f;
+            }
+            currentPose=NecroPose.Attack;
+            frameClock=0f;
+            attackTimer=frames!=null ?
+                Mathf.Min(.32f,frames.Duration(NecroPose.Attack)) : .24f;
         }
 
         void LateUpdate()
@@ -163,15 +178,36 @@ namespace Necromancer
 
             if(type=="grave_pup")
             {
-                int pose=pupAction!=0?pupAction:moving && Mathf.Sin(t*13f)>0?1:0;
+                bool bracing=pupAction==2;
+                bool lunging=pupAction==3;
+                int pose=pupAction!=0?pupAction:
+                    moving && Mathf.Sin(t*13f)>0?1:0;
                 artRenderer.sprite=friendly?alliedPupFrames[pose]:pupFrames[pose];
-                if(pupAction==0 && Mathf.Abs(delta.x)>.0001f)artRenderer.flipX=delta.x<0;
-                float lift=pupAction==3?.14f:moving && pupAction==0?.024f*Mathf.Abs(Mathf.Sin(t*13f)):0f;
-                art.localPosition=Vector3.up*lift;
-                artRenderer.color=impactTimer>0?new Color(1,.65f,.68f):baseTint;
+                if(pupAction==0 && Mathf.Abs(delta.x)>.0001f)
+                    artRenderer.flipX=delta.x<0;
+                float lift=lunging?.14f:
+                    moving && pupAction==0?.024f*Mathf.Abs(Mathf.Sin(t*13f)):0f;
+                // Existing ground circle signals the windup, no new objects.
+                float hurtSquash=impactTimer>0f?.93f:1f;
+                art.localScale=new Vector3(
+                    bracing?1.07f:lunging?1.04f:1f,
+                    (bracing?.89f:lunging?1.09f:1f)*hurtSquash,1f);
+                art.localPosition=Vector3.up*(bracing?-.045f:lift);
+                artRenderer.color=impactTimer>0f ?
+                    (friendly?new Color(.70f,.97f,1f):new Color(1f,.58f,.63f)):
+                    baseTint;
+                float ringAlpha=bracing?.46f+.15f*
+                    (.5f+.5f*Mathf.Sin(t*18f)):
+                    friendly?.34f:.38f;
+                haloRenderer.color=bracing ?
+                    (friendly?new Color(.49f,.98f,.83f,ringAlpha):
+                        new Color(1f,.42f,.37f,ringAlpha)):
+                    (friendly?new Color(.50f,.91f,.80f,ringAlpha):
+                        new Color(.05f,.07f,.09f,ringAlpha));
+                if(friendly)halo.localRotation=Quaternion.Euler(0f,0f,t*18f);
                 return;
             }
-            if(moving)
+            if(moving && attackTimer<=0f)
                 currentDirection=Direction(delta,currentDirection);
 
             NecroPose next=impactTimer>0f?NecroPose.Hurt:
@@ -205,9 +241,11 @@ namespace Necromancer
                 else if(delta.x<-.0001f)artRenderer.flipX=true;
             }
 
-            float attackScale=attackTimer > 0f ? .02f : 0f;
-            art.localScale=new Vector3(animationScale.x*(bodyScale+squash),
-                animationScale.y*(bodyScale-squash+attackScale),1f);
+            float attackScale=attackTimer>0f ? .045f : 0f;
+            float recoilScale=impactTimer>0f ? .035f : 0f;
+            art.localScale=new Vector3(
+                animationScale.x*(bodyScale+squash+attackScale+recoilScale),
+                animationScale.y*(bodyScale-squash+attackScale-recoilScale),1f);
 
             artRenderer.color=impactTimer>0f?
                 friendly?new Color(.90f,.99f,1f,1f):

@@ -175,6 +175,7 @@ namespace Necromancer
             actor.body.position=new Vector3(at.x,at.y,0);
             return contact;
         }
+        static readonly float[] AvoidanceAngles={35f,-35f,70f,-70f,105f,-105f};
         void MoveToward(Actor actor,Vector2 destination,float dt,
             float followBoost=1f)
         {
@@ -191,7 +192,7 @@ namespace Necromancer
             Move(actor,direct);
             if(Vector2.Distance(prior,actor.body.position)>.02f*dt)return;
             // Sample lateral paths when a rock blocks the direct path.
-            foreach(float angle in new float[]{35,-35,70,-70,105,-105})
+            foreach(float angle in AvoidanceAngles)
             {
                 Vector2 candidate=Quaternion.Euler(0,0,angle)*normal;
                 Move(actor,candidate*distance);
@@ -247,7 +248,8 @@ namespace Necromancer
                     else if(self.cooldown<=0)
                     {
                         self.cooldown=IsBoss(self.kind)?1.55f:1.18f;
-                        if(self.view!=null)self.view.Strike();
+                        if(self.view!=null)
+                            self.view.Strike(target.body.position-self.body.position);
                         Damage(target,friendly?SkillServantDamage(self.attack):self.attack);
                     }
                 }
@@ -320,7 +322,8 @@ namespace Necromancer
             victim.hp-=amount;
             victim.flash=.16f;
             if(victim.view!=null)victim.view.Flash();
-            NecroCombatFx.Emit(victim.body.position,current.root.transform,0);
+            NecroCombatFx.Emit(victim.body.position,current.root.transform,0,
+                victim.ally);
             if(victim.hp>0)return;
             if(victim.ally)
             {

@@ -26,6 +26,8 @@ namespace Necromancer
             LoadBoarFrames("Creatures/rotboar_fallen",boarFallFrames);
             var art=boar.boarArt;
             art.sortingOrder=2;
+            art.color=Color.white;
+            art.transform.localScale=boar.boarVisualScale;
             art.sprite=boarFallFrames[0];
             yield return new WaitForSeconds(.14f);
             if(art==null)yield break;
@@ -58,6 +60,7 @@ namespace Necromancer
             Fit(art,2.8f,2.8f);
             art.flipX=true;
             return new Actor {kind="rotboar",body=art.transform,boarArt=art,
+                boarVisualScale=art.transform.localScale,
                 hp=180,maxHp=180,radius=.54f,attack=19f,speed=ally?3.8f:1.5f,ally=ally};
         }
 
@@ -65,11 +68,20 @@ namespace Necromancer
         {
             boar.boarPose=pose;
             boar.boarArt.sprite=(boar.ally?alliedBoarFrames:boarFrames)[(int)pose];
+            boar.boarArt.transform.localScale=boar.boarVisualScale*
+                (pose==BoarPose.Windup?.94f:pose==BoarPose.Charge?1.06f:1f);
             boar.cooldown=duration;
+            if(pose==BoarPose.Windup && current!=null && !inSanctuary)
+                NecroCombatFx.Emit(boar.body.position,current.root.transform,
+                    boar.ally?6:5);
         }
 
         void UpdateRotboar(Actor boar,float dt)
         {
+            // Boars have a direct SpriteRenderer and need their own hit tint.
+            boar.boarArt.color=boar.flash>0f ?
+                (boar.ally?new Color(.70f,.96f,1f):
+                    new Color(1f,.58f,.62f)) : Color.white;
             Vector2 at=boar.body.position;
             if(boar.boarPose==BoarPose.Windup)
             {

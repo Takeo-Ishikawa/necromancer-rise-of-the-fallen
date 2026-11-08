@@ -16,35 +16,48 @@ namespace Necromancer
         Color tint;
         Vector3 size;
 
-        public static void Emit(Vector2 position,Transform parent,int type)
+        public static void Emit(Vector2 position,Transform parent,int type,
+            bool alliedHit=false)
         {
             if(active>=Capacity)return;
             GameObject obj=new GameObject(type==1?"Soul Reanimation":
                 type==2?"Guardian Soul Release":
                 type==3?"Necrotic Soul Pulse":
-                type==4?"Order of the Dead":"Hit");
+                type==4?"Order of the Dead":
+                type==5?"Rotboar Charge Warning":
+                type==6?"Allied Rotboar Charge Warning":
+                alliedHit?"Servant Hit":"Hit");
             if(parent!=null)obj.transform.SetParent(parent,false);
             obj.transform.position=new Vector3(position.x,position.y,0);
             NecroCombatFx fx=obj.AddComponent<NecroCombatFx>();
-            fx.duration=type==4 ? .85f : type==3 ? .52f :
+            fx.duration=type==5 || type==6 ? .82f :
+                type==4 ? .85f : type==3 ? .52f :
                 type == 1 ? .76f : type == 2 ? 1.1f : .30f;
             fx.remaining=fx.duration;
-            fx.rotationSpeed=type==4?-88f:type==3?105f:type==0?90f:type==1?75f:-52f;
-            fx.drift=type==4 ? Vector2.zero : type==3 ? Vector2.zero :
+            fx.rotationSpeed=type==5?40f:type==6?-40f:
+                type==4?-88f:type==3?105f:type==0?90f:type==1?75f:-52f;
+            fx.drift=type==5 || type==6 || type==4 || type==3 ?
+                Vector2.zero :
                 type==0 ? new Vector2(.04f,.13f) : new Vector2(0,.25f);
-            fx.size=type==4 ? new Vector3(1.75f,1.75f,1f) :
+            fx.size=type==5 || type==6 ? new Vector3(1.75f,1.12f,1f) :
+                type==4 ? new Vector3(1.75f,1.75f,1f) :
                 type==3 ? new Vector3(4.0f,4.0f,1f) :
                 type==0 ? new Vector3(.38f,.38f,1f) :
                 type==1 ? new Vector3(1.0f,.68f,1f) :
                 new Vector3(1.5f,1.1f,1f);
-            fx.tint=type==4 ? new Color(.33f,.95f,.76f,.74f) :
+            fx.tint=type==5 ? new Color(.99f,.41f,.33f,.70f) :
+                type==6 ? new Color(.37f,.92f,.78f,.65f) :
+                type==4 ? new Color(.33f,.95f,.76f,.74f) :
                 type==3 ? new Color(.62f,.41f,.92f,.78f) :
-                type==0 ? new Color(.98f,.76f,.77f,.85f) :
+                type==0 ? (alliedHit?
+                    new Color(.63f,.93f,1f,.85f):
+                    new Color(.98f,.76f,.77f,.85f)) :
                 type==1 ? new Color(.55f,.97f,.86f,.85f) :
                 new Color(.71f,.65f,.97f,.85f);
             fx.sprite=obj.AddComponent<SpriteRenderer>();
             fx.sprite.sprite=type==0?NecroArt.Effect():NecroArt.RitualCircle();
-            fx.sprite.sortingOrder=type==3?11:type==4?14:18;
+            fx.sprite.sortingOrder=type==5 || type==6 ? 10 :
+                type==3?11:type==4?14:18;
             fx.sprite.color=fx.tint;
             obj.transform.localScale=fx.size*.70f;
             active++;

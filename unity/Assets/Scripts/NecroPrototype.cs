@@ -17,6 +17,7 @@ namespace Necromancer
             public BoarPose boarPose;
             public Vector2 chargeDirection;
             public SpriteRenderer boarArt;
+            public Vector3 boarVisualScale;
             public float bindUntil;
             public float pupAttackTime;
             public Vector2 pupHeading;
