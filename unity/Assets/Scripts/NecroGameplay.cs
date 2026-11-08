@@ -346,6 +346,9 @@ namespace Necromancer
                 else Destroy(victim.body.gameObject);
             }
             else SpawnRecoverableCorpse(victim);
+            // A single rising soul marks death without covering the corpse.
+            NecroCombatFx.Emit(victim.body.position,current.root.transform,7,
+                victim.ally);
             // Defeated hostiles award XP exactly once, including servant kills.
             if(!victim.ally)AwardMeditationExperience(victim.kind);
         }

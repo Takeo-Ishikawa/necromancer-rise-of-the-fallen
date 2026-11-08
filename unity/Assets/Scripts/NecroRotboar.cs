@@ -40,7 +40,16 @@ namespace Necromancer
                 boar.bindUntil=Time.time+3f;
                 owner.fallenBoars.Add(boar);
             }
-            yield return new WaitForSeconds(3f);
+            float remaining=3f;
+            while(remaining>0f && art!=null)
+            {
+                remaining-=Time.deltaTime;
+                // The last moments dissolve; players can bind the body while
+                // it is still visible, then the corpse disappears naturally.
+                float alpha=Mathf.Clamp01(remaining/.72f);
+                art.color=new Color(1f,1f,1f,alpha);
+                yield return null;
+            }
             if(art!=null)Destroy(art.gameObject);
         }
 
