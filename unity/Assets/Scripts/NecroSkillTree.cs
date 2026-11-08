@@ -82,7 +82,8 @@ namespace Necromancer
 
         float SkillServantDamage(float baseDamage)
         {
-            return baseDamage*(SkillUnlocked(1)?1.15f:1f);
+            return baseDamage*(SkillUnlocked(1)?1.15f:1f)*
+                GraveCommandDamageMultiplier;
         }
 
         float SkillSpectralDamage(float baseDamage)

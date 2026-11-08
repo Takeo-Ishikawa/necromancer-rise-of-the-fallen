@@ -181,7 +181,8 @@ namespace Necromancer
             Vector2 delta=destination-at;
             if(delta.sqrMagnitude<.005f)return;
             Vector2 normal=delta.normalized;
-            Vector2 direct=normal*actor.speed*dt;
+            float travelSpeed=actor.speed*GraveCommandSpeedMultiplier(actor);
+            Vector2 direct=normal*travelSpeed*dt;
             Vector2 prior=actor.body.position;
             Move(actor,direct);
             if(Vector2.Distance(prior,actor.body.position)>.02f*dt)return;
@@ -189,7 +190,7 @@ namespace Necromancer
             foreach(float angle in new float[]{35,-35,70,-70,105,-105})
             {
                 Vector2 candidate=Quaternion.Euler(0,0,angle)*normal;
-                Move(actor,candidate*actor.speed*dt);
+                Move(actor,candidate*travelSpeed*dt);
                 if(Vector2.Distance(prior,actor.body.position)>.02f*dt)break;
             }
         }
@@ -225,7 +226,13 @@ namespace Necromancer
                 float closest=friendly?(huntOrder?5.6f:3.2f):4.1f;
                 if(friendly)
                 {
-                    foreach(Actor enemy in current.enemies)
+                    if(GraveCommandActive && servantOrder!=null &&
+                       servantOrder.hp>0f && servantOrder.body!=null &&
+                       Vector2.Distance(self.body.position,
+                           servantOrder.body.position)<7.2f &&
+                       Visible(self.body.position,servantOrder.body.position))
+                        target=servantOrder;
+                    if(target==null)foreach(Actor enemy in current.enemies)
                     {
                         float distance=Vector2.Distance(self.body.position,enemy.body.position);
                         if(enemy.hp>0 && distance<closest){closest=distance;target=enemy;}

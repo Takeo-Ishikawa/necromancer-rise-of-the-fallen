@@ -27,6 +27,9 @@ namespace Necromancer
             // No effect persists across the refuge / battle boundary.
             // The cooldown itself remains active to prevent travel resets.
             soulPulseFailureNoticeUntil=0f;
+            // End the active order on travel, but keep its cooldown.
+            graveCommandUntil=0f;
+            graveCommandFailureNoticeUntil=0f;
         }
 
         bool CanCastSoulPulse()
@@ -137,6 +140,7 @@ namespace Necromancer
                 if(rect.Contains(point))pressed=true;
             }
             if(pressed)TryCastSoulPulse();
+            ReadGraveCommandInput(scale);
         }
 
         void DrawSoulPulseButton(float scale)

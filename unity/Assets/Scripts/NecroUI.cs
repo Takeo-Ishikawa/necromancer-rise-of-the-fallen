@@ -37,6 +37,7 @@ namespace Necromancer
             Vector2 gui=new Vector2(point.x,Screen.height-point.y)/scale;
             if(SanctuaryTravelAvailable() && SanctuaryTravelRect(scale).Contains(gui))return false;
             if(!inSanctuary && SoulPulseButtonRect(scale).Contains(gui))return false;
+            if(!inSanctuary && GraveCommandButtonRect(scale).Contains(gui))return false;
             if(NearbySanctuaryStation()!=null &&
                SanctuaryInteractionButtonRect(scale).Contains(gui))return false;
             return !RosterButton.Contains(gui) && point.x<Screen.width*.65f &&
@@ -186,6 +187,7 @@ namespace Necromancer
                 DrawAction(button,false,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",
                     Time.time>=castCooldown);
                 DrawSoulPulseButton(scale);
+                DrawGraveCommandButton(scale);
             }
             if(!inSanctuary && CanBindNearby())DrawAction(BindRect(scale),true,"ERGUER",true);
             if(joystickFingerId!=-1)
