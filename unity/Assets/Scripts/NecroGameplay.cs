@@ -210,7 +210,10 @@ namespace Necromancer
                 }
                 if(self.kind=="grave_pup")
                 {
-                    Actor prey=friendly?servantOrder:ClosestPartyMember(self);
+                    Actor prey=friendly?
+                        (GraveCommandActive && graveCommandTarget!=null &&
+                         graveCommandTarget.hp>0f ? graveCommandTarget : servantOrder)
+                        :ClosestPartyMember(self);
                     if(prey!=null && prey.hp>0)
                         UpdatePup(self,prey,dt);
                     else if(friendly)
@@ -226,12 +229,12 @@ namespace Necromancer
                 float closest=friendly?(huntOrder?5.6f:3.2f):4.1f;
                 if(friendly)
                 {
-                    if(GraveCommandActive && servantOrder!=null &&
-                       servantOrder.hp>0f && servantOrder.body!=null &&
+                    if(GraveCommandActive && graveCommandTarget!=null &&
+                       graveCommandTarget.hp>0f && graveCommandTarget.body!=null &&
                        Vector2.Distance(self.body.position,
-                           servantOrder.body.position)<7.2f &&
-                       Visible(self.body.position,servantOrder.body.position))
-                        target=servantOrder;
+                           graveCommandTarget.body.position)<7.2f &&
+                       Visible(self.body.position,graveCommandTarget.body.position))
+                        target=graveCommandTarget;
                     if(target==null)foreach(Actor enemy in current.enemies)
                     {
                         float distance=Vector2.Distance(self.body.position,enemy.body.position);

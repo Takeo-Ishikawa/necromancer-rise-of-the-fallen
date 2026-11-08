@@ -93,7 +93,10 @@ namespace Necromancer
                 return;
             }
             if(boar.cooldown>0)return;
-            Actor target=boar.ally?servantOrder:ClosestPartyMember(boar);
+            Actor target=boar.ally?
+                (GraveCommandActive && graveCommandTarget!=null &&
+                 graveCommandTarget.hp>0f ? graveCommandTarget : servantOrder)
+                :ClosestPartyMember(boar);
             if(boar.ally && (target==null || target.hp<=0))
             {
                 servantOrder=null;

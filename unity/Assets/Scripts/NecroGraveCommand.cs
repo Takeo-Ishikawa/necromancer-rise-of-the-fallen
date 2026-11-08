@@ -16,6 +16,7 @@ namespace Necromancer
         const float GraveCommandSpeedBonus=1.20f;
         float graveCommandUntil,graveCommandCooldownUntil;
         float graveCommandFailureNoticeUntil;
+        Actor graveCommandTarget;
 
         bool GraveCommandActive
         {
@@ -92,8 +93,9 @@ namespace Necromancer
 
             // Prioritize a visible enemy for allied grave pups, rotboars,
             // and generic servants while they are within engagement range.
-            Actor priority=Closest(7.2f);
-            if(priority!=null)servantOrder=priority;
+            // Do not overwrite the manual attack order: the focus target
+            // is temporary and disappears when the buff ends.
+            graveCommandTarget=Closest(7.2f);
 
             // Existing ritual circles, limited by the CombatFx effect pool.
             NecroCombatFx.Emit(player.body.position,current.root.transform,4);

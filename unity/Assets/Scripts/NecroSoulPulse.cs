@@ -30,6 +30,7 @@ namespace Necromancer
             // End the active order on travel, but keep its cooldown.
             graveCommandUntil=0f;
             graveCommandFailureNoticeUntil=0f;
+            graveCommandTarget=null;
         }
 
         bool CanCastSoulPulse()
