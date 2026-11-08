@@ -152,7 +152,7 @@ for feature in ("NecroSaveData", "NecroSaveStore", "Application.persistentDataPa
                 "JsonUtility.ToJson", "vault", "stages"):
     assert feature in data, f"Missing save component: {feature}"
 assert "RestoreProgress();" not in scripts["NecroPrototype.cs"]
-assert "SaveProgress();" not in gameplay.split("void Damage(",1)[1].split("Actor Closest(",1)[0]
+assert "SaveProgress();" not in gameplay.split("void Damage(",1)[1].split("Actor servantOrder;",1)[0]
 assert "DrawCryptPanel(" in scripts["NecroUI.cs"]
 assert "SceneManager.LoadScene" not in scripts["NecroUI.cs"]
 assert "NecroSaveEditorCheck.Verify();" in (
