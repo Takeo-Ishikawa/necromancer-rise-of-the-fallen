@@ -119,3 +119,27 @@ O combate recebeu **Pulso Necrótico**, uma habilidade ativa básica da necroman
 **Roteiro de teste:** (1) Em combate, pressionar Q ou PULSO longe dos monstros, sem gastar ânima; (2) entrar no alcance e ativar, conferir vários alvos, impacto e recarga; (3) tentar novamente antes de 9s; (4) usar ao lado de servos, conferir que eles não recebem dano; (5) testar com menos de 18 de ânima; (6) conferir XP e nível ao abater vários inimigos; (7) voltar à câmara, onde não existe botão de pulso. Verificar a versão compilada pela Unity antes de distribuir a testers.
 
 Nota visual: o círculo ritual começa menor e expande até cerca de 5,36 unidades de diâmetro, acompanhando o raio efetivo de 2,7 unidades sem parecer que o golpe alcança inimigos mais distantes.
+
+
+## 0.9.4 — Segunda habilidade ativa: Ordem dos Mortos
+
+**Ordem dos Mortos** fortalece os servos ativos durante **8 segundos**, com **+25% de dano** e **+20% de velocidade de deslocamento**. Gasta **20 de ânima** e possui **18 segundos de recarga**. Os bônus incidem sobre ataques de servos comuns, Grave Pups e Rotboars aliados; não afetam monstros hostis nem a protagonista. O bônus de dano é multiplicativo com o passivo Servo Voraz, sem alterar os atributos persistidos dos companheiros. O aumento de velocidade afeta perseguição e seguimento, não a duração nem a velocidade das animações de salto e investida.
+
+**Controles:** pressione **R no Windows** ou toque no novo botão **ORDEM no Android**, à esquerda de PULSO. Os três comandos de combate ORDEM, PULSO e ATACAR ficam lado a lado, com áreas de toque separadas, e o joystick ignora o toque usado no novo botão. Também é possível clicar em ORDEM com o mouse no Windows. O botão exibe custo, recarga e segundos de bônus ativo.
+
+Se existir um inimigo visível dentro de **7,2 unidades da necromante**, ele vira uma prioridade temporária para o grupo. Servos só o perseguem enquanto for válido e alcançável, respeitando paredes e os limites usuais de acompanhamento. Este foco temporário não altera a ordem manual anterior: ao acabar o bônus, a rotina de ataque volta aos alvos normais ou à última ordem explícita.
+
+Se não houver **servos vivos**, ou se a necromante não tiver ânima suficiente, a tentativa apenas exibe uma mensagem e **não desconta recursos nem inicia recarga**. A habilidade não pode ser usada em menus ou no refúgio. Entrar no refúgio termina imediatamente o bônus, mas a recarga mantém o prazo original, impedindo exploração por troca de mapa. O custo é gravado no salvamento existente; a duração/recarga são estados apenas da sessão.
+
+Um círculo ritual esverdeado aparece brevemente na necromante e em até oito servos (reutiliza o efeito NecroCombatFx e os sprites atuais, sem recursos novos). A versão identificada como **0.9.4** preserva o save v1, a assinatura e o ID da preview Android. Workflows de Windows e Android continuam manuais e separados.
+
+### Testes sugeridos
+
+1. Sem servos, tente R ou ORDEM: deve exibir aviso sem consumir ânima.
+2. Com servos, ative o bônus e verifique a duração, o movimento e o dano; confirme a contagem de 18 segundos de recarga.
+3. Ataque um monstro visível para verificar a priorização e confirme que o caminho não atravessa obstáculos.
+4. Após 8 segundos, confirme o retorno ao dano e à ordem anteriores; tente usar a habilidade com ânima insuficiente.
+5. Retorne ao refúgio durante o efeito e verifique que o bônus termina e a recarga não é reiniciada.
+6. Confirme a funcionalidade por **R** e clique no Windows e por toque no Android. Teste também Pulso Necrótico e ataque básico, que continuam independentes.
+
+O código foi atualizado e exige **compilação manual e teste em Unity** antes de considerar a versão validada em runtime.

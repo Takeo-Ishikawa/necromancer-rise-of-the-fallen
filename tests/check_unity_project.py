@@ -37,6 +37,7 @@ required = [
     "Assets/Scripts/NecroSanctuaryMeditation.cs",
     "Assets/Scripts/NecroSkillTree.cs",
     "Assets/Scripts/NecroSoulPulse.cs",
+    "Assets/Scripts/NecroGraveCommand.cs",
     "Assets/Scripts/NecroProgressHud.cs",
     "Assets/Resources/Data/sanctuary_interactions.json",
     "Assets/Resources/Sprites/necromante.png",
@@ -219,7 +220,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.3\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.4\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -532,8 +533,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.3";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.3";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.4";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.4";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -620,9 +621,50 @@ assert "new Vector3(4.0f,4.0f,1f)" in fx_source
 assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "mana" not in cast_body  # Basic attack stays free.
-assert 'PlayerSettings.bundleVersion = "0.9.3";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.3";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.4";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.4";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
+
+
+# 0.9.4: temporary tactical order for existing necromancer servants.
+command_source=(unity/"Assets/Scripts/NecroGraveCommand.cs").read_text()
+for token in ("GraveCommandManaCost=20", "GraveCommandDuration=8f",
+              "GraveCommandCooldownSeconds=18f",
+              "GraveCommandDamageBonus=1.25f",
+              "GraveCommandSpeedBonus=1.20f",
+              "bool GraveCommandActive", "GraveCommandDamageMultiplier",
+              "GraveCommandSpeedMultiplier(Actor actor)",
+              "LivingServantCount()", "GraveCommandButtonRect(float scale)",
+              "CanCastGraveCommand()", "TryCastGraveCommand()",
+              "Input.GetKeyDown(KeyCode.R)", "TouchPhase.Began",
+              "Input.GetMouseButtonDown(0)", "ReadGraveCommandInput(float scale)",
+              "DrawGraveCommandButton(float scale)", "if(living==0)",
+              "mana-=GraveCommandManaCost",
+              "graveCommandUntil=Time.time+GraveCommandDuration",
+              "graveCommandCooldownUntil=Time.time+GraveCommandCooldownSeconds",
+              "graveCommandTarget=Closest(7.2f)",
+              "NecroCombatFx.Emit(player.body.position,current.root.transform,4)",
+              "SaveProgress();"):
+    assert token in command_source, "Missing 0.9.4 servant command: "+token
+assert "ReadGraveCommandInput(scale);" in pulse_source
+assert "graveCommandUntil=0f;" in pulse_source
+assert "graveCommandTarget=null;" in pulse_source
+assert "GraveCommandSpeedMultiplier(actor)" in gameplay
+assert "GraveCommandActive && graveCommandTarget!=null" in gameplay
+assert "GraveCommandDamageMultiplier" in skill_source
+assert "GraveCommandButtonRect(scale).Contains(gui)" in ui
+assert "DrawGraveCommandButton(scale);" in ui
+boar_source=(unity/"Assets/Scripts/NecroRotboar.cs").read_text()
+assert "GraveCommandActive && graveCommandTarget!=null" in boar_source
+assert 'type==4?"Order of the Dead"' in fx_source
+assert "new Vector3(1.75f,1.75f,1f)" in fx_source
+assert "new Color(.33f,.95f,.76f,.74f)" in fx_source
+assert 282-78 > 195 and 195-78 > 108, "Spell touch controls overlap"
+assert '"com.takeo.necromancer.unity.preview080"' in builder
+assert 'PlayerSettings.bundleVersion = "0.9.4";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.4";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 

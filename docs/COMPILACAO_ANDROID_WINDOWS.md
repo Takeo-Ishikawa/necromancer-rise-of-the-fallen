@@ -49,3 +49,8 @@ A árvore de seis habilidades utiliza um único módulo Unity e é incluída aut
 ### 0.9.3 — Pulso Necrótico
 
 A nova habilidade ativa utiliza **Q** no Windows e um botão na interface Android, sem sprites extras. Para verificar o novo recurso, compile somente o workflow da plataforma que você vai testar; nenhuma compilação automática dos workflows Unity foi introduzida.
+
+
+### 0.9.4 — Ordem dos Mortos
+
+O comando temporário para servos é compartilhado entre Windows (tecla R / clique) e Android (botão ORDEM). Os dois workflows permanecem **manuais e independentes**. A versão de exibição foi atualizada para 0.9.4 e a assinatura/identificador da prévia Android não mudaram. O estado temporário do comando não altera o formato do save.
