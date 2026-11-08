@@ -39,6 +39,7 @@ required = [
     "Assets/Scripts/NecroSoulPulse.cs",
     "Assets/Scripts/NecroGraveCommand.cs",
     "Assets/Scripts/NecroServantTactics.cs",
+    "Assets/Scripts/NecroServantFormation.cs",
     "Assets/Scripts/NecroProgressHud.cs",
     "Assets/Resources/Data/sanctuary_interactions.json",
     "Assets/Resources/Sprites/necromante.png",
@@ -221,7 +222,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.5\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.6\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -534,8 +535,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.5";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.5";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.6";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.6";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -622,8 +623,8 @@ assert "new Vector3(4.0f,4.0f,1f)" in fx_source
 assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "mana" not in cast_body  # Basic attack stays free.
-assert 'PlayerSettings.bundleVersion = "0.9.5";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.5";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.6";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.6";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -664,8 +665,8 @@ assert "new Vector3(1.75f,1.75f,1f)" in fx_source
 assert "new Color(.33f,.95f,.76f,.74f)" in fx_source
 assert 282-78 > 195 and 195-78 > 108, "Spell touch controls overlap"
 assert '"com.takeo.necromancer.unity.preview080"' in builder
-assert 'PlayerSettings.bundleVersion = "0.9.5";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.5";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.6";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.6";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -700,8 +701,53 @@ assert "ToggleServantTactics);" in hud
 assert "huntOrder=saved.huntOrder;" in crypt
 assert "huntOrder=save.huntOrder;" in crypt
 assert "spellUnlocked=spellUnlocked,huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.5";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.5";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.6";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.6";' in win_builder
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
+
+
+# 0.9.6 — deterministic follower ranks and safe catch-up.
+formation_source=(unity/"Assets/Scripts/NecroServantFormation.cs").read_text()
+for token in ("const float FormationFollowStart=.82f;",
+              "const float FormationFollowStop=.28f;",
+              "const float FormationRecoveryDistance=12f;",
+              "const float FormationRecoveryDelay=5.5f;",
+              "Vector2 PartyPosition(int slot,float bodyRadius=.30f)",
+              "capacity=4+2*row", "facing.normalized",
+              "sizeAdjust=Mathf.Max(0f,bodyRadius-.30f)",
+              "bool FormationSpotOpen(Actor ally,Vector2 target)",
+              "Blocked(target,ally.radius)",
+              "ActorAt(ally,target,target)==null",
+              "TryFindFormationSpot(Actor ally,int slot,out Vector2 target)",
+              "for(int i=0;i<12;i++)",
+              "bool FormationRecoverySafe(Actor ally)",
+              "if(inSanctuary)return true;",
+              "(hostile-at).sqrMagnitude<25f",
+              "(hostile-leader).sqrMagnitude<25f",
+              "void FollowNecromancer(Actor ally,float dt)",
+              "ally.followStragglerSeconds+=dt",
+              "FormationRecoverySafe(ally)",
+              "ally.body.position=target",
+              "MoveToward(ally,target,dt,catchup)"):
+    assert token in formation_source, "Formation/recovery missing: "+token
+assert "void MoveToward(Actor actor,Vector2 destination,float dt," in gameplay
+assert "float followBoost=1f" in gameplay
+assert "Mathf.Min(delta.magnitude,travelSpeed*dt)" in gameplay
+assert "GraveCommandSpeedMultiplier(actor)" in gameplay, "Buff integration lost"
+assert "Vector2 PartyPosition(int slot)" not in gameplay, "Duplicate old formation"
+assert "void FollowNecromancer(Actor ally,float dt)" not in gameplay
+assert "public float followStragglerSeconds;" in core
+assert "followStragglerSeconds=0f;" in (unity/"Assets/Scripts/NecroSanctuary.cs").read_text()
+assert "TryFindFormationSpot(ally,index,out at)" in (unity/"Assets/Scripts/NecroSanctuary.cs").read_text()
+assert "TryFindFormationSpot(mover,i,out position)" in (unity/"Assets/Scripts/NecroRoster.cs").read_text()
+assert "else if(friendly)FollowNecromancer(self,dt);" in gameplay
+assert "FindServantTarget(self)" in gameplay
+assert "FindServantTarget(boar)" in boar_source
+assert "NecroSaveStore" in crypt and "huntOrder=huntOrder" in crypt
+assert 'PlayerSettings.bundleVersion = "0.9.6";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.6";' in win_builder
+assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 

@@ -59,3 +59,8 @@ O comando temporário para servos é compartilhado entre Windows (tecla R / cliq
 ### 0.9.5 — Controle tático do exército
 
 O modo Caça/Defesa tem tecla **T** no Windows e botão dedicado no Android, usa o mesmo save v1 e os mesmos assets da Unity. A seleção da plataforma permanece manual na aba Actions: nenhuma compilação automática foi adicionada.
+
+
+### 0.9.6 — Organização dos servos
+
+A lógica de formação e recuperação foi movida para `NecroServantFormation.cs`, compartilhado por Android e Windows. Ela não altera controles, formato do save, assinatura do APK nem os workflows manuais. Compile uma plataforma de cada vez quando for validar a nova movimentação em jogo.
