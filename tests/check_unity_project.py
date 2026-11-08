@@ -224,7 +224,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.9\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.10\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -537,8 +537,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -627,8 +627,8 @@ assert "new Vector3(4.0f,4.0f,1f)" in fx_source
 assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "mana" not in cast_body  # Basic attack stays free.
-assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -669,8 +669,8 @@ assert "new Vector3(1.75f,1.75f,1f)" in fx_source
 assert "new Color(.33f,.95f,.76f,.74f)" in fx_source
 assert 282-78 > 195 and 195-78 > 108, "Spell touch controls overlap"
 assert '"com.takeo.necromancer.unity.preview080"' in builder
-assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -705,8 +705,8 @@ assert "ToggleServantTactics);" in hud
 assert "huntOrder=saved.huntOrder;" in crypt
 assert "huntOrder=save.huntOrder;" in crypt
 assert "spellUnlocked=spellUnlocked,huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -751,8 +751,8 @@ assert "else if(friendly)FollowNecromancer(self,dt);" in gameplay
 assert "FindServantTarget(self)" in gameplay
 assert "FindServantTarget(boar)" in boar_source
 assert "NecroSaveStore" in crypt and "huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -790,8 +790,8 @@ assert "type==5 || type==6 ? .82f" in fx_polish
 assert "type==5 || type==6 ? 10" in fx_polish
 assert "victim.ally);" in gameplay
 assert "const int Capacity=30;" in fx_polish
-assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 assert (root/"docs/POLIMENTO_COMBATE_0_9_7.md").is_file()
@@ -855,8 +855,8 @@ assert "type==7 ? new Vector2(0f,.65f)" in fx_source
 assert "type==0 || type==7 || type==8 || type==10?" in fx_source
 assert "const int Capacity=30;" in fx_source
 assert "NecroCombatFx.Emit(victim.body.position,current.root.transform,7," in gameplay
-assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
 assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
@@ -917,6 +917,50 @@ assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs"
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 assert (root/"docs/POLIMENTO_HERO_COMBATE_0_9_9.md").is_file()
+
+
+# 0.9.10 — integrated review: persistence, companion command budget and
+# correct boar factories on every snapshot restore path.
+roster_audit=(unity/"Assets/Scripts/NecroRoster.cs").read_text()
+crypt_audit=(unity/"Assets/Scripts/NecroCrypt.cs").read_text()
+assert "InvokeRepeating(nameof(PeriodicAutosave),15f,15f);" in core
+assert "private void PeriodicAutosave()" in crypt_audit
+assert "Autosave(15f);" in crypt_audit
+autosave_audit=crypt_audit.split("private void Autosave(float dt)",1)[1].split(
+    "void RecoverAfterDeath()",1)[0]
+assert "if(autoSaveClock<15f)return;" in autosave_audit
+assert "if(!inSanctuary)SaveCompanions();" in autosave_audit
+assert "SaveProgress();" in autosave_audit
+assert "inventoryOpen || wardrobeOpen" in autosave_audit
+assert "Autosave(" not in core.split("void Update()",1)[1].split(
+    "bool NearSeal",1)[0], "Avoid per-frame autosaving"
+assert "void OnApplicationPause(bool paused)" in roster_audit
+assert "if(paused)SaveOnSuspendOrExit();" in roster_audit
+assert "void OnApplicationQuit()" in roster_audit
+assert "void SaveOnSuspendOrExit()" in roster_audit
+suspend_body=roster_audit.split("void SaveOnSuspendOrExit()",1)[1].split(
+    "void OnApplicationPause",1)[0]
+assert "SaveCompanions();" in suspend_body
+assert "SaveProgress()" in suspend_body
+transfer_body=roster_audit.split("void TransferSelected()",1)[1].split(
+    "static string CompanionName",1)[0]
+assert "CommandUsed()+CommandCost(a.kind)>CommandLimit" in transfer_body
+assert transfer_body.index("CommandUsed()+CommandCost(a.kind)>CommandLimit") < (
+    transfer_body.index("resting.Remove(a);"))
+assert "SaveCompanions();" in transfer_body and "SaveProgress();" in transfer_body
+assert "SaveCompanions();SaveProgress();" in roster_audit, "Release must update both stores"
+assert 'Actor CreateRestoredActor(string kind,Vector2 at,bool ally,' in crypt_audit
+assert 'kind=="rotboar"?CreateRotboar(at,parent,ally)' in crypt_audit
+assert "CreateRestoredActor(record.kind," in crypt_audit
+assert "CreateRestoredActor(item.kind," in crypt_audit
+assert crypt_audit.count("CreateRestoredActor(record.kind,")>=2
+assert "if(!inSanctuary)SaveCompanions();" in crypt_audit
+assert 'PlayerSettings.bundleVersion = "0.9.10";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.10";' in win_builder
+assert '"com.takeo.necromancer.unity.preview080"' in builder
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
+assert (root/"docs/REVISAO_INTEGRADA_COMBATE_0_9_10.md").is_file()
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "

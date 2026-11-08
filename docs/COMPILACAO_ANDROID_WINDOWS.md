@@ -69,3 +69,8 @@ A lógica de formação e recuperação foi movida para `NecroServantFormation.c
 ### 0.9.9 — Polimento do combate da protagonista
 
 As animações e os efeitos da necromante são compartilhados pelos builds Windows e Android. Não foram adicionados assets nem alterações de assinatura, package ID ou esquema de save. Ambos os workflows Unity permanecem manuais e independentes.
+
+
+### 0.9.10 — Estabilização antes da próxima compilação
+
+A revisão acrescentou salvamento periódico agendado (15 s), gravação de progresso ao suspender ou sair, proteção do limite de comando em Meus servos e fábrica correta para restaurar Rotboars. A assinatura/ID Android e o formato de save v1 não foram alterados. A versão 0.9.10 deve ser testada manualmente no workflow da plataforma escolhida; nenhum workflow automático de build foi introduzido.
