@@ -68,6 +68,22 @@ namespace Necromancer
                     return true;
                 }
             }
+            // A narrow tunnel may have no free lateral position at all.
+            // Re-form into an orderly single-file trail behind the heroine.
+            Vector2 forward=facing.sqrMagnitude>.01f?
+                facing.normalized:Vector2.right;
+            float trailStep=Mathf.Max(.70f,ally.radius*1.85f);
+            for(int depth=0;depth<12;depth++)
+            {
+                float back=1.05f+(slot+depth)*trailStep;
+                Vector2 candidate=(Vector2)player.body.position-
+                    forward*back;
+                if(FormationSpotOpen(ally,candidate))
+                {
+                    target=candidate;
+                    return true;
+                }
+            }
             target=preferred;
             return false;
         }
