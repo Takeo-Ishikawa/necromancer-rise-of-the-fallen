@@ -33,6 +33,7 @@ required = [
     "Assets/Scripts/NecroScenery.cs",
     "Assets/Editor/NecroVisualEditorCheck.cs",
     "Assets/Scripts/NecroCharacterAnimation.cs",
+    "Assets/Scripts/NecroHeroCombatPolish.cs",
     "Assets/Scripts/NecroSanctuaryInteractions.cs",
     "Assets/Scripts/NecroSanctuaryWardrobe.cs",
     "Assets/Scripts/NecroSanctuaryMeditation.cs",
@@ -223,7 +224,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnInterval;" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.8\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.9\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -536,8 +537,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -626,8 +627,8 @@ assert "new Vector3(4.0f,4.0f,1f)" in fx_source
 assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "mana" not in cast_body  # Basic attack stays free.
-assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -668,8 +669,8 @@ assert "new Vector3(1.75f,1.75f,1f)" in fx_source
 assert "new Color(.33f,.95f,.76f,.74f)" in fx_source
 assert 282-78 > 195 and 195-78 > 108, "Spell touch controls overlap"
 assert '"com.takeo.necromancer.unity.preview080"' in builder
-assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -704,8 +705,8 @@ assert "ToggleServantTactics);" in hud
 assert "huntOrder=saved.huntOrder;" in crypt
 assert "huntOrder=save.huntOrder;" in crypt
 assert "spellUnlocked=spellUnlocked,huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -750,8 +751,8 @@ assert "else if(friendly)FollowNecromancer(self,dt);" in gameplay
 assert "FindServantTarget(self)" in gameplay
 assert "FindServantTarget(boar)" in boar_source
 assert "NecroSaveStore" in crypt and "huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -789,8 +790,8 @@ assert "type==5 || type==6 ? .82f" in fx_polish
 assert "type==5 || type==6 ? 10" in fx_polish
 assert "victim.ally);" in gameplay
 assert "const int Capacity=30;" in fx_polish
-assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 assert (root/"docs/POLIMENTO_COMBATE_0_9_7.md").is_file()
@@ -854,13 +855,68 @@ assert "type==7 ? new Vector2(0f,.65f)" in fx_source
 assert "type==0 || type==7?" in fx_source
 assert "const int Capacity=30;" in fx_source
 assert "NecroCombatFx.Emit(victim.body.position,current.root.transform,7," in gameplay
-assert 'PlayerSettings.bundleVersion = "0.9.8";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.8";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.9";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.9";' in win_builder
 assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 assert (root/"docs/POLIMENTO_MORTE_REANIMACAO_0_9_8.md").is_file()
+
+
+# 0.9.9: hero visual states and swept free-projectile impacts.
+hero_polish=(unity/"Assets/Scripts/NecroHeroCombatPolish.cs").read_text()
+hero_v=(unity/"Assets/Scripts/NecroCharacterAnimation.cs").read_text()
+vfx_source=(unity/"Assets/Scripts/NecroCombatFx.cs").read_text()
+for token in ("const float StrikeVisualDuration=.53f;",
+              "const float RaiseVisualDuration=.92f;",
+              "heroineStrikePulse=Mathf.Max(0f,heroineStrikePulse-dt);",
+              "heroineRaisePulse=Mathf.Max(0f,heroineRaisePulse-dt);",
+              "else if(heroineRaisePulse>0f)",
+              "else if(heroineStrikePulse>0f)",
+              "visualLean=.095f*Mathf.Sin(phase*Mathf.PI);",
+              "witchArtRenderer.transform.localPosition=pose;",
+              "heroineCastPulse=Mathf.Max(0,heroineCastPulse-dt);",
+              "if(releasePending && elapsed>=CastRelease)"):
+    assert token in hero_v, "Missing heroine attack/ritual pose: "+token
+for token in ("static bool SpectralSegmentHit(Vector2 from,Vector2 to,",
+              "Mathf.Clamp01(Vector2.Dot(center-from,delta)/lengthSquared)",
+              "void UpdateSpectralProjectileVisual(Projectile bolt)",
+              "Mathf.Sin(bolt.age*22f)",
+              "bolt.renderer.color=tint;",
+              "Mathf.Clamp01(bolt.time/.16f)"):
+    assert token in hero_polish, "Missing spectral projectile polish: "+token
+assert "public float age;" in core and "public SpriteRenderer renderer;" in core
+assert "UpdateSpectralProjectileVisual(bolt);" in gameplay
+assert "SpectralSegmentHit(before,after,enemy.body.position," in gameplay
+assert "Visible(before,after)" in gameplay
+assert "heroineStrikePulse=.53f;" in gameplay
+assert "Vector2 strikeDelta=target.body.position-player.body.position;" in gameplay
+assert "facing=castAim;" in gameplay
+assert "NecroCombatFx.Emit(hands,current.root.transform,8);" in gameplay
+assert "NecroCombatFx.Emit(after,current.root.transform,9);" in gameplay
+assert "NecroCombatFx.Emit(target.body.position,current.root.transform,10);" in gameplay
+assert "heroineRaisePulse=0f;" in (unity/"Assets/Scripts/NecroSanctuary.cs").read_text()
+assert "heroineStrikePulse=0f;" in (unity/"Assets/Scripts/NecroSanctuary.cs").read_text()
+for token in ('type==8?"Spectral Muzzle"', 'type==9?"Spectral Impact"',
+              'type==10?"Unarmed Strike"', "type==8 ? .25f",
+              "type==9 ? .33f", "type==10 ? .25f",
+              "type==8 ? 21 :", "type==9 || type==10 ? 18 :",
+              "const int Capacity=30;"):
+    assert token in vfx_source, "Combat FX regression: "+token
+# No changes to combat economy or compatibility:
+assert "heroineCastPulse=CastDuration;" in gameplay
+assert "castCooldown=Time.time+(SkillUnlocked(5) ? .60f : .72f);" in gameplay
+assert "projectiles.Add(new Projectile{" in gameplay
+assert "direction=direction,time=.9f" in gameplay
+assert "bolt.direction*(dt*7f)" in gameplay
+assert "SkillSpectralDamage(" in gameplay
+assert "mana" not in cast_body
+assert "SpellUnlocked" not in hero_polish
+assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
+assert "  push:" not in android_preview.split("jobs:",1)[0]
+assert "  push:" not in windows_preview.split("jobs:",1)[0]
+assert (root/"docs/POLIMENTO_HERO_COMBATE_0_9_9.md").is_file()
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "

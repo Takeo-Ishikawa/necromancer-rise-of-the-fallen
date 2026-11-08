@@ -64,3 +64,8 @@ O modo Caça/Defesa tem tecla **T** no Windows e botão dedicado no Android, usa
 ### 0.9.6 — Organização dos servos
 
 A lógica de formação e recuperação foi movida para `NecroServantFormation.cs`, compartilhado por Android e Windows. Ela não altera controles, formato do save, assinatura do APK nem os workflows manuais. Compile uma plataforma de cada vez quando for validar a nova movimentação em jogo.
+
+
+### 0.9.9 — Polimento do combate da protagonista
+
+As animações e os efeitos da necromante são compartilhados pelos builds Windows e Android. Não foram adicionados assets nem alterações de assinatura, package ID ou esquema de save. Ambos os workflows Unity permanecem manuais e independentes.

@@ -176,3 +176,8 @@ A formação é reutilizada também quando os companheiros entram na região e a
 ## 0.9.7 — Polimento visual do combate
 
 Os ataques de criaturas comuns agora se orientam para seus alvos; Grave Pups antecipam o salto com compressão corporal e cor no círculo de chão; Rotboars sinalizam investidas com um círculo temporário e exibem reação visual a impactos. Golpes sofridos por servos usam efeito azul-claro, e por hostis, rosado. Veja [documentação de polimento de combate](POLIMENTO_COMBATE_0_9_7.md). Mecânicas, salvamentos e workflows manuais permanecem inalterados.
+
+
+## 0.9.9 — Polimento da protagonista e dos projéteis
+
+Os temporizadores de ataque físico e invocação passaram a controlar animações de preparação/recuperação da necromante. Projéteis espectrais ganham pulsação visual, brilho de lançamento, impacto em alvo ou rocha e detecção de contato ao longo da trajetória entre quadros. A lógica de custo, dano e recarga não foi alterada. Consulte [Polimento da necromante 0.9.9](POLIMENTO_HERO_COMBATE_0_9_9.md).
