@@ -79,3 +79,8 @@ A revisão acrescentou salvamento periódico agendado (15 s), gravação de prog
 ### 0.9.11 — Teste de vida e derrota
 
 Para validar o novo risco de combate, compile manualmente Windows x64 ou Android e teste danos, proteção após acertos, tela de derrota e retorno à câmara segura. Não há novos recursos gráficos, mudança de save, assinatura, pacote Android nem gatilhos automáticos de build.
+
+
+### 0.9.12 — Balanceamento de dificuldade
+
+A compilação manual Windows/Android já incorpora os ajustes por região, ritmo de ressurgimento, agressividade dos inimigos e recuperação de vida por recursos. Não há novos sprites ou recursos, campos de salvamento, alteração de assinatura ou acionamento automático do workflow da outra plataforma.

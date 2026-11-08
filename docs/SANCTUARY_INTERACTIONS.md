@@ -191,3 +191,8 @@ Após o teste inicial bem-sucedido da 0.9.9 no Windows, foi feita uma auditoria 
 ## 0.9.11 — Vida, derrota e recuperação
 
 Os inimigos agora reduzem a vida da necromante; cada impacto concede 1,1 segundo de invulnerabilidade temporária. Ao chegar a 0 HP, o combate para e abre uma tela de derrota com botão RETORNAR AO REFÚGIO (clique, toque, Enter ou Espaço). A recuperação restaura 65% da vida, 100% da ânima e desconta até 2 fragmentos, preservando servos e progressão. Veja [guia de vida e derrota](VIDA_DERROTA_RECUPERACAO_0_9_11.md). O save v1 e os workflows manuais continuam os mesmos.
+
+
+## 0.9.12 — Curva de dificuldade e sobrevivência
+
+O balanceamento inicial ajusta a pressão de ataques e os respawns por região: primeira caverna mais acessível (preparação prolongada de Grave Pups/Rotboar, dano recebido reduzido, inimigos com ressurgimento mais lento), com progressão gradual de ameaça nas regiões posteriores. Servos próximos passam a atrair mais a atenção dos hostis, valorizando posicionamento e formação. Recursos restauram 12% do HP máximo, com mínimo de 9 HP, mantendo fragmentos e ânima. Ver [guia de balanceamento 0.9.12](BALANCEAMENTO_DIFICULDADE_0_9_12.md). Valores de ataque dos servos, salvamentos e workflows manuais não foram alterados.
