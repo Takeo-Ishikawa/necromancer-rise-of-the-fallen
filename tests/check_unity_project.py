@@ -1078,7 +1078,7 @@ assert "current.respawnIndex++;" in respawn
 assert "current.enemies.Add(spawned);" in respawn
 assert "return stage==0 ? .82f" in balance_source, "First stage must be most accessible"
 assert "return stage==0 ? 19f" in balance_source, "First stage needs more room"
-assert "0.9.16" in builder and "0.9.16" in win_builder
+assert "0.9.17" in builder and "0.9.17" in win_builder
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
