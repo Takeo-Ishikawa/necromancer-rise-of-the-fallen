@@ -6,9 +6,9 @@ namespace Necromancer
     [Serializable]
     public class NecroCharacterDefinition
     {
-        public string id, name, subtitle, description, idleResource, spectralResource;
+        public string id, name, subtitle, description, idleResource, spectralResource, walkResource;
         public bool available;
-        // First playable sprite set: directional idle, two diagonal steps, strike cell 13.
+        // Enables the character-specific strike in spectral cell 13.
         public bool previewMotion;
     }
 

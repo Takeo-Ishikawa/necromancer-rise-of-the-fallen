@@ -58,3 +58,29 @@ for name,sheet in [('idle',idle),('spectral',spectral)]:
         import re
         meta.write_text(re.sub(r'guid: .*', 'guid: '+uuid.uuid4().hex,template))
     print(path.relative_to(ROOT),path.stat().st_size)
+
+# Dedicated four-phase walking sheet, never mixed with the unrelated idle art.
+cycle_source=Image.open(ROOT/'tools/arlequina-walk-cycle-source.png').convert('RGBA')
+cycle=Image.new('RGBA',(1024,2048))
+for direction in range(8):
+    for phase in range(4):
+        x0,x1=round(phase*cycle_source.width/4),round((phase+1)*cycle_source.width/4)
+        y0,y1=round(direction*cycle_source.height/8),round((direction+1)*cycle_source.height/8)
+        cell=cycle_source.crop((x0,y0,x1,y1))
+        mask=cell.getchannel('A').point(lambda a:255 if a>24 else 0)
+        bbox=mask.getbbox()
+        assert bbox
+        # Anchor the head/upper torso, not the moving feet or swinging hands.
+        upper=mask.crop((0,bbox[1],cell.width,bbox[1]+70)).getbbox()
+        center=(upper[0]+upper[2])*.5
+        frame=Image.new('RGBA',(256,256))
+        # Uniform 1:1 scale across all 32 frames. No per-frame resize/bobbing.
+        frame.alpha_composite(cell,(round(128-center),16-bbox[1]))
+        put(cycle,direction*4+phase,frame)
+cycle.save(out/'walk.png',optimize=True)
+meta=out/'walk.png.meta'
+if not meta.exists():
+    import re
+    template=(out/'spectral.png.meta').read_text()
+    meta.write_text(re.sub(r'guid: .*','guid: '+uuid.uuid4().hex,template))
+print('Dedicated walking atlas:',out/'walk.png')

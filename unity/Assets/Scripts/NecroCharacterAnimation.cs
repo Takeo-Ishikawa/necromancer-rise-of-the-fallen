@@ -10,6 +10,10 @@ namespace Necromancer
         const float RaiseVisualDuration=.92f;
         readonly Sprite[] heroSprites=new Sprite[32];
         SpriteRenderer witchArtRenderer;
+        Sprite[] dedicatedWalkSprites;
+        Vector2 lastAnimatedHeroPosition;
+        float walkCycle;
+        const float WalkStrideDistance=1.6f;
         Sprite skullSprite;
         const float HeroPaintedFootOffset = .52f;
         const float SanctuaryHeroScale = 1.9f;
@@ -38,6 +42,18 @@ namespace Necromancer
                 heroSprites[24+i]=Sprite.Create(idle,rect,new Vector2(.5f,14f/256f),
                     138f,0,SpriteMeshType.FullRect);
             }
+            if(!string.IsNullOrEmpty(SelectedCharacter.walkResource))
+            {
+                var walking=Resources.Load<Texture2D>(SelectedCharacter.walkResource);
+                dedicatedWalkSprites=new Sprite[32];
+                for(int i=0;i<32;i++)
+                {
+                    Rect region=new Rect(i%4*256,walking.height-(1+i/4)*256,256,256);
+                    dedicatedWalkSprites[i]=Sprite.Create(walking,region,
+                        new Vector2(.5f,14f/256f),138f,0,SpriteMeshType.FullRect);
+                }
+            }
+            lastAnimatedHeroPosition=player.body.position;
             var skullRegion=new Rect(0,texture.height-1024+14,256,72);
             skullSprite=Sprite.Create(texture,skullRegion,new Vector2(.5f,.5f),270f,0,SpriteMeshType.FullRect);
 
@@ -81,6 +97,17 @@ namespace Necromancer
             heroineHitPulse=Mathf.Max(0f,heroineHitPulse-dt);
             heroineStrikePulse=Mathf.Max(0f,heroineStrikePulse-dt);
             heroineRaisePulse=Mathf.Max(0f,heroineRaisePulse-dt);
+            float traveled=Vector2.Distance(lastAnimatedHeroPosition,player.body.position);
+            lastAnimatedHeroPosition=player.body.position;
+            if(dedicatedWalkSprites!=null)
+            {
+                // Advance by real displacement: slow joystick movement slows the
+                // steps; pushing against a wall does not run the animation in place.
+                if(traveled>1f) { traveled=0f; walkCycle=0f; } // travel/teleport
+                heroineWalking=heroineWalking && traveled>.0001f;
+                if(heroineWalking)walkCycle=Mathf.Repeat(walkCycle+traveled/WalkStrideDistance,1f);
+                else walkCycle=0f;
+            }
             if(heroineWalking)
             {
                 walkDirection=DirectionFrom(facing);
@@ -143,18 +170,18 @@ namespace Necromancer
                 flip=phase>=2;
                 int direction=flip?(8-walkDirection)%8:walkDirection;
                 frame=direction+(phase%2==1?16:0);
-                if(SelectedCharacter.previewMotion)
+                if(dedicatedWalkSprites!=null)
                 {
-                    // Keep asymmetric costume panels stable; do not mirror an
-                    // entire directional pose halfway through the walk cycle.
+                    // The dedicated row is selected below; never mirror its costume.
                     flip=false;
-                    // Alternate contact and passing poses in all eight directions.
-                    // Each cell is a replacement, never an overlay of two bodies.
-                    frame=phase==0?walkDirection:
-                        phase==2?16+walkDirection:24+walkDirection;
                 }
             }
-            witchArtRenderer.sprite=heroSprites[frame];
+            bool useWalk=dedicatedWalkSprites!=null && heroineWalking &&
+                heroineCastPulse<=0f && heroineStrikePulse<=0f && heroineRaisePulse<=0f;
+            witchArtRenderer.sprite=useWalk
+                ? dedicatedWalkSprites[walkDirection*4+Mathf.FloorToInt(walkCycle*4f)]
+                : heroSprites[frame];
+            if(useWalk)flip=false;
             witchArtRenderer.flipX=flip;
             bool invulnerable=!inSanctuary &&
                 Time.time<heroDamageImmuneUntil;
@@ -167,9 +194,6 @@ namespace Necromancer
             Vector3 pose=witchArtRenderer.transform.localPosition;
             pose.x=visualLean*(facing.x<0f?-1f:1f);
             pose.y=-HeroPaintedFootOffset/player.body.lossyScale.y;
-            if(SelectedCharacter.previewMotion && heroineWalking &&
-               heroineCastPulse<=0f && heroineStrikePulse<=0f && heroineRaisePulse<=0f)
-                pose.y+=Mathf.Abs(Mathf.Sin(walkClock*7.5f*Mathf.PI))*.018f;
             witchArtRenderer.transform.localPosition=pose;
         }
     }

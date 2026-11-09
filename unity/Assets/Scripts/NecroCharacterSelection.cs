@@ -57,6 +57,15 @@ namespace Necromancer
                 characterSelectionError="Arte indisponível. Selecione outro personagem.";
                 return;
             }
+            if(!string.IsNullOrEmpty(selected.walkResource))
+            {
+                var walking=Resources.Load<Texture2D>(selected.walkResource);
+                if(walking==null || walking.width!=1024 || walking.height!=2048)
+                {
+                    characterSelectionError="Animação de caminhada indisponível.";
+                    return;
+                }
+            }
             touchMove=Vector2.zero;
             joystickFingerId=-1;
             manualQueued=false;

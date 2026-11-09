@@ -62,17 +62,24 @@ A arte aprovada está em `tools/arlequina-source.png`; execute
 `python tools/prepare_arlequina.py` (Pillow) para reproduzir os atlas. O empacotador
 mantém transparência e reutiliza somente a célula do projétil da necromante.
 
-Caminhada corrigida: duas poses de contato para cada uma das oito direções,
-intercaladas com a pose neutra em um ciclo de quatro fases. A nova fonte é
-`tools/arlequina-walk-source.png`. O empacotador substitui todos os pixels RGBA
-nas células ocupadas; compor transparência sobre uma pose anterior causava as
-pernas duplicadas. O soco lateral e a pose de invocação continuam simplificados.
+Caminhada: atlas dedicado `Characters/Arlequina/walk.png` com 32 quadros,
+quatro fases por direção, sem alternar com a folha idle. Cada linha contém
+S, SO, O, NO, N, NE, L ou SE e cada coluna uma fase. A fonte reproduzível é
+`tools/arlequina-walk-cycle-source.png`. O empacotador usa escala uniforme e
+alinha cabeça/tronco em vez de centralizar pelas pernas móveis. Não há balanço
+vertical adicional aplicado por código. O ciclo avança uma volta a cada 1,6
+unidade de deslocamento real e para quando não há movimento; mudar de direção
+preserva a fase. A folha antiga spectral continua fornecendo ataque e invocação.
+
+O empacotador substitui todos os pixels RGBA nas células ocupadas, impedindo
+sobreposição de membros. O soco lateral e a invocação continuam simplificados.
 A necromante original mantém seu ciclo existente.
 
 Validação adicional: `python tests/check_arlequina_atlas.py` (Pillow) testa
-substituição completa de RGBA, isolamento de células, margens e existência de
-passos diferentes em todas as direções. A conferência visual dos quadros é feita
-fora do Unity; fluidez e escala no aparelho ainda precisam de teste na compilação.
+substituição RGBA, isolamento, margens e os 32 quadros da caminhada dedicada.
+Conferência visual feita fora do Unity; a fluidez no aparelho precisa ser
+confirmada numa nova compilação. Não é usada interpolação por transparência,
+que poderia produzir novamente a aparência de membros duplicados.
 
 Na próxima compilação, testar cada personagem, reabrir para conferir a escolha,
 andar nas oito direções, atacar dos dois lados, erguer um servo e confirmar que

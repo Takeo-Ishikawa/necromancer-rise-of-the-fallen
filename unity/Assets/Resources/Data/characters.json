@@ -17,7 +17,8 @@
       "idleResource": "Characters/Arlequina/idle",
       "spectralResource": "Characters/Arlequina/spectral",
       "available": true,
-      "previewMotion": true
+      "previewMotion": true,
+      "walkResource": "Characters/Arlequina/walk"
     },
     {
       "id": "future_2",

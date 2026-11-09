@@ -24,3 +24,13 @@ for direction in range(8):
   box=frame.getchannel('A').point(lambda v:255 if v>24 else 0).getbbox()
   assert box and box[0]>0 and box[1]>0 and box[2]<256 and box[3]<=242,(direction,box)
 print('Arlequina: full RGBA replacement, cell isolation and 8 walking pairs OK')
+
+cycle=Image.open(folder/'walk.png').convert('RGBA')
+assert cycle.size==(1024,2048)
+for direction in range(8):
+ frames=[cell(cycle,direction*4+phase) for phase in range(4)]
+ assert len({f.tobytes() for f in frames})==4, ('repeated frame',direction)
+ for f in frames:
+  box=f.getchannel('A').point(lambda v:255 if v>24 else 0).getbbox()
+  assert box and box[0]>0 and box[1]>=15 and box[2]<256 and box[3]<256,(direction,box)
+print('Dedicated cycle: 32 distinct frames with safe margins OK')
