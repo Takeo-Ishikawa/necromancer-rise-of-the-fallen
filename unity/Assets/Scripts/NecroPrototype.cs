@@ -102,6 +102,11 @@ namespace Necromancer
 
         void Start()
         {
+            InitializeCharacterSelection();
+        }
+
+        void BeginSelectedCharacterWorld()
+        {
             levels=NecroLevels.Load();
             if(levels.Length==0){Debug.LogError("No levels configured.");enabled=false;return;}
             stages=new StageInstance[levels.Length];
@@ -296,6 +301,11 @@ namespace Necromancer
 
         void Update()
         {
+            if(characterSelectionOpen)
+            {
+                UpdateCharacterSelection();
+                return;
+            }
             if(player==null || level==null || gameOver || inventoryOpen)return;
             if(wardrobeOpen)
             {

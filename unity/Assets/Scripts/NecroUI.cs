@@ -156,6 +156,11 @@ namespace Necromancer
 
         void OnGUI()
         {
+            if(characterSelectionOpen)
+            {
+                DrawCharacterSelection();
+                return;
+            }
             if(player==null || current==null)return;
             EnsureHudArt();
             float scale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);

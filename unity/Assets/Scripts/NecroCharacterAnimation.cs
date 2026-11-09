@@ -22,7 +22,7 @@ namespace Necromancer
 
         void InitializeHeroAnimation()
         {
-            var texture=Resources.Load<Texture2D>("Heroine/spectral");
+            var texture=Resources.Load<Texture2D>(SelectedCharacter.spectralResource);
             texture.filterMode=FilterMode.Bilinear;
             for(int i=0;i<24;i++)
             {
@@ -31,7 +31,7 @@ namespace Necromancer
                 heroSprites[i]=Sprite.Create(texture,region,new Vector2(.5f,14f/256f),
                     138f,0,SpriteMeshType.FullRect);
             }
-            var idle=Resources.Load<Texture2D>("Heroine/idle");
+            var idle=Resources.Load<Texture2D>(SelectedCharacter.idleResource);
             for(int i=0;i<8;i++)
             {
                 Rect rect=new Rect(i%4*256,idle.height-(1+i/4)*256,256,256);

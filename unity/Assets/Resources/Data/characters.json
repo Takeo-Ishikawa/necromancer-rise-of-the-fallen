@@ -1,0 +1,15 @@
+{
+  "characters": [
+    {
+      "id": "necromante",
+      "name": "A Necromante",
+      "subtitle": "Entre a vida e a morte",
+      "description": "Lute de perto e erga os caídos para formar seu exército. Sua jornada começa no refúgio.",
+      "idleResource": "Heroine/idle",
+      "spectralResource": "Heroine/spectral",
+      "available": true
+    },
+    { "id": "future_1", "name": "Em breve", "available": false },
+    { "id": "future_2", "name": "Em breve", "available": false }
+  ]
+}
