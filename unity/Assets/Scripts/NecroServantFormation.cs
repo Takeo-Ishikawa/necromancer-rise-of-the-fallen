@@ -32,7 +32,11 @@ namespace Necromancer
                 facing.normalized:Vector2.right;
             Vector2 lateral=new Vector2(-forward.y,forward.x);
             float sizeAdjust=Mathf.Max(0f,bodyRadius-.30f);
-            float backward=1.28f+row*1.38f+sizeAdjust*.7f;
+            // First defensive rank flanks slightly ahead of the heroine;
+            // the sanctuary and hunting ranks keep their old marching slots.
+            float backward=(!inSanctuary && !huntOrder && row==0)
+                ? -.28f+sizeAdjust*.7f
+                : 1.28f+row*1.38f+sizeAdjust*.7f;
             int column=index/2;
             float side=(column+.5f)*(1.16f+sizeAdjust*.7f);
             if((index&1)==0)side=-side;

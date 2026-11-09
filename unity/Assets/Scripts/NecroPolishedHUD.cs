@@ -176,9 +176,17 @@ namespace Necromancer
             PanelUi(new Rect(0,0,width,89));
             DrawPortraitUi(new Rect(8,5,69,69));
             float meterX=82f, meterWidth=Mathf.Max(100f,width-172f);
+            string healthLabel=Mathf.CeilToInt(player.hp)+"/"+
+                Mathf.CeilToInt(player.maxHp);
+            bool recentHit=!inSanctuary && !gameOver &&
+                Time.time<heroHitFeedbackUntil;
+            if(recentHit)
+                healthLabel+="  -"+Mathf.CeilToInt(heroLastDamage)+
+                    (heroLastGuarded>=.5f?
+                    " (MANTO "+Mathf.CeilToInt(heroLastGuarded)+")":"");
             DrawMeterUi(new Rect(meterX,8,meterWidth,17),
-                player.hp/player.maxHp,UiPink,
-                Mathf.CeilToInt(player.hp)+"/"+Mathf.CeilToInt(player.maxHp));
+                player.hp/player.maxHp,
+                recentHit?new Color(.98f,.39f,.43f):UiPink,healthLabel);
             DrawMeterUi(new Rect(meterX,29,meterWidth,16),
                 (float)mana/maxMana,UiMana,mana+"/"+maxMana);
             GUI.Label(new Rect(83,47,meterWidth+5,19),

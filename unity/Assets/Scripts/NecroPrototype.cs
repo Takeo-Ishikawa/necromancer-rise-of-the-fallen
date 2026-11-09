@@ -24,6 +24,8 @@ namespace Necromancer
             public bool pupHit,catchingUp;
             public float followStragglerSeconds;
             public bool ally;
+            // Transient hostile AI focus: never serialized into the v1 save.
+            public Actor hostileFocus;
             public float reanimationUntil;
             public NecroCreatureView view;
         }

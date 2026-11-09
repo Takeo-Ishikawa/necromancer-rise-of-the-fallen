@@ -67,3 +67,7 @@ Agora você escolhe a plataforma na aba Actions: [Unity Android Preview APK](htt
 ### 0.9.13 — Defesa e recuperação
 
 O manto reduz 6% do dano recebido por grau, até 18%, além dos bônus de vida existentes. A fonte arcana passa a recuperar 30% da vida máxima por acionamento (mínimo de 18 HP), respeitando sua recarga. Saves, ID da preview e workflows manuais são preservados. [Regras e verificações](docs/DEFESA_E_RECUPERACAO_0_9_13.md).
+
+### 0.9.14 — IA tática e feedback de combate
+
+Inimigos comuns, Grave Pups e Rotboars agora compartilham a seleção de alvos, com alcance físico por espécie e retenção de foco. Servos em DEFESA priorizam ameaças à necromante e adotam uma primeira formação de flanco. A barra de vida exibe brevemente dano recebido e proteção do manto. A preview mantém seu identificador e salvamento v1; builds continuam manuais. [Detalhes e roteiro de testes](docs/COMBATE_TATICO_0_9_14.md).

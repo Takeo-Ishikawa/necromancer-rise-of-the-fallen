@@ -223,26 +223,19 @@ namespace Necromancer
                         ClosestPartyMember(self);
                     if(prey!=null && prey.hp>0)
                         UpdatePup(self,prey,dt);
-                    else if(friendly)
+                    else
                     {
-                        self.pupAttackTime=0;
-                        self.view.SetPupAction(0,Vector2.zero);
-                        FollowNecromancer(self,dt);
+                        // A lost or defeated target must cancel a pending leap.
+                        self.pupAttackTime=0f;
+                        if(self.view!=null)
+                            self.view.SetPupAction(0,Vector2.zero);
+                        if(friendly)FollowNecromancer(self,dt);
                     }
                     continue;
                 }
-                Actor target=friendly?FindServantTarget(self):null;
-                float closest=4.1f;
-                if(!friendly)
-                {
-                    float distance=Vector2.Distance(self.body.position,player.body.position);
-                    if(player.hp>0 && distance<closest){closest=distance;target=player;}
-                    foreach(Actor friend in servants)
-                    {
-                        distance=Vector2.Distance(self.body.position,friend.body.position);
-                        if(friend.hp>0 && distance<closest){closest=distance;target=friend;}
-                    }
-                }
+                // All hostile species now honor the same party threat policy.
+                Actor target=friendly?FindServantTarget(self):
+                    ClosestPartyMember(self);
                 if(target!=null)
                 {
                     float distance=Vector2.Distance(self.body.position,target.body.position);
@@ -260,19 +253,53 @@ namespace Necromancer
                 else if(friendly)FollowNecromancer(self,dt);
             }
         }
-        // The companion can linger until the player leaves its comfort range.
+        // Shared target selection for standard hostiles, Grave Pups and Rotboars.
+        // Each species retains its own acquisition range and attack animation.
+        // A 20% retarget margin prevents rapid player/servant target flipping.
         Actor ClosestPartyMember(Actor enemy)
         {
-            Actor nearest=player;
-            float best=(player.body.position-enemy.body.position).sqrMagnitude;
+            if(enemy==null || enemy.body==null || player==null ||
+                player.body==null || player.hp<=0f)return null;
+            float range=enemy.kind=="grave_pup"?
+                HostilePupDetectionDistance():
+                enemy.kind=="rotboar"?5.5f:4.1f;
+            float rangeSquared=range*range;
+            Vector2 source=enemy.body.position;
+            Actor nearest=null;
+            float best=float.PositiveInfinity;
+            float heroDistance=(player.body.position-enemy.body.position).sqrMagnitude;
+            if(heroDistance<=rangeSquared)
+            {
+                nearest=player;
+                best=NecroTargetRules.ThreatScore(heroDistance,false,1f);
+            }
             float companionWeight=ServantThreatDistanceWeight();
             foreach(Actor ally in servants)
             {
                 if(ally==null || ally.hp<=0f || ally.body==null)continue;
+                float unweighted=(ally.body.position-enemy.body.position).sqrMagnitude;
+                // Weighted threat must never extend the physical aggro radius.
+                if(unweighted>rangeSquared)continue;
                 float distance=(ally.body.position-enemy.body.position).sqrMagnitude*
                     companionWeight;
                 if(distance<best){best=distance;nearest=ally;}
             }
+
+            Actor previous=enemy.hostileFocus;
+            if(previous!=null && previous.hp>0f && previous.body!=null &&
+                (previous==player || servants.Contains(previous)))
+            {
+                float separation=(previous.body.position-source).sqrMagnitude;
+                if(separation<=rangeSquared)
+                {
+                    float heldScore=NecroTargetRules.ThreatScore(
+                        separation,previous!=player,companionWeight);
+                    if(nearest==null ||
+                        NecroTargetRules.KeepFocus(heldScore,best))
+                        nearest=previous;
+                }
+            }
+            enemy.hostileFocus=nearest;
             return nearest;
         }
 

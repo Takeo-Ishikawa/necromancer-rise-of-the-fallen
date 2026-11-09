@@ -12,6 +12,7 @@ namespace Necromancer
         const float HeroHitInvulnerabilitySeconds=1.10f;
         const float HeroArrivalGraceSeconds=1.10f;
         float heroDamageImmuneUntil;
+        float heroHitFeedbackUntil,heroLastDamage,heroLastGuarded;
 
         void ApplyHeroDamage(float damage)
         {
@@ -21,6 +22,10 @@ namespace Necromancer
             float amount=Mathf.Max(1f,MitigateHeroDamage(scaledDamage));
             float before=player.hp;
             player.hp=Mathf.Max(0f,player.hp-amount);
+            heroLastDamage=before-player.hp;
+            heroLastGuarded=Mathf.Max(0f,
+                Mathf.Max(1f,scaledDamage)-amount);
+            heroHitFeedbackUntil=Time.time+1.2f;
             if(before>player.maxHp*.25f && player.hp>0f &&
                player.hp<=player.maxHp*.25f)
                 Announce("VIDA CRITICA! Recuar e procurar recursos.");

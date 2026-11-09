@@ -49,16 +49,21 @@ namespace Necromancer
             float playerRange=huntOrder?HuntPlayerRange:DefensePlayerRange;
             float servantRange=huntOrder?HuntServantRange:DefenseServantRange;
             Actor nearest=null;
-            float nearestDistance=servantRange;
+            float nearestDistance=float.PositiveInfinity;
             foreach(Actor enemy in current.enemies)
             {
                 if(!IsCompanionTargetValid(ally,enemy,playerRange,
                     servantRange))continue;
                 float distance=Vector2.Distance(ally.body.position,
                     enemy.body.position);
-                if(distance<nearestDistance)
+                // Defense favors enemies pressuring the heroine, while Hunt
+                // preserves the closest-enemy pursuit from previous versions.
+                float score=huntOrder?distance:
+                    NecroTargetRules.DefenseScore(distance,
+                        Vector2.Distance(player.body.position,enemy.body.position));
+                if(score<nearestDistance)
                 {
-                    nearestDistance=distance;
+                    nearestDistance=score;
                     nearest=enemy;
                 }
             }
