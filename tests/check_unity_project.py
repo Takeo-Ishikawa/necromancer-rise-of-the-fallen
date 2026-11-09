@@ -229,7 +229,7 @@ for removed in ("TryPortal(", "Raise(", "CollectNearby(", "Claim(", "Autosave(")
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnIntervalForStage();" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.12\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.13\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
