@@ -33,6 +33,8 @@ namespace Necromancer
                     GUI.Label(new Rect(x+6f,49f,w-12f,17f),
                         "ALTAR: "+attributes+" ATR | "+skills+" HAB",
                         wardrobeNoteStyle);
+                else GUI.Label(new Rect(x+6f,49f,w-12f,17f),
+                    resourceHint,wardrobeNoteStyle);
                 GUI.Label(new Rect(x+6f,65f,w-12f,17f),
                     "FRAGMENTOS "+shards+" | RECURSOS "+
                     current.resources.Count,wardrobeNoteStyle);
@@ -49,6 +51,13 @@ namespace Necromancer
                     new Color(.095f,.069f,.134f,.96f),WardrobeEdge);
                 GUI.Label(new Rect(banner.x+8f,banner.y+4f,
                     banner.width-16f,banner.height-8f),notice,hudSmall);
+            }
+            if(!inSanctuary && Time.time<resourceToastUntil)
+            {
+                // Never cover main notifications, portal controls or XP panel.
+                float toastY=Time.time<noticeUntil?
+                    (SanctuaryTravelAvailable()?164f:138f):96f;
+                DrawResourceRewardToast(width,toastY);
             }
         }
     }

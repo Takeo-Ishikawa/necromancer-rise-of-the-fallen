@@ -75,3 +75,7 @@ Inimigos comuns, Grave Pups e Rotboars agora compartilham a seleção de alvos, 
 ### 0.9.15 — Coleta de recursos e primeiros fragmentos
 
 Os cristais, ossos e fungos definidos nos mapas agora aparecem e são coletados automaticamente por aproximação. A primeira caverna tem cinco cristais, suficientes para um aprimoramento do manto; o progresso de coleta é salvo e não se duplica ao reiniciar. A HUD mostra fragmentos e recursos restantes, e a tecla Espaço ataca no Windows. O formato de save v1 e o ID da preview permanecem. [Detalhes e roteiro de testes](docs/RECURSOS_COLETA_0_9_15.md).
+
+### 0.9.16 — Exploração e recompensas mais claras
+
+Recursos próximos ganham brilho leve; o indicador de exploração mostra tipo e distância até o recurso visível mais próximo. A coleta apresenta uma notificação breve que acumula fragmentos, vida e ânima realmente recebidos, sem cobrir avisos importantes de combate. Sem mudanças na economia, nos salvamentos v1 nem nas identidades das builds. [Notas e roteiro de teste](docs/EXPLORACAO_RECOMPENSAS_0_9_16.md).

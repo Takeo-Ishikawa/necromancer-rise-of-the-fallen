@@ -679,7 +679,16 @@ namespace Necromancer
             SpriteRenderer marker=Visual("Recurso "+type,position,
                 NecroArt.Get(type),6,current.root.transform);
             Fit(marker,.56f,.56f);
-            current.resources.Add(new ResourceNode{body=marker.transform,type=type});
+            Color shimmer=type=="cristal"?
+                new Color(.58f,.89f,1f):
+                type=="fungo"?new Color(.66f,.97f,.75f):
+                new Color(.92f,.79f,.63f);
+            current.resources.Add(new ResourceNode{
+                body=marker.transform,type=type,artwork=marker,
+                defaultScale=marker.transform.localScale,
+                shimmerTint=shimmer,
+                shimmerOffset=position.x*.63f+position.y*.47f
+            });
         }
         void CollectNearby()
         {
@@ -726,13 +735,16 @@ namespace Necromancer
                 }
                 if(Vector2.Distance(player.body.position,res.body.position)>.70f)continue;
                 shards+=2;gathered++;
-                float healed=HealFromGatheredResource();
+                float healed=NecroExplorationRules.ActualHealing(
+                    player.hp,player.maxHp,HealFromGatheredResource());
                 player.hp=Mathf.Min(player.maxHp,player.hp+healed);
                 int manaGained=Mathf.Min(12,Mathf.Max(0,maxMana-mana));
                 mana+=manaGained;
-                Announce("Recurso "+res.type+": +2 fragmentos, +"+
-                    Mathf.CeilToInt(healed)+" vida, +"+
-                    manaGained+" anima.");
+                RecordResourceReward(healed,manaGained);
+                // A single short effect for a collected resource, never per frame.
+                if(current.root!=null)
+                    NecroCombatFx.Emit((Vector2)res.body.position,
+                        current.root.transform,9);
                 Destroy(res.body.gameObject);
                 current.resources.RemoveAt(i);
                 collected=true;

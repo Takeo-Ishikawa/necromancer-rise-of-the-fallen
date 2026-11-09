@@ -53,6 +53,11 @@ namespace Necromancer
         {
             public Transform body;
             public string type;
+            // Cached visual state; remains transient and absent from saves.
+            public SpriteRenderer artwork;
+            public Vector3 defaultScale;
+            public Color shimmerTint;
+            public float shimmerOffset;
         }
         class StageInstance
         {
@@ -310,7 +315,11 @@ namespace Necromancer
                 Move(player,control*player.speed*(1f+agilityPoints*.06f)*FountainSpeedMultiplier*dt);
             }
             if(inSanctuary)ReadSanctuaryInteractionKey();
-            else CollectNearby();
+            else
+            {
+                CollectNearby();
+                UpdateResourceExploration();
+            }
             Regenerate(dt);
             if(!inSanctuary)
             {
