@@ -62,12 +62,17 @@ A arte aprovada está em `tools/arlequina-source.png`; execute
 `python tools/prepare_arlequina.py` (Pillow) para reproduzir os atlas. O empacotador
 mantém transparência e reutiliza somente a célula do projétil da necromante.
 
-Limites desta versão para teste: oito poses paradas, dois passos diagonais,
-movimento vertical sutil nas demais direções, soco lateral espelhado à esquerda
-(com investida direcional nos outros ângulos), e uma pose de invocação usada
-nas fases do ritual. Ainda não é uma animação completa desenhada quadro a quadro.
-O sinalizador `previewMotion` mantém os painéis assimétricos da roupa estáveis
-na caminhada e habilita o soco na célula 13 sem alterar a animação da necromante.
+Caminhada corrigida: duas poses de contato para cada uma das oito direções,
+intercaladas com a pose neutra em um ciclo de quatro fases. A nova fonte é
+`tools/arlequina-walk-source.png`. O empacotador substitui todos os pixels RGBA
+nas células ocupadas; compor transparência sobre uma pose anterior causava as
+pernas duplicadas. O soco lateral e a pose de invocação continuam simplificados.
+A necromante original mantém seu ciclo existente.
+
+Validação adicional: `python tests/check_arlequina_atlas.py` (Pillow) testa
+substituição completa de RGBA, isolamento de células, margens e existência de
+passos diferentes em todas as direções. A conferência visual dos quadros é feita
+fora do Unity; fluidez e escala no aparelho ainda precisam de teste na compilação.
 
 Na próxima compilação, testar cada personagem, reabrir para conferir a escolha,
 andar nas oito direções, atacar dos dois lados, erguer um servo e confirmar que

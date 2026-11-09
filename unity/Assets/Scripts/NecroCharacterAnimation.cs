@@ -148,7 +148,10 @@ namespace Necromancer
                     // Keep asymmetric costume panels stable; do not mirror an
                     // entire directional pose halfway through the walk cycle.
                     flip=false;
-                    frame=walkDirection+(phase%2==1?16:0);
+                    // Alternate contact and passing poses in all eight directions.
+                    // Each cell is a replacement, never an overlay of two bodies.
+                    frame=phase==0?walkDirection:
+                        phase==2?16+walkDirection:24+walkDirection;
                 }
             }
             witchArtRenderer.sprite=heroSprites[frame];
