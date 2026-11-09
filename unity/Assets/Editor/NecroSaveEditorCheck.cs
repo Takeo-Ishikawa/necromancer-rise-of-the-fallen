@@ -46,7 +46,7 @@ namespace Necromancer.EditorTools
             // A pre-0.9.15 v1 stage lacks this optional flag and must be
             // distinguishable from a new stage with zero remaining pickups.
             NecroStageRecord legacy=JsonUtility.FromJson<NecroStageRecord>(
-                "{\\"visited\\":true,\\"resources\\":[]}");
+                "{\"visited\":true,\"resources\":[]}");
             if(legacy==null || !legacy.visited || legacy.resourcesInitialized)
                 throw new BuildFailedException(
                     "Legacy resource migration marker regression.");

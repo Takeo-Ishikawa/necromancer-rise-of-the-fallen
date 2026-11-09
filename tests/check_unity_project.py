@@ -1205,6 +1205,8 @@ assert '"ESPACO",hudAction' in ui
 save_editor=(unity/"Assets/Editor/NecroSaveEditorCheck.cs").read_text()
 assert "resourcesInitialized=true" in save_editor
 assert "Legacy resource migration marker regression." in save_editor
+assert r'\"visited\"' in save_editor, "Legacy C# JSON string must escape quotes once"
+assert r'\\"visited\\"' not in save_editor, "Double-escaped JSON literal breaks Unity compilation"
 assert 'PlayerSettings.bundleVersion = "0.9.15";' in builder
 assert 'PlayerSettings.bundleVersion="0.9.15";' in win_builder
 assert 'PlayerSettings.Android.bundleVersionCode = 23;' in builder
