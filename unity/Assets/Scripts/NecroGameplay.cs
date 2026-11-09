@@ -289,7 +289,7 @@ namespace Necromancer
             if(previous!=null && previous.hp>0f && previous.body!=null &&
                 (previous==player || servants.Contains(previous)))
             {
-                float separation=(previous.body.position-source).sqrMagnitude;
+                float separation=((Vector2)previous.body.position-source).sqrMagnitude;
                 if(separation<=rangeSquared)
                 {
                     float heldScore=NecroTargetRules.ThreatScore(

@@ -1139,6 +1139,8 @@ assert "public Actor hostileFocus;" in core
 assert "Actor target=friendly?FindServantTarget(self):" in gameplay
 assert "ClosestPartyMember(self);" in gameplay
 assert "enemy.hostileFocus=nearest;" in gameplay
+assert "float separation=((Vector2)previous.body.position-source).sqrMagnitude;" in gameplay
+assert "(previous.body.position-source).sqrMagnitude" not in gameplay
 assert "previous==player || servants.Contains(previous)" in gameplay
 assert "if(unweighted>rangeSquared)continue;" in gameplay
 assert "if(self.view!=null)" in gameplay.split(

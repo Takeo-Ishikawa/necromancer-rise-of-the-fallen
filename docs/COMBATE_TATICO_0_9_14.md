@@ -34,3 +34,7 @@ Por **1,2 segundo** após um golpe válido, a barra de vida fica mais viva e mos
 7. Feche e reabra o jogo; confirme que servos, postura, equipamentos e vida persistem. Inicie o Windows e Android apenas quando quiser testar cada plataforma.
 
 **Estado:** alterações e regressões integradas em código; compilação Unity e validação em jogo permanecem pendentes.
+
+### Correção de compilação Windows (0.9.14)
+
+A primeira compilação Windows da 0.9.14 falhou em `NecroGameplay.cs` por subtrair a posição `Transform.position` (`Vector3`) da posição de referência (`Vector2`), operação ambígua em C#. A seleção de alvo agora converte explicitamente a posição do alvo anterior para `Vector2` antes da subtração; isso não altera as regras de ameaça nem a jogabilidade. O teste estrutural passou a exigir essa conversão. A build Windows precisa ser reexecutada manualmente para validar a compilação de fato.
