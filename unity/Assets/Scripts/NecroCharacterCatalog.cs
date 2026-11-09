@@ -8,6 +8,8 @@ namespace Necromancer
     {
         public string id, name, subtitle, description, idleResource, spectralResource;
         public bool available;
+        // First playable sprite set: directional idle, two diagonal steps, strike cell 13.
+        public bool previewMotion;
     }
 
     [Serializable]

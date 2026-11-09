@@ -1324,7 +1324,7 @@ print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle
 selection=(unity/"Assets/Scripts/NecroCharacterSelection.cs").read_text()
 characters=json.loads((unity/"Assets/Resources/Data/characters.json").read_text())["characters"]
 assert len({c["id"] for c in characters})==len(characters)
-assert [c["id"] for c in characters if c["available"]]==["necromante"]
+assert [c["id"] for c in characters if c["available"]]==["necromante","arlequina"]
 for c in characters:
     if not c["available"]: continue
     for field, size in (("idleResource", (1024,512)), ("spectralResource", (1024,2048))):

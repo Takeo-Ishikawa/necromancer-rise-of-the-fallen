@@ -9,7 +9,20 @@
       "spectralResource": "Heroine/spectral",
       "available": true
     },
-    { "id": "future_1", "name": "Em breve", "available": false },
-    { "id": "future_2", "name": "Em breve", "available": false }
+    {
+      "id": "arlequina",
+      "name": "Arlequina do Luto",
+      "subtitle": "O último riso ecoa nas sombras",
+      "description": "Uma presença teatral entre os mortos. Lute de perto e reúna os caídos ao seu lado.",
+      "idleResource": "Characters/Arlequina/idle",
+      "spectralResource": "Characters/Arlequina/spectral",
+      "available": true,
+      "previewMotion": true
+    },
+    {
+      "id": "future_2",
+      "name": "Em breve",
+      "available": false
+    }
   ]
 }

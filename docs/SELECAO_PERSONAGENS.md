@@ -47,3 +47,28 @@ Teste manual na próxima compilação Unity Android ou Windows:
 6. Redimensionar a janela e verificar recortes de tela no Android.
 
 Não há nova imagem pesada nem mudança nos workflows de compilação separados.
+
+## Arlequina do Luto — primeira versão jogável
+
+A Arlequina está disponível ao lado da necromante. A seleção é lembrada ao reabrir.
+As duas aparências compartilham o progresso, equipamentos, atributos e habilidades;
+a seleção não cria nem apaga campanhas.
+
+Os atlas `Characters/Arlequina/idle.png` e `spectral.png` têm células RGBA de
+256×256, escala uniforme e base dos pés em y=242. A ordem de direções é
+S, SO, O, NO, N, NE, L, SE, conforme `DirectionFrom`.
+
+A arte aprovada está em `tools/arlequina-source.png`; execute
+`python tools/prepare_arlequina.py` (Pillow) para reproduzir os atlas. O empacotador
+mantém transparência e reutiliza somente a célula do projétil da necromante.
+
+Limites desta versão para teste: oito poses paradas, dois passos diagonais,
+movimento vertical sutil nas demais direções, soco lateral espelhado à esquerda
+(com investida direcional nos outros ângulos), e uma pose de invocação usada
+nas fases do ritual. Ainda não é uma animação completa desenhada quadro a quadro.
+O sinalizador `previewMotion` mantém os painéis assimétricos da roupa estáveis
+na caminhada e habilita o soco na célula 13 sem alterar a animação da necromante.
+
+Na próxima compilação, testar cada personagem, reabrir para conferir a escolha,
+andar nas oito direções, atacar dos dois lados, erguer um servo e confirmar que
+nível, fragmentos e equipamentos permanecem ao trocar de personagem.

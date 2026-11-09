@@ -26,7 +26,7 @@ namespace Necromancer
             texture.filterMode=FilterMode.Bilinear;
             for(int i=0;i<24;i++)
             {
-                if(i>=12 && i<16)continue;
+                if(i>=12 && i<16 && !(i==13 && SelectedCharacter.previewMotion))continue;
                 Rect region=new Rect(i%4*256,texture.height-(1+i/4)*256,256,256);
                 heroSprites[i]=Sprite.Create(texture,region,new Vector2(.5f,14f/256f),
                     138f,0,SpriteMeshType.FullRect);
@@ -124,6 +124,12 @@ namespace Necromancer
                 frame=phase<.28f?24+walkDirection:
                     phase<.72f?16+walkDirection:24+walkDirection;
                 flip=false;
+                if(SelectedCharacter.previewMotion && phase>=.28f && phase<.72f &&
+                   Mathf.Abs(facing.x)>.5f)
+                {
+                    frame=13;
+                    flip=facing.x<0f;
+                }
                 visualLean=.095f*Mathf.Sin(phase*Mathf.PI);
             }
             else if(!heroineWalking)
@@ -137,6 +143,13 @@ namespace Necromancer
                 flip=phase>=2;
                 int direction=flip?(8-walkDirection)%8:walkDirection;
                 frame=direction+(phase%2==1?16:0);
+                if(SelectedCharacter.previewMotion)
+                {
+                    // Keep asymmetric costume panels stable; do not mirror an
+                    // entire directional pose halfway through the walk cycle.
+                    flip=false;
+                    frame=walkDirection+(phase%2==1?16:0);
+                }
             }
             witchArtRenderer.sprite=heroSprites[frame];
             witchArtRenderer.flipX=flip;
@@ -151,6 +164,9 @@ namespace Necromancer
             Vector3 pose=witchArtRenderer.transform.localPosition;
             pose.x=visualLean*(facing.x<0f?-1f:1f);
             pose.y=-HeroPaintedFootOffset/player.body.lossyScale.y;
+            if(SelectedCharacter.previewMotion && heroineWalking &&
+               heroineCastPulse<=0f && heroineStrikePulse<=0f && heroineRaisePulse<=0f)
+                pose.y+=Mathf.Abs(Mathf.Sin(walkClock*7.5f*Mathf.PI))*.018f;
             witchArtRenderer.transform.localPosition=pose;
         }
     }
