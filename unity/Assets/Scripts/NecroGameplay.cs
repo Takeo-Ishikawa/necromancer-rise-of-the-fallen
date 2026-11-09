@@ -230,6 +230,7 @@ namespace Necromancer
                         if(self.view!=null)
                             self.view.SetPupAction(0,Vector2.zero);
                         if(friendly)FollowNecromancer(self,dt);
+                        else ReturnToLair(self,dt);
                     }
                     continue;
                 }
@@ -251,6 +252,7 @@ namespace Necromancer
                     }
                 }
                 else if(friendly)FollowNecromancer(self,dt);
+                else ReturnToLair(self,dt);
             }
         }
         // Shared target selection for standard hostiles, Grave Pups and Rotboars.
@@ -260,6 +262,15 @@ namespace Necromancer
         {
             if(enemy==null || enemy.body==null || player==null ||
                 player.body==null || player.hp<=0f)return null;
+            // End a chase beyond the enemy's territory; returning creatures
+            // cannot build an endless train behind the player.
+            if(NecroEncounterRules.OutsideTerritory(
+                (Vector2)enemy.body.position,enemy.lairPosition))
+            {
+                enemy.hostileFocus=null;
+                enemy.targetMemoryUntil=0f;
+                return null;
+            }
             float range=enemy.kind=="grave_pup"?
                 HostilePupDetectionDistance():
                 enemy.kind=="rotboar"?5.5f:4.1f;
@@ -268,7 +279,8 @@ namespace Necromancer
             Actor nearest=null;
             float best=float.PositiveInfinity;
             float heroDistance=(player.body.position-enemy.body.position).sqrMagnitude;
-            if(heroDistance<=rangeSquared)
+            if(heroDistance<=rangeSquared &&
+                Visible(source,player.body.position))
             {
                 nearest=player;
                 best=NecroTargetRules.ThreatScore(heroDistance,false,1f);
@@ -280,6 +292,7 @@ namespace Necromancer
                 float unweighted=(ally.body.position-enemy.body.position).sqrMagnitude;
                 // Weighted threat must never extend the physical aggro radius.
                 if(unweighted>rangeSquared)continue;
+                if(!Visible(source,ally.body.position))continue;
                 float distance=(ally.body.position-enemy.body.position).sqrMagnitude*
                     companionWeight;
                 if(distance<best){best=distance;nearest=ally;}
@@ -292,15 +305,37 @@ namespace Necromancer
                 float separation=((Vector2)previous.body.position-source).sqrMagnitude;
                 if(separation<=rangeSquared)
                 {
-                    float heldScore=NecroTargetRules.ThreatScore(
-                        separation,previous!=player,companionWeight);
-                    if(nearest==null ||
-                        NecroTargetRules.KeepFocus(heldScore,best))
-                        nearest=previous;
+                    bool stillSeen=Visible(source,previous.body.position);
+                    if(stillSeen)
+                        enemy.targetMemoryUntil=Time.time+
+                            NecroEncounterRules.SightMemorySeconds;
+                    // Short memory lets foes round a corner, but not follow
+                    // invisible targets forever or through entire walls.
+                    if(stillSeen || Time.time<enemy.targetMemoryUntil)
+                    {
+                        float heldScore=NecroTargetRules.ThreatScore(
+                            separation,previous!=player,companionWeight);
+                        if(nearest==null ||
+                            NecroTargetRules.KeepFocus(heldScore,best))
+                            nearest=previous;
+                    }
                 }
             }
+            if(nearest!=previous)
+                enemy.targetMemoryUntil=nearest!=null?
+                    Time.time+NecroEncounterRules.SightMemorySeconds:0f;
             enemy.hostileFocus=nearest;
             return nearest;
+        }
+
+        void ReturnToLair(Actor enemy,float dt)
+        {
+            if(enemy==null || enemy.ally || enemy.body==null)return;
+            if(!NecroEncounterRules.NeedsReturn(
+                (Vector2)enemy.body.position,enemy.lairPosition))return;
+            // A slower walk back keeps encounters readable; normal obstacle
+            // avoidance and collision still govern every movement step.
+            MoveToward(enemy,enemy.lairPosition,dt*.72f);
         }
 
         // Formation and catch-up logic lives in NecroServantFormation.cs.

@@ -94,6 +94,22 @@ namespace Necromancer
 
             if(Time.time<nextResourceHintRefresh)return;
             nextResourceHintRefresh=Time.time+ResourceHintRefreshSeconds;
+            int nearbyHostiles=0;
+            foreach(Actor enemy in current.enemies)
+            {
+                if(enemy==null || enemy.hp<=0f || enemy.body==null)continue;
+                Vector2 at=enemy.body.position;
+                if((at-origin).sqrMagnitude>12.25f || !Visible(origin,at))
+                    continue;
+                nearbyHostiles++;
+            }
+            if(nearbyHostiles>0)
+            {
+                resourceHint=nearbyHostiles==1?
+                    "ALERTA: INIMIGO PROXIMO":
+                    "ALERTA: "+nearbyHostiles+" INIMIGOS PROXIMOS";
+                return;
+            }
             if(current.resources.Count==0)
             {
                 resourceHint="TODOS OS RECURSOS COLETADOS";

@@ -69,6 +69,7 @@ namespace Necromancer
             Fit(art,2.8f,2.8f);
             art.flipX=true;
             return new Actor {kind="rotboar",body=art.transform,boarArt=art,
+                lairPosition=at,
                 boarVisualScale=art.transform.localScale,
                 hp=180,maxHp=180,radius=.54f,attack=19f,speed=ally?3.8f:1.5f,ally=ally};
         }
@@ -118,13 +119,11 @@ namespace Necromancer
                 ClosestPartyMember(boar);
             if(target==null || target.hp<=0f || target.body==null)
             {
-                if(boar.ally)
-                {
-                    FollowNecromancer(boar,dt);
-                    Vector2 movement=(Vector2)boar.body.position-at;
-                    if(Mathf.Abs(movement.x)>.001f)
-                        boar.boarArt.flipX=movement.x<0;
-                }
+                if(boar.ally)FollowNecromancer(boar,dt);
+                else ReturnToLair(boar,dt);
+                Vector2 movement=(Vector2)boar.body.position-at;
+                if(Mathf.Abs(movement.x)>.001f)
+                    boar.boarArt.flipX=movement.x<0;
                 return;
             }
             Vector2 delta=(Vector2)target.body.position-at;

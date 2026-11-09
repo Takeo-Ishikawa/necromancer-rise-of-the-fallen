@@ -26,6 +26,10 @@ namespace Necromancer
             public bool ally;
             // Transient hostile AI focus: never serialized into the v1 save.
             public Actor hostileFocus;
+            // Unsaved combat memory: foes return to their creation point
+            // once the party retreats or breaks visual contact.
+            public Vector2 lairPosition;
+            public float targetMemoryUntil;
             public float reanimationUntil;
             public NecroCreatureView view;
         }
@@ -171,6 +175,7 @@ namespace Necromancer
             Fit(sprite,diameter,diameter);
             Actor a=new Actor{
                 kind=kind,ally=ally,body=sprite.transform,radius=diameter*.30f,
+                lairPosition=at,
                 maxHp=kind=="marsh_lord"?460:kind=="grave_lord"?320:
                     kind=="warden"?230:kind=="skeleton"?75:kind=="wisp"?58:
                     kind=="grave_pup"?82:kind=="slime"?54:kind=="necromante"?115:34,

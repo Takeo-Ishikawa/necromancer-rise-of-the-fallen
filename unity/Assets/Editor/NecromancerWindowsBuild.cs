@@ -24,6 +24,7 @@ namespace Necromancer.EditorTools
             NecroDefenseEditorCheck.Verify();
             NecroTargetEditorCheck.Verify();
             NecroExplorationEditorCheck.Verify();
+            NecroEncounterEditorCheck.Verify();
             NecroVisualEditorCheck.Verify();
             NecroIllustratedAssetEditorCheck.Verify();
             NecroFrameEditorCheck.Verify();
@@ -41,7 +42,7 @@ namespace Necromancer.EditorTools
 
             PlayerSettings.companyName="NecromancerStudio";
             PlayerSettings.productName="Necromancer (Windows Preview)";
-            PlayerSettings.bundleVersion="0.9.16";
+            PlayerSettings.bundleVersion="0.9.17";
             // Windows Mono can be built on the Linux GameCI editor image.
             PlayerSettings.SetScriptingBackend(
                 NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);

@@ -79,3 +79,7 @@ Os cristais, ossos e fungos definidos nos mapas agora aparecem e são coletados 
 ### 0.9.16 — Exploração e recompensas mais claras
 
 Recursos próximos ganham brilho leve; o indicador de exploração mostra tipo e distância até o recurso visível mais próximo. A coleta apresenta uma notificação breve que acumula fragmentos, vida e ânima realmente recebidos, sem cobrir avisos importantes de combate. Sem mudanças na economia, nos salvamentos v1 nem nas identidades das builds. [Notas e roteiro de teste](docs/EXPLORACAO_RECOMPENSAS_0_9_16.md).
+
+### 0.9.17 — Encontros prolongados e exploração segura
+
+Inimigos retornam ao local de origem após perder o alvo, com memória curta de linha de visão; novos spawns evitam a câmera e as áreas de coleta. O painel contextual avisa quando há ameaças próximas. Economia, arte, formato de save e workflows permanecem inalterados. [Notas e testes recomendados](docs/ENCONTROS_E_EXPLORACAO_0_9_17.md).
