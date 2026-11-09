@@ -15,7 +15,7 @@ namespace Necromancer
             if(!inSanctuary)
             {
                 float x=124f, w=Mathf.Max(120f,width-138f);
-                Rect panel=new Rect(x,12f,w,54f);
+                Rect panel=new Rect(x,12f,w,77f);
                 DrawWardrobeSurface(panel,
                     new Color(.09f,.065f,.13f,.94f),WardrobeMutedEdge);
                 GUI.Label(new Rect(x+7f,15f,w-14f,20f),
@@ -33,6 +33,9 @@ namespace Necromancer
                     GUI.Label(new Rect(x+6f,49f,w-12f,17f),
                         "ALTAR: "+attributes+" ATR | "+skills+" HAB",
                         wardrobeNoteStyle);
+                GUI.Label(new Rect(x+6f,65f,w-12f,17f),
+                    "FRAGMENTOS "+shards+" | RECURSOS "+
+                    current.resources.Count,wardrobeNoteStyle);
             }
 
             if(Time.time<noticeUntil)

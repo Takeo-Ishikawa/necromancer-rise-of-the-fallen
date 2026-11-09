@@ -49,6 +49,9 @@ namespace Necromancer
     [Serializable] public sealed class NecroStageRecord
     {
         public bool visited,claimed,bossDefeated,bossBound;
+        // Optional v1 field: false for snapshots from before resource spawning
+        // was enabled; true means an empty resources array is intentional.
+        public bool resourcesInitialized;
         public NecroActorRecord[] enemies=new NecroActorRecord[0];
         public NecroCorpseRecord[] corpses=new NecroCorpseRecord[0];
         public NecroItemRecord[] drops=new NecroItemRecord[0];

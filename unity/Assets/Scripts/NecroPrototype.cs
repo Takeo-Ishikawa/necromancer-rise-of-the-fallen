@@ -184,6 +184,26 @@ namespace Necromancer
             return a;
         }
 
+        // Existing saves from <= 0.9.14 never recorded placed resources.
+        // The optional marker disambiguates old empty snapshots from new
+        // stages whose pickups have genuinely all been collected.
+        void PopulateStageResources(NecroStageRecord snapshot)
+        {
+            if(snapshot!=null && snapshot.visited && snapshot.resourcesInitialized)
+            {
+                if(snapshot.resources==null)return;
+                foreach(NecroResourceRecord saved in snapshot.resources)
+                    if(saved!=null && !string.IsNullOrEmpty(saved.type))
+                        SpawnResource(saved.type,new Vector2(saved.x,saved.y));
+                return;
+            }
+            if(level.resources==null)return;
+            foreach(ResourceSpawn resource in level.resources)
+                if(resource!=null && !string.IsNullOrEmpty(resource.type))
+                    SpawnResource(resource.type,
+                        NecroLevels.At(level,resource.x,resource.y));
+        }
+
         void LoadStage(int index)
         {
             if(index<0 || index>=levels.Length)return;
@@ -221,6 +241,11 @@ namespace Necromancer
                     next.enemies.Add(Create(spawn.kind,NecroLevels.At(level,spawn.x,spawn.y),
                         false,next.root.transform));
                 }
+                NecroStageRecord lastSnapshot=
+                    previousStageSnapshots!=null &&
+                    stage<previousStageSnapshots.Length
+                    ? previousStageSnapshots[stage] : null;
+                PopulateStageResources(lastSnapshot);
             } else {
                 current=stages[stage];
                 current.root.SetActive(true);
@@ -285,6 +310,7 @@ namespace Necromancer
                 Move(player,control*player.speed*(1f+agilityPoints*.06f)*FountainSpeedMultiplier*dt);
             }
             if(inSanctuary)ReadSanctuaryInteractionKey();
+            else CollectNearby();
             Regenerate(dt);
             if(!inSanctuary)
             {

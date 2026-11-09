@@ -155,6 +155,7 @@ namespace Necromancer
             NecroStageRecord state=new NecroStageRecord();
             if(instance==null)return state;
             state.visited=true;
+            state.resourcesInitialized=true;
             state.claimed=instance.claimed;
             state.bossDefeated=instance.bossDefeated;
             state.bossBound=instance.bossBound;
@@ -420,11 +421,9 @@ namespace Necromancer
             foreach(ResourceNode node in current.resources)
                 if(node.body!=null)Destroy(node.body.gameObject);
             current.resources.Clear();
-            if(saved.resources!=null)foreach(NecroResourceRecord node in saved.resources)
-            {
-                if(node!=null && !string.IsNullOrEmpty(node.type))
-                    SpawnResource(node.type,new Vector2(node.x,node.y));
-            }
+            // Restore new snapshots as-is (including fully collected stages).
+            // Older v1 snapshots receive the authored resources once.
+            PopulateStageResources(saved);
             current.claimed=saved.claimed;
             current.bossDefeated=saved.bossDefeated;
             current.bossBound=saved.bossBound;

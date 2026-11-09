@@ -71,3 +71,7 @@ O manto reduz 6% do dano recebido por grau, até 18%, além dos bônus de vida e
 ### 0.9.14 — IA tática e feedback de combate
 
 Inimigos comuns, Grave Pups e Rotboars agora compartilham a seleção de alvos, com alcance físico por espécie e retenção de foco. Servos em DEFESA priorizam ameaças à necromante e adotam uma primeira formação de flanco. A barra de vida exibe brevemente dano recebido e proteção do manto. A preview mantém seu identificador e salvamento v1; builds continuam manuais. [Detalhes e roteiro de testes](docs/COMBATE_TATICO_0_9_14.md).
+
+### 0.9.15 — Coleta de recursos e primeiros fragmentos
+
+Os cristais, ossos e fungos definidos nos mapas agora aparecem e são coletados automaticamente por aproximação. A primeira caverna tem cinco cristais, suficientes para um aprimoramento do manto; o progresso de coleta é salvo e não se duplica ao reiniciar. A HUD mostra fragmentos e recursos restantes, e a tecla Espaço ataca no Windows. O formato de save v1 e o ID da preview permanecem. [Detalhes e roteiro de testes](docs/RECURSOS_COLETA_0_9_15.md).

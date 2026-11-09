@@ -683,9 +683,17 @@ namespace Necromancer
         }
         void CollectNearby()
         {
+            // One save snapshot for any number of resources collected in the
+            // same frame; the loop must not write the whole save per item.
+            bool collected=false;
             for(int i=current.drops.Count-1;i>=0;i--)
             {
                 Drop drop=current.drops[i];
+                if(drop==null || drop.body==null)
+                {
+                    current.drops.RemoveAt(i);
+                    continue;
+                }
                 if(Vector2.Distance(player.body.position,drop.body.position)>.64f)continue;
                 if(drop.slot==0)
                 {
@@ -706,11 +714,16 @@ namespace Necromancer
                 }
                 Destroy(drop.body.gameObject);
                 current.drops.RemoveAt(i);
-                SaveProgress();
+                collected=true;
             }
             for(int i=current.resources.Count-1;i>=0;i--)
             {
                 ResourceNode res=current.resources[i];
+                if(res==null || res.body==null)
+                {
+                    current.resources.RemoveAt(i);
+                    continue;
+                }
                 if(Vector2.Distance(player.body.position,res.body.position)>.70f)continue;
                 shards+=2;gathered++;
                 float healed=HealFromGatheredResource();
@@ -722,8 +735,9 @@ namespace Necromancer
                     manaGained+" anima.");
                 Destroy(res.body.gameObject);
                 current.resources.RemoveAt(i);
-                SaveProgress();
+                collected=true;
             }
+            if(collected)SaveProgress();
         }
     }
 }

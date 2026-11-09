@@ -118,7 +118,8 @@ namespace Necromancer
         {
             Rect button=AttackRect(scale);
             Rect bind=BindRect(scale);
-            bool pressed=false;
+            // Desktop parity: the basic attack no longer requires the mouse.
+            bool pressed=Input.GetKeyDown(KeyCode.Space);
             for(int i=0;i<Input.touchCount;i++)
             {
                 Touch touch=Input.GetTouch(i);
@@ -198,6 +199,9 @@ namespace Necromancer
             {
                 DrawAction(button,false,Time.time<noTargetUntil?"SEM ALVO":manualQueued?"NA FILA":"ATACAR",
                     Time.time>=castCooldown);
+                if(!Application.isMobilePlatform)
+                    GUI.Label(new Rect(button.x-3f,button.y+66f,
+                        button.width+6f,16f),"ESPACO",hudAction);
                 DrawSoulPulseButton(scale);
                 DrawGraveCommandButton(scale);
                 DrawServantTacticsButton(scale);
