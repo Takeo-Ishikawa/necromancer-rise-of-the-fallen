@@ -434,7 +434,7 @@ namespace Necromancer
                     current.backdrop.sprite=NecroArt.Environment(level.baseBackground);
                     Fit(current.backdrop,level.width,level.height);
                 }
-                current.seal.localScale=Vector3.one*3.2f;
+                ActivateRegionSeal();
                 if(stage==0)ShowCryptAltar();
             }
         }

@@ -83,3 +83,7 @@ Recursos próximos ganham brilho leve; o indicador de exploração mostra tipo e
 ### 0.9.17 — Encontros prolongados e exploração segura
 
 Inimigos retornam ao local de origem após perder o alvo, com memória curta de linha de visão; novos spawns evitam a câmera e as áreas de coleta. O painel contextual avisa quando há ameaças próximas. Economia, arte, formato de save e workflows permanecem inalterados. [Notas e testes recomendados](docs/ENCONTROS_E_EXPLORACAO_0_9_17.md).
+
+### 0.9.18 — Acesso às quatro regiões corrigido
+
+Selos de passagem criados em todas as regiões, conquista acionada por proximidade ou derrota do guardião, chefes restaurados nos estágios avançados e botões reais de avanço/retorno na interface ativa. Saves anteriores compatíveis. [Roteiro de teste](docs/ACESSO_REGIOES_0_9_18.md).

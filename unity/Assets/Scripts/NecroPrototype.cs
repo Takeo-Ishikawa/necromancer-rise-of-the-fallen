@@ -238,6 +238,13 @@ namespace Necromancer
                 next.backdrop=Visual("Ground",new Vector2(level.width*.5f,level.height*.5f),
                     background,-50,next.root.transform);
                 FitGround(next.backdrop,level);
+                // A visible marker is required for NearSeal and progression.
+                Vector2 sealAt=NecroLevels.At(level,level.sealX,level.sealY);
+                SpriteRenderer sealArt=Visual("Selo de passagem",sealAt,
+                    NecroArt.RitualCircle(),5,next.root.transform);
+                Fit(sealArt,1.85f,1.30f);
+                sealArt.color=new Color(.56f,.56f,.92f,.64f);
+                next.seal=sealArt.transform;
                 // The painted cave already includes its walls and scenery.
                 if(level.background!="forgotten_cave")
                 {
@@ -248,19 +255,30 @@ namespace Necromancer
                         Fit(stone,rock.r*2f,rock.r*2f);
                     }
                 }
-                if(level.id=="bonehollow")
-                    next.enemies.Add(CreateRotboar(NecroLevels.At(level,12.8f,6.3f),next.root.transform));
-                foreach(Spawn spawn in level.enemies)
-                {
-                    if(IsBoss(spawn.kind))continue;
-                    next.enemies.Add(Create(spawn.kind,NecroLevels.At(level,spawn.x,spawn.y),
-                        false,next.root.transform));
-                }
                 NecroStageRecord lastSnapshot=
                     previousStageSnapshots!=null &&
                     stage<previousStageSnapshots.Length
                     ? previousStageSnapshots[stage] : null;
+                if(lastSnapshot!=null && lastSnapshot.visited)
+                {
+                    next.claimed=lastSnapshot.claimed;
+                    next.bossDefeated=lastSnapshot.bossDefeated;
+                    next.bossBound=lastSnapshot.bossBound;
+                    if(next.claimed)ActivateRegionSeal();
+                }
+                if(level.id=="bonehollow")
+                    next.enemies.Add(CreateRotboar(NecroLevels.At(level,12.8f,6.3f),next.root.transform));
+                foreach(Spawn spawn in level.enemies)
+                {
+                    if(IsBoss(spawn.kind) &&
+                        !NecroRegionRules.NeedsGuardian(level.requiresGuardian,
+                            next.claimed,next.bossDefeated))continue;
+                    next.enemies.Add(Create(spawn.kind,
+                        NecroLevels.At(level,spawn.x,spawn.y),
+                        false,next.root.transform));
+                }
                 PopulateStageResources(lastSnapshot);
+                if(stage==0 && next.claimed)ShowCryptAltar();
             } else {
                 current=stages[stage];
                 current.root.SetActive(true);
@@ -343,6 +361,7 @@ namespace Necromancer
             }
             if(!inSanctuary)UpdateActors(current.enemies,dt,false);
             if(gameOver)return;
+            UpdateRegionProgress();
             UpdateActors(servants,dt,true);
             if(!inSanctuary)TickCorpses(dt);
             if(!inSanctuary)UpdateProjectiles(dt);
@@ -373,13 +392,14 @@ namespace Necromancer
 
         void Claim()
         {
+            if(current==null || current.claimed || inSanctuary)return;
             current.claimed=true;
             if(!string.IsNullOrEmpty(level.baseBackground))
             {
                 current.backdrop.sprite=NecroArt.Environment(level.baseBackground);
                 FitGround(current.backdrop,level);
             }
-            current.seal.localScale=Vector3.one*3.2f;
+            ActivateRegionSeal();
             if(stage==0)ShowCryptAltar();
             if(stage==levels.Length-1) {
                 completed=true;

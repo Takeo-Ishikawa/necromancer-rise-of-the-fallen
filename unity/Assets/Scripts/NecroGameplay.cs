@@ -401,7 +401,11 @@ namespace Necromancer
                 servants.Remove(victim);
                 SaveCompanions();
             }
-            else current.enemies.Remove(victim);
+            else
+            {
+                current.enemies.Remove(victim);
+                if(IsBoss(victim.kind))current.bossDefeated=true;
+            }
             if(victim.kind=="grave_pup")
             {
                 victim.view.Fall();

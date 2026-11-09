@@ -36,6 +36,7 @@ namespace Necromancer
         {
             Vector2 gui=new Vector2(point.x,Screen.height-point.y)/scale;
             if(SanctuaryTravelAvailable() && SanctuaryTravelRect(scale).Contains(gui))return false;
+            if(RegionTravelAvailable() && RegionTravelRect(scale).Contains(gui))return false;
             if(!inSanctuary && SoulPulseButtonRect(scale).Contains(gui))return false;
             if(!inSanctuary && GraveCommandButtonRect(scale).Contains(gui))return false;
             if(!inSanctuary && TacticModeButtonRect(scale).Contains(gui))return false;
@@ -198,6 +199,7 @@ namespace Necromancer
                 return;
             }
             DrawProgressOverlay(Screen.width/scale,Screen.height/scale);
+            DrawRegionNavigation(scale);
             if(pearl==null)pearl=Resources.Load<Texture2D>("HUD/pearl");
             Rect button=AttackRect(scale);
             if(!inSanctuary)
