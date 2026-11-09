@@ -1062,7 +1062,7 @@ assert "PupWindupDuration(pup)" in gameplay
 assert "HostilePupDetectionDistance()" in gameplay
 assert "pup.cooldown=PupRecoveryCooldown(pup);" in gameplay
 assert "RotboarWindupDuration(boar)" in boar_source
-assert "float healed=HealFromGatheredResource();" in gameplay
+assert "HealFromGatheredResource()" in gameplay
 assert "player.hp=Mathf.Min(player.maxHp,player.hp+healed);" in gameplay
 assert "Mathf.Min(12,Mathf.Max(0,maxMana-mana))" in gameplay
 assert "damage*IncomingHeroDamageMultiplier()" in survival_source
@@ -1076,7 +1076,7 @@ assert "current.respawnIndex++;" in respawn
 assert "current.enemies.Add(spawned);" in respawn
 assert "return stage==0 ? .82f" in balance_source, "First stage must be most accessible"
 assert "return stage==0 ? 19f" in balance_source, "First stage needs more room"
-assert "0.9.15" in builder and "0.9.15" in win_builder
+assert "0.9.16" in builder and "0.9.16" in win_builder
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
