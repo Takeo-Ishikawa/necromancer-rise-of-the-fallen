@@ -230,7 +230,8 @@ assert struct.unpack(">II",idle[16:24])==(1024,512) and idle[24:26]==bytes([8,6]
 loop=core.split("void Update()",1)[1].split("bool NearSeal",1)[0]
 for removed in ("TryPortal(", "Raise(", "Claim(", "Autosave("):
     assert removed not in loop
-assert "else CollectNearby();" in loop, "Gameplay must collect map resources"
+assert "CollectNearby();" in loop, "Gameplay must collect map resources"
+assert "UpdateResourceExploration();" in loop, "Explore visuals must update after collecting"
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnIntervalForStage();" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
@@ -1182,7 +1183,7 @@ load_body=core.split("void LoadStage(int index)",1)[1].split(
     "void Advance()",1)[0]
 assert "PopulateStageResources(lastSnapshot);" in load_body
 assert "previousStageSnapshots[stage]" in load_body
-assert "else CollectNearby();" in core.split("void Update()",1)[1].split(
+assert "CollectNearby();" in core.split("void Update()",1)[1].split(
     "bool NearSeal()",1)[0]
 assert "public bool resourcesInitialized;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 crypt_resources=(unity/"Assets/Scripts/NecroCrypt.cs").read_text()
