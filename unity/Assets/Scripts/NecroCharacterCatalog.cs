@@ -7,6 +7,8 @@ namespace Necromancer
     public class NecroCharacterDefinition
     {
         public string id, name, subtitle, description, idleResource, spectralResource, walkResource, combatResource;
+        // Optional 8-direction x 6-frame art, exclusive to the new heroine.
+        public string walkSixResource, portraitResource;
         public bool available;
         public bool meleeOnly;
         // Enables the character-specific strike in spectral cell 13.

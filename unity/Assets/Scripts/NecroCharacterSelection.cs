@@ -8,7 +8,7 @@ namespace Necromancer
         bool characterSelectionOpen=true, characterStartRequested, characterHasSave;
         int selectedCharacterIndex;
         NecroCharacterDefinition[] characterDefinitions;
-        Texture2D characterPreview;
+        Texture2D characterPreview, characterPortrait;
         string characterSelectionError;
         Vector2 characterListScroll;
         GUIStyle characterLogo,characterName,characterCopy,characterTag;
@@ -32,7 +32,11 @@ namespace Necromancer
 
         void RefreshCharacterPreview()
         {
-            characterPreview=Resources.Load<Texture2D>(SelectedCharacter.idleResource);
+            characterPreview=string.IsNullOrEmpty(SelectedCharacter.walkSixResource)
+                ? Resources.Load<Texture2D>(SelectedCharacter.idleResource)
+                : Resources.Load<Texture2D>(SelectedCharacter.walkSixResource);
+            characterPortrait=string.IsNullOrEmpty(SelectedCharacter.portraitResource)
+                ? null:Resources.Load<Texture2D>(SelectedCharacter.portraitResource);
             characterSelectionError=null;
         }
 
@@ -48,23 +52,37 @@ namespace Necromancer
             characterStartRequested=false;
             var selected=SelectedCharacter;
             if(!selected.available)return;
-            bool physicalAtlas=!string.IsNullOrEmpty(selected.combatResource);
-            var spectral=Resources.Load<Texture2D>(physicalAtlas?selected.combatResource:selected.spectralResource);
-            // The animation contract is eight 256px idle poses and the existing
-            // 4-column spectral sheet. Reject incomplete additions before spawning.
-            if(characterPreview==null || characterPreview.width!=1024 || characterPreview.height!=512 ||
-               spectral==null || spectral.width!=1024 || spectral.height!=2048)
+            if(!string.IsNullOrEmpty(selected.walkSixResource))
             {
-                characterSelectionError="Arte indisponível. Selecione outro personagem.";
-                return;
-            }
-            if(!string.IsNullOrEmpty(selected.walkResource))
-            {
-                var walking=Resources.Load<Texture2D>(selected.walkResource);
-                if(walking==null || walking.width!=1024 || walking.height!=2048)
+                // The fourth character has a unique atlas contract, while
+                // the existing three still follow their original dimensions.
+                if(characterPreview==null || characterPreview.width!=768 ||
+                   characterPreview.height!=1024 || characterPortrait==null)
                 {
-                    characterSelectionError="Animação de caminhada indisponível.";
+                    characterSelectionError="Arte da Necromante Sombria indisponível.";
                     return;
+                }
+            }
+            else
+            {
+                bool physicalAtlas=!string.IsNullOrEmpty(selected.combatResource);
+                var spectral=Resources.Load<Texture2D>(
+                    physicalAtlas?selected.combatResource:selected.spectralResource);
+                if(characterPreview==null || characterPreview.width!=1024 ||
+                   characterPreview.height!=512 || spectral==null ||
+                   spectral.width!=1024 || spectral.height!=2048)
+                {
+                    characterSelectionError="Arte indisponível. Selecione outro personagem.";
+                    return;
+                }
+                if(!string.IsNullOrEmpty(selected.walkResource))
+                {
+                    var walking=Resources.Load<Texture2D>(selected.walkResource);
+                    if(walking==null || walking.width!=1024 || walking.height!=2048)
+                    {
+                        characterSelectionError="Animação de caminhada indisponível.";
+                        return;
+                    }
                 }
             }
             touchMove=Vector2.zero;
@@ -126,7 +144,12 @@ namespace Necromancer
                 DrawWardrobeSurface(new Rect(84,151,252,244),WardrobeCardBackground,
                     new Color(.32f,.47f,.46f));
                 FillUi(new Rect(115,374,190,2),new Color(.41f,.76f,.68f));
-                if(characterPreview!=null)
+                if(characterPortrait!=null)
+                {
+                    GUI.DrawTexture(new Rect(97,152,226,236),
+                        characterPortrait,ScaleMode.ScaleToFit,true);
+                }
+                else if(characterPreview!=null)
                 {
                     float breath=Mathf.Sin(Time.unscaledTime*1.6f)*2f;
                     GUI.DrawTextureWithTexCoords(new Rect(90,146+breath,240,240),

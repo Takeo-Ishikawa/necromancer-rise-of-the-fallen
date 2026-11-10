@@ -95,3 +95,7 @@ Botões de Pulso e Ordem removidos. Guarda-roupa e local de orações mantidos a
 ### 0.9.20 — Extração ou captura após derrotar criaturas
 
 Monstros caídos podem ser **extraídos por fragmentos** ou **capturados como servos**. As ações são exclusivas, aparecem perto da personagem e ficam disponíveis por cerca de 14 segundos. Teclas F/E no Windows e dois botões no Android. [Regras e teste](docs/ESCOLHAS_CRIATURA_CAIDA_0_9_20.md).
+
+### 0.9.21 — Necromante Sombria na seleção
+
+Adicionada uma quarta personagem jogável com 48 quadros próprios de caminhada (oito direções × seis quadros) e retrato de seleção gótico. Os três personagens originais e seus recursos permanecem inalterados. [Detalhes e testes](docs/NECROMANTE_SOMBRIA_0_9_21.md).

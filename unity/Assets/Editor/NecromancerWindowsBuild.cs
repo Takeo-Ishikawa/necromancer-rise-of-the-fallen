@@ -44,7 +44,7 @@ namespace Necromancer.EditorTools
 
             PlayerSettings.companyName="NecromancerStudio";
             PlayerSettings.productName="Necromancer (Windows Preview)";
-            PlayerSettings.bundleVersion="0.9.20";
+            PlayerSettings.bundleVersion="0.9.21";
             // Windows Mono can be built on the Linux GameCI editor image.
             PlayerSettings.SetScriptingBackend(
                 NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);

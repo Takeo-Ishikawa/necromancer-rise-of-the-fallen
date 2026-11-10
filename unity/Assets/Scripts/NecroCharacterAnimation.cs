@@ -12,6 +12,7 @@ namespace Necromancer
         SpriteRenderer witchArtRenderer;
         Sprite[] dedicatedWalkSprites;
         Sprite[] physicalCombatSprites;
+        Sprite[] sixFrameWalkSprites;
         Vector2 lastAnimatedHeroPosition;
         float walkCycle;
         const float WalkStrideDistance=1.6f;
@@ -27,7 +28,30 @@ namespace Necromancer
 
         void InitializeHeroAnimation()
         {
-            if(!string.IsNullOrEmpty(SelectedCharacter.combatResource))
+            if(!string.IsNullOrEmpty(SelectedCharacter.walkSixResource))
+            {
+                Texture2D walk=Resources.Load<Texture2D>(
+                    SelectedCharacter.walkSixResource);
+                walk.filterMode=FilterMode.Bilinear;
+                sixFrameWalkSprites=new Sprite[48];
+                for(int direction=0;direction<8;direction++)
+                {
+                    for(int step=0;step<6;step++)
+                    {
+                        Rect region=new Rect(step*128f,
+                            walk.height-(direction+1)*128f,128f,128f);
+                        sixFrameWalkSprites[direction*6+step]=Sprite.Create(
+                            walk,region,new Vector2(.5f,.07f),69f,0,
+                            SpriteMeshType.FullRect);
+                    }
+                    heroSprites[direction]=sixFrameWalkSprites[direction*6+1];
+                    heroSprites[16+direction]=sixFrameWalkSprites[direction*6+3];
+                    heroSprites[24+direction]=sixFrameWalkSprites[direction*6];
+                    heroSprites[8+direction]=sixFrameWalkSprites[direction*6+4];
+                }
+                lastAnimatedHeroPosition=player.body.position;
+            }
+            else if(!string.IsNullOrEmpty(SelectedCharacter.combatResource))
             {
                 var combat=Resources.Load<Texture2D>(SelectedCharacter.combatResource);
                 physicalCombatSprites=new Sprite[32];
@@ -122,7 +146,8 @@ namespace Necromancer
             heroineRaisePulse=Mathf.Max(0f,heroineRaisePulse-dt);
             float traveled=Vector2.Distance(lastAnimatedHeroPosition,player.body.position);
             lastAnimatedHeroPosition=player.body.position;
-            if(dedicatedWalkSprites!=null || physicalCombatSprites!=null)
+            if(dedicatedWalkSprites!=null || physicalCombatSprites!=null ||
+               sixFrameWalkSprites!=null)
             {
                 // Advance by real displacement: slow joystick movement slows the
                 // steps; pushing against a wall does not run the animation in place.
@@ -205,6 +230,17 @@ namespace Necromancer
                 ? dedicatedWalkSprites[walkDirection*4+Mathf.FloorToInt(walkCycle*4f)]
                 : heroSprites[frame];
             if(useWalk)flip=false;
+            if(sixFrameWalkSprites!=null)
+            {
+                int walkPose=heroineWalking?
+                    Mathf.FloorToInt(walkCycle*6f):0;
+                if(heroineStrikePulse>0f)walkPose=3;
+                else if(heroineRaisePulse>0f ||
+                        heroineCastPulse>0f)walkPose=4;
+                witchArtRenderer.sprite=sixFrameWalkSprites[
+                    walkDirection*6+Mathf.Clamp(walkPose,0,5)];
+                flip=false;
+            }
             if(physicalCombatSprites!=null)
             {
                 int combatPose=0;

@@ -29,6 +29,16 @@
       "combatResource": "Characters/Unarmed/combat",
       "meleeOnly": true,
       "available": true
+    },
+    {
+      "id": "necromante_sombria",
+      "name": "Necromante Sombria",
+      "subtitle": "Silenciosa e implacável",
+      "description": "Guerreira de pés descalços. Combate físico e captura de criaturas caídas; caminhada fluida em oito direções.",
+      "walkSixResource": "Characters/NecromanteSombria/walk6",
+      "portraitResource": "Characters/NecromanteSombria/portrait",
+      "meleeOnly": true,
+      "available": true
     }
   ]
 }
