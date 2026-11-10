@@ -79,10 +79,18 @@ namespace Necromancer
         IEnumerator ReanimateRotboar(Actor boar)
         {
             float elapsed=0f;
+            Sprite[] ritualAtlas=GetRotboarAtlas(boar.ally,BoarReanimate);
             while(elapsed<SoulReanimationDuration &&
                   boar!=null && boar.hp>0f && boar.boarArt!=null)
             {
                 float ratio=Mathf.Clamp01(elapsed/SoulReanimationDuration);
+                if(ritualAtlas!=null)
+                {
+                    int frame=Mathf.Min(3,Mathf.FloorToInt(ratio*4f));
+                    boar.boarArt.sprite=ritualAtlas[
+                        boar.boarFacingIndex*4+frame];
+                    boar.boarArt.flipX=false;
+                }
                 float ease=ratio*ratio*(3f-2f*ratio);
                 boar.boarArt.transform.localScale=boar.boarVisualScale*
                     Mathf.Lerp(.70f,1f,ease);
@@ -95,6 +103,9 @@ namespace Necromancer
             {
                 boar.boarArt.transform.localScale=boar.boarVisualScale;
                 boar.boarArt.color=Color.white;
+                Sprite[] walk=GetRotboarAtlas(boar.ally,BoarWalk);
+                if(walk!=null)
+                    boar.boarArt.sprite=walk[boar.boarFacingIndex*4];
             }
         }
     }

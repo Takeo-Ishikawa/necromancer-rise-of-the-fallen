@@ -23,18 +23,36 @@ namespace Necromancer
         IEnumerator FallRotboar(Actor boar)
         {
             StageInstance owner=current; // A transition can happen during the fall animation.
-            LoadBoarFrames("Creatures/rotboar_fallen",boarFallFrames);
             var art=boar.boarArt;
+            if(art==null)yield break;
             art.sortingOrder=2;
             art.color=Color.white;
             art.transform.localScale=boar.boarVisualScale;
-            art.sprite=boarFallFrames[0];
-            yield return new WaitForSeconds(.14f);
-            if(art==null)yield break;
-            art.sprite=boarFallFrames[1];
-            yield return new WaitForSeconds(.18f);
-            if(art==null)yield break;
-            art.sprite=boarFallFrames[2];
+            Sprite[] death=GetRotboarAtlas(boar.ally,BoarDeath);
+            if(death!=null)
+            {
+                int row=Mathf.Clamp(boar.boarFacingIndex,0,7)*4;
+                for(int frame=0;frame<4;frame++)
+                {
+                    if(art==null)yield break;
+                    art.sprite=death[row+frame];
+                    yield return new WaitForSeconds(frame==0?.10f:.14f);
+                }
+            }
+            else
+            {
+                LoadBoarFrames("Creatures/rotboar_fallen",boarFallFrames);
+                if(boarFallFrames[0]!=null)
+                {
+                    art.sprite=boarFallFrames[0];
+                    yield return new WaitForSeconds(.14f);
+                    if(art==null)yield break;
+                    art.sprite=boarFallFrames[1];
+                    yield return new WaitForSeconds(.18f);
+                    if(art==null)yield break;
+                    art.sprite=boarFallFrames[2];
+                }
+            }
             if(!boar.ally)
             {
                 boar.bindUntil=Time.time+14f;
@@ -65,19 +83,27 @@ namespace Necromancer
                         new Rect(cell*i,0,cell,sheet.height),
                         new Vector2(.5f,.37f),cell,0,SpriteMeshType.FullRect);
             }
-            var art=Visual("Rotboar",at,ally?alliedBoarFrames[0]:boarFrames[0],ally?15:12,parent);
+            Sprite[] walk=GetRotboarAtlas(ally,BoarWalk);
+            Sprite initial=walk!=null?walk[0]:(ally?alliedBoarFrames[0]:boarFrames[0]);
+            var art=Visual("Rotboar",at,initial,ally?15:12,parent);
             Fit(art,2.8f,2.8f);
-            art.flipX=true;
+            art.flipX=walk==null;
             return new Actor {kind="rotboar",body=art.transform,boarArt=art,
-                lairPosition=at,
-                boarVisualScale=art.transform.localScale,
+                lairPosition=at,boarLastPosition=at,boarFacingIndex=0,
+                boarFrameClock=0f,boarVisualScale=art.transform.localScale,
                 hp=180,maxHp=180,radius=.54f,attack=19f,speed=ally?3.8f:1.5f,ally=ally};
         }
 
         void SetBoarPose(Actor boar,BoarPose pose,float duration)
         {
             boar.boarPose=pose;
-            boar.boarArt.sprite=(boar.ally?alliedBoarFrames:boarFrames)[(int)pose];
+            boar.boarFrameClock=0f;
+            Sprite[] atlas=GetRotboarAtlas(boar.ally,
+                pose==BoarPose.Idle?BoarWalk:BoarAttack);
+            boar.boarArt.sprite=atlas!=null?
+                atlas[boar.boarFacingIndex*4]:
+                (boar.ally?alliedBoarFrames:boarFrames)[(int)pose];
+            if(atlas!=null)boar.boarArt.flipX=false;
             boar.boarArt.transform.localScale=boar.boarVisualScale*
                 (pose==BoarPose.Windup?.94f:pose==BoarPose.Charge?1.06f:1f);
             boar.cooldown=duration;
@@ -92,6 +118,8 @@ namespace Necromancer
             boar.boarArt.color=boar.flash>0f ?
                 (boar.ally?new Color(.70f,.96f,1f):
                     new Color(1f,.58f,.62f)) : Color.white;
+            if(Time.time<boar.reanimationUntil)return;
+            RenderRotboar(boar,dt);
             Vector2 at=boar.body.position;
             if(boar.boarPose==BoarPose.Windup)
             {
@@ -122,18 +150,23 @@ namespace Necromancer
                 if(boar.ally)FollowNecromancer(boar,dt);
                 else ReturnToLair(boar,dt);
                 Vector2 movement=(Vector2)boar.body.position-at;
-                if(Mathf.Abs(movement.x)>.001f)
+                if(GetRotboarAtlas(boar.ally,BoarWalk)==null &&
+                   Mathf.Abs(movement.x)>.001f)
                     boar.boarArt.flipX=movement.x<0;
                 return;
             }
             Vector2 delta=(Vector2)target.body.position-at;
             if(delta.magnitude>5.5f || !Visible(at,target.body.position))return;
-            if(Mathf.Abs(delta.x)>.02f)boar.boarArt.flipX=delta.x<0;
+            if(GetRotboarAtlas(boar.ally,BoarWalk)==null &&
+               Mathf.Abs(delta.x)>.02f)
+                boar.boarArt.flipX=delta.x<0;
             if(delta.magnitude>3.2f)
                 MoveToward(boar,target.body.position,dt);
             else
             {
                 boar.chargeDirection=delta.sqrMagnitude>.0001f?delta.normalized:Vector2.left;
+                boar.boarFacingIndex=BoarDirection8(
+                    boar.chargeDirection,boar.boarFacingIndex);
                 SetBoarPose(boar,BoarPose.Windup,
                     RotboarWindupDuration(boar));
             }
