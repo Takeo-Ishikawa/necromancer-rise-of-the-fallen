@@ -207,18 +207,18 @@ namespace Necromancer
             if(useWalk)flip=false;
             if(physicalCombatSprites!=null)
             {
-                int pose=0;
+                int combatPose=0;
                 if(heroineStrikePulse>0f)
                 {
                     float strikePhase=Mathf.Clamp01(strikeElapsed/StrikeVisualDuration);
-                    pose=strikePhase>=.20f && strikePhase<.78f?3:0;
+                    combatPose=strikePhase>=.20f && strikePhase<.78f?3:0;
                 }
                 else if(heroineWalking)
                 {
                     int phase=Mathf.FloorToInt(walkCycle*4f);
-                    pose=phase==0?1:phase==2?2:0;
+                    combatPose=phase==0?1:phase==2?2:0;
                 }
-                witchArtRenderer.sprite=physicalCombatSprites[walkDirection*4+pose];
+                witchArtRenderer.sprite=physicalCombatSprites[walkDirection*4+combatPose];
                 flip=false;
             }
             witchArtRenderer.flipX=flip;

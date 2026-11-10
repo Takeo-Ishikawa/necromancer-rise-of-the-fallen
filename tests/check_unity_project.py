@@ -1394,3 +1394,15 @@ for filename, signatures in {
         body = source.split(signature, 1)[1].split('{', 1)[1].lstrip()
         assert body.startswith('if(!HeroCanUseMagic)return'), signature
 print('Physical character: selection, melee override and magic capability gates verified.')
+
+# Regression: C# forbids a combat-frame local named pose inside the same method
+# as the existing Vector3 pose variable, even when declared later (CS0136).
+character_anim=(unity/"Assets/Scripts/NecroCharacterAnimation.cs").read_text()
+combat_section=character_anim.split("if(physicalCombatSprites!=null)",1)[1].split(
+    "witchArtRenderer.flipX=flip;",1)[0]
+assert "int combatPose=0;" in combat_section
+assert "combatPose=strikePhase" in combat_section
+assert "combatPose=phase==0" in combat_section
+assert "physicalCombatSprites[walkDirection*4+combatPose]" in combat_section
+assert "int pose=0;" not in combat_section
+assert "Vector3 pose=witchArtRenderer.transform.localPosition;" in character_anim
