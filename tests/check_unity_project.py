@@ -1441,6 +1441,7 @@ assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs"
 assert (root/"docs/ESCOLHAS_CRIATURA_CAIDA_0_9_20.md").is_file()
 
 
+selection=(unity/"Assets/Scripts/NecroCharacterSelection.cs").read_text()
 # 0.9.22: in-game avatar selection, correct portrait crop and NPOT importer.
 switch_import=(unity/"Assets/Editor/NecroSombriaTextureImport.cs").read_text()
 switch_check=(unity/"Assets/Editor/NecroCharacterSwitchEditorCheck.cs").read_text()
