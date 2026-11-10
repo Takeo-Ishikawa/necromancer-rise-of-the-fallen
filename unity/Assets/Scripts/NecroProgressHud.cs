@@ -27,13 +27,8 @@ namespace Necromancer
                     new Color(.25f,.19f,.31f,.98f));
                 FillUi(new Rect(x+9f,39f,(w-18f)*progress,6f),
                     new Color(.79f,.61f,.91f,.98f));
-                int attributes=MeditationPointsAvailable();
-                int skills=AvailableSkillPoints();
-                if(attributes>0 || skills>0)
-                    GUI.Label(new Rect(x+6f,49f,w-12f,17f),
-                        "ALTAR: "+attributes+" ATR | "+skills+" HAB",
-                        wardrobeNoteStyle);
-                else GUI.Label(new Rect(x+6f,49f,w-12f,17f),
+                // No altar actions are accessible in this simplified build.
+                GUI.Label(new Rect(x+6f,49f,w-12f,17f),
                     resourceHint,wardrobeNoteStyle);
                 GUI.Label(new Rect(x+6f,65f,w-12f,17f),
                     "FRAGMENTOS "+shards+" | RECURSOS "+

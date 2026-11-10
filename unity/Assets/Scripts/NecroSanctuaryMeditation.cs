@@ -47,15 +47,14 @@ namespace Necromancer
                     playerLevel++;
                     gained=true;
                 }
-                if(gained)
-                    Announce("NIVEL "+playerLevel+
-                        "! Novo ponto disponivel no altar.");
+                if(gained)Announce("NIVEL "+playerLevel+" ALCANCADO!");
             }
             if(!pulseAwardBatch)SaveProgress();
         }
 
         void OpenSanctuaryMeditation()
         {
+            if(!NecroInterfaceScope.SanctuaryProgressionEnabled)return;
             if(!inSanctuary || inventoryOpen || wardrobeOpen ||
                 gameOver || player==null)return;
             meditationOpen=true;
@@ -75,6 +74,7 @@ namespace Necromancer
 
         void InvestMeditationPoint(int index)
         {
+            if(!NecroInterfaceScope.SanctuaryProgressionEnabled)return;
             if(!inSanctuary || !meditationOpen || gameOver || player==null ||
                 MeditationPointsAvailable()<=0)return;
             if(index==0)

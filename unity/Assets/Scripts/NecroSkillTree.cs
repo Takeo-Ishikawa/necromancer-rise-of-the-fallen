@@ -101,6 +101,7 @@ namespace Necromancer
         void ResetLearnedSkills()
         {
             if(!HeroCanUseMagic)return;
+            if(!NecroInterfaceScope.SanctuaryProgressionEnabled)return;
             if(!inSanctuary || !meditationOpen || !meditationSkillsTab ||
                 !skillRespecConfirm || gameOver || LearnedSkillCount()==0)return;
             int price=SkillRespecCost();
@@ -130,6 +131,7 @@ namespace Necromancer
         void UnlockSkillTreeNode(int index)
         {
             if(!HeroCanUseMagic)return;
+            if(!NecroInterfaceScope.SanctuaryProgressionEnabled)return;
             if(!inSanctuary || !meditationOpen || !meditationSkillsTab ||
                 gameOver || player==null || index<0 || index>=SkillTreeNodeCount ||
                 AvailableSkillPoints()<=0 || SkillUnlocked(index))return;

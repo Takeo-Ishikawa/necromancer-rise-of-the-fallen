@@ -37,8 +37,6 @@ namespace Necromancer
             Vector2 gui=new Vector2(point.x,Screen.height-point.y)/scale;
             if(SanctuaryTravelAvailable() && SanctuaryTravelRect(scale).Contains(gui))return false;
             if(RegionTravelAvailable() && RegionTravelRect(scale).Contains(gui))return false;
-            if(HeroCanUseMagic && !inSanctuary && SoulPulseButtonRect(scale).Contains(gui))return false;
-            if(HeroCanUseMagic && !inSanctuary && GraveCommandButtonRect(scale).Contains(gui))return false;
             if(!inSanctuary && TacticModeButtonRect(scale).Contains(gui))return false;
             if(NearbySanctuaryStation()!=null &&
                SanctuaryInteractionButtonRect(scale).Contains(gui))return false;
@@ -209,8 +207,6 @@ namespace Necromancer
                 if(!Application.isMobilePlatform)
                     GUI.Label(new Rect(button.x-3f,button.y+66f,
                         button.width+6f,16f),"ESPACO",hudAction);
-                DrawSoulPulseButton(scale);
-                DrawGraveCommandButton(scale);
                 DrawServantTacticsButton(scale);
             }
             if(!inSanctuary && CanBindNearby())DrawAction(BindRect(scale),true,"ERGUER",true);

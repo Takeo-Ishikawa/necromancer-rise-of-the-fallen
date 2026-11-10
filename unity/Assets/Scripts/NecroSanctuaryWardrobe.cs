@@ -16,6 +16,7 @@ namespace Necromancer
 
         void OpenSanctuaryWardrobe()
         {
+            if(!NecroInterfaceScope.SanctuaryProgressionEnabled)return;
             if(!inSanctuary || inventoryOpen || gameOver)return;
             wardrobeOpen = true;
             touchMove = Vector2.zero;
@@ -32,6 +33,7 @@ namespace Necromancer
 
         void UpgradeSanctuaryEquipment(bool focus)
         {
+            if(!NecroInterfaceScope.SanctuaryProgressionEnabled)return;
             if(!inSanctuary || !wardrobeOpen || gameOver || player==null)return;
             int tier = focus ? staffTier : mantleTier;
             if(tier>=3) { Announce("Equipamento no grau maximo."); return; }

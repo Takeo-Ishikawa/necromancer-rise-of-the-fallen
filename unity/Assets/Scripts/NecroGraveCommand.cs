@@ -118,23 +118,8 @@ namespace Necromancer
         void ReadGraveCommandInput(float scale)
         {
             if(!HeroCanUseMagic)return;
-            bool pressed=Input.GetKeyDown(KeyCode.R);
-            Rect button=GraveCommandButtonRect(scale);
-            for(int i=0;i<Input.touchCount;i++)
-            {
-                Touch touch=Input.GetTouch(i);
-                if(touch.phase!=TouchPhase.Began)continue;
-                Vector2 point=new Vector2(touch.position.x,
-                    Screen.height-touch.position.y)/scale;
-                if(button.Contains(point))pressed=true;
-            }
-            if(Input.touchCount==0 && Input.GetMouseButtonDown(0))
-            {
-                Vector3 mouse=Input.mousePosition;
-                Vector2 point=new Vector2(mouse.x,Screen.height-mouse.y)/scale;
-                if(button.Contains(point))pressed=true;
-            }
-            if(pressed)TryCastGraveCommand();
+            // Optional Windows shortcut remains; touch hitbox is removed.
+            if(Input.GetKeyDown(KeyCode.R))TryCastGraveCommand();
         }
 
         void DrawGraveCommandButton(float scale)

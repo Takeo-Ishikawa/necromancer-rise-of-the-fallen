@@ -1,6 +1,6 @@
 {
-  "version": 3,
-  "notes": "Walkable points for fountain, wardrobe, and meditation altar. No new art assets.",
+  "version": 4,
+  "notes": "Only the fountain is interactive; wardrobe and prayer props remain decorative.",
   "stations": [
     {
       "id": "fountain",
@@ -15,34 +15,6 @@
       "speedMultiplier": 1.2,
       "effectX": 13,
       "effectY": 15.15
-    },
-    {
-      "id": "wardrobe",
-      "kind": "wardrobe",
-      "label": "ABRIR ARMARIO",
-      "x": 5.12,
-      "y": 12.25,
-      "radius": 1.58,
-      "durationSeconds": 0,
-      "cooldownSeconds": 0,
-      "damageMultiplier": 1,
-      "speedMultiplier": 1,
-      "effectX": 0,
-      "effectY": 0
-    },
-    {
-      "id": "meditation",
-      "kind": "meditation",
-      "label": "MEDITAR",
-      "x": 10.72,
-      "y": 8.9,
-      "radius": 1.62,
-      "durationSeconds": 0,
-      "cooldownSeconds": 0,
-      "damageMultiplier": 1,
-      "speedMultiplier": 1,
-      "effectX": 0,
-      "effectY": 0
     }
   ]
 }

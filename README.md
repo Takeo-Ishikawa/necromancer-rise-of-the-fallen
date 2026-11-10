@@ -87,3 +87,7 @@ Inimigos retornam ao local de origem após perder o alvo, com memória curta de 
 ### 0.9.18 — Acesso às quatro regiões corrigido
 
 Selos de passagem criados em todas as regiões, conquista acionada por proximidade ou derrota do guardião, chefes restaurados nos estágios avançados e botões reais de avanço/retorno na interface ativa. Saves anteriores compatíveis. [Roteiro de teste](docs/ACESSO_REGIOES_0_9_18.md).
+
+### 0.9.19 — Interface e refúgio simplificados
+
+Botões de Pulso e Ordem removidos. Guarda-roupa e local de orações mantidos apenas como decoração; fonte, ataque, servos e exploração preservados. Saves v1 intactos. [Notas de teste](docs/INTERFACE_SIMPLIFICADA_0_9_19.md).

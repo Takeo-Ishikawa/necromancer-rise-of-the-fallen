@@ -72,7 +72,9 @@ namespace Necromancer
             float closest = float.MaxValue;
             foreach(SanctuaryStation station in sanctuaryStations)
             {
-                if(station == null || station.radius <= 0f ||
+                // Wardrobe and prayer corner are scenery only.
+                if(station == null || station.kind != "fountain_buff" ||
+                    station.radius <= 0f ||
                     string.IsNullOrEmpty(station.id))continue;
                 float distance = Vector2.Distance(player.body.position,
                     new Vector2(station.x, station.y));
@@ -102,21 +104,8 @@ namespace Necromancer
                 NearbySanctuaryStation() != station ||
                 StationCooldownRemaining(station) > 0f)return;
 
-            if(station.kind == "wardrobe")
-            {
-                OpenSanctuaryWardrobe();
-                return;
-            }
-            if(station.kind == "meditation")
-            {
-                OpenSanctuaryMeditation();
-                return;
-            }
-            if(station.kind != "fountain_buff")
-            {
-                Debug.LogWarning("Unknown sanctuary station kind: " + station.kind);
-                return;
-            }
+            // Retired stations cannot open menus even with legacy data.
+            if(station.kind != "fountain_buff")return;
             float duration = Mathf.Clamp(station.durationSeconds, 5f, 300f);
             float cooldown = Mathf.Max(duration, station.cooldownSeconds);
             fountainDamageBonus = Mathf.Clamp(station.damageMultiplier, 1f, 2f);
@@ -181,8 +170,6 @@ namespace Necromancer
             Rect button = SanctuaryInteractionButtonRect(scale);
             GUI.Label(new Rect(button.x - 2f, button.y - 27f,
                     button.width + 4f, 24f),
-                station.kind == "wardrobe" ? "GUARDA-ROUPA  |  EQUIPAMENTOS" :
-                station.kind == "meditation" ? "ALTAR  |  ATRIBUTOS PERMANENTES" :
                 "FONTE ARCANA  |  CURA + BENCAO TEMPORARIA", smallStyle);
             GUI.enabled = !active && cooldown <= 0f && !gameOver;
             if(GUI.Button(button, caption, buttonStyle))

@@ -113,8 +113,7 @@ namespace Necromancer
             // file writes for area-of-effect multi-kills.
             SaveProgress();
             if(playerLevel>levelBefore)
-                Announce("NIVEL "+playerLevel+
-                    "! Visite o altar para distribuir pontos.");
+                Announce("NIVEL "+playerLevel+" ALCANCADO!");
             else
                 Announce("Pulso Necrotico! "+targets+
                     (targets==1?" alvo atingido.":" alvos atingidos."));
@@ -131,23 +130,8 @@ namespace Necromancer
                 return;
             }
             if(inSanctuary || gameOver || player==null)return;
-            bool pressed=Input.GetKeyDown(KeyCode.Q);
-            Rect rect=SoulPulseButtonRect(scale);
-            for(int i=0;i<Input.touchCount;i++)
-            {
-                Touch touch=Input.GetTouch(i);
-                if(touch.phase!=TouchPhase.Began)continue;
-                Vector2 point=new Vector2(touch.position.x,
-                    Screen.height-touch.position.y)/scale;
-                if(rect.Contains(point))pressed=true;
-            }
-            if(Input.touchCount==0 && Input.GetMouseButtonDown(0))
-            {
-                Vector3 at=Input.mousePosition;
-                Vector2 point=new Vector2(at.x,Screen.height-at.y)/scale;
-                if(rect.Contains(point))pressed=true;
-            }
-            if(pressed)TryCastSoulPulse();
+            // No invisible touch/mouse hotspots after hiding this skill.
+            if(Input.GetKeyDown(KeyCode.Q))TryCastSoulPulse();
             ReadGraveCommandInput(scale);
             ReadServantTacticsInput(scale);
         }
