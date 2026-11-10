@@ -91,3 +91,7 @@ Selos de passagem criados em todas as regiões, conquista acionada por proximida
 ### 0.9.19 — Interface e refúgio simplificados
 
 Botões de Pulso e Ordem removidos. Guarda-roupa e local de orações mantidos apenas como decoração; fonte, ataque, servos e exploração preservados. Saves v1 intactos. [Notas de teste](docs/INTERFACE_SIMPLIFICADA_0_9_19.md).
+
+### 0.9.20 — Extração ou captura após derrotar criaturas
+
+Monstros caídos podem ser **extraídos por fragmentos** ou **capturados como servos**. As ações são exclusivas, aparecem perto da personagem e ficam disponíveis por cerca de 14 segundos. Teclas F/E no Windows e dois botões no Android. [Regras e teste](docs/ESCOLHAS_CRIATURA_CAIDA_0_9_20.md).

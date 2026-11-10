@@ -40,8 +40,11 @@ namespace Necromancer
             if(!inSanctuary && TacticModeButtonRect(scale).Contains(gui))return false;
             if(NearbySanctuaryStation()!=null &&
                SanctuaryInteractionButtonRect(scale).Contains(gui))return false;
+            if(FindNearbyDowned().Valid &&
+                (DownedHarvestRect(scale).Contains(gui) ||
+                 DownedCaptureRect(scale).Contains(gui)))return false;
             return !RosterButton.Contains(gui) && point.x<Screen.width*.65f &&
-                !AttackRect(scale).Contains(gui) && !BindRect(scale).Contains(gui);
+                !AttackRect(scale).Contains(gui);
         }
 
         void ReadMovement(float scale)
@@ -116,28 +119,36 @@ namespace Necromancer
         void ReadManualAttack(float scale)
         {
             Rect button=AttackRect(scale);
-            Rect bind=BindRect(scale);
-            // Desktop parity: the basic attack no longer requires the mouse.
+            DownedChoice downed=FindNearbyDowned();
+            Rect harvest=DownedHarvestRect(scale);
+            Rect capture=DownedCaptureRect(scale);
             bool pressed=Input.GetKeyDown(KeyCode.Space);
             for(int i=0;i<Input.touchCount;i++)
             {
                 Touch touch=Input.GetTouch(i);
                 Vector2 point=new Vector2(touch.position.x,Screen.height-touch.position.y)/scale;
                 if(touch.phase!=TouchPhase.Began)continue;
-                if(button.Contains(point))pressed=true;
-                else if(bind.Contains(point))BindNearbyCreature();
+                if(downed.Valid && harvest.Contains(point))
+                    HarvestDowned(downed);
+                else if(downed.Valid && capture.Contains(point))
+                    CaptureDowned(downed);
+                else if(button.Contains(point))pressed=true;
             }
             if(Input.touchCount==0 && Input.GetMouseButtonDown(0))
             {
                 Vector3 pos=Input.mousePosition;
                 Vector2 point=new Vector2(pos.x,Screen.height-pos.y)/scale;
-                pressed=button.Contains(point);
-                if(bind.Contains(point))BindNearbyCreature();
+                if(downed.Valid && harvest.Contains(point))
+                    HarvestDowned(downed);
+                else if(downed.Valid && capture.Contains(point))
+                    CaptureDowned(downed);
+                else if(button.Contains(point))pressed=true;
             }
-            // Keyboard parity with the existing ERGUER touch action.
-            // E is reserved for sanctuary stations outside combat.
-            if(Input.GetKeyDown(KeyCode.E) && CanBindNearby())
-                BindNearbyCreature();
+            // Windows F extracts and E captures; both use the same body.
+            if(downed.Valid && Input.GetKeyDown(KeyCode.F))
+                HarvestDowned(downed);
+            if(downed.Valid && Input.GetKeyDown(KeyCode.E))
+                CaptureDowned(downed);
             if(pressed)manualQueued=true;
             if(!manualQueued)return;
             if(Closest(EffectiveManualRange)==null)
@@ -209,7 +220,7 @@ namespace Necromancer
                         button.width+6f,16f),"ESPACO",hudAction);
                 DrawServantTacticsButton(scale);
             }
-            if(!inSanctuary && CanBindNearby())DrawAction(BindRect(scale),true,"ERGUER",true);
+            if(!inSanctuary)DrawDownedChoices(scale);
             if(joystickFingerId!=-1)
             {
                 Vector2 center=new Vector2(joystickAnchor.x,Screen.height-joystickAnchor.y)/scale;

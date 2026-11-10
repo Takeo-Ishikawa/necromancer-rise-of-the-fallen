@@ -22,7 +22,7 @@ namespace Necromancer
         string type;
 
         static Sprite[] pupFrames, alliedPupFrames, fallenPupFrames;
-        const float FallenHold = 3f;
+        const float FallenHold = 14f;
         const float DissolveDuration = .8f;
         int pupAction;
         bool fallen;
@@ -54,6 +54,8 @@ namespace Necromancer
         }
 
         public bool CanBind => fallen && !friendly && Time.time-fallenAt<FallenHold;
+        public float FallenRemaining => CanBind?
+            Mathf.Max(0f,FallenHold-(Time.time-fallenAt)):0f;
 
         public void Fall()
         {

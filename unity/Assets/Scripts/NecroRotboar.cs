@@ -37,10 +37,10 @@ namespace Necromancer
             art.sprite=boarFallFrames[2];
             if(!boar.ally)
             {
-                boar.bindUntil=Time.time+3f;
+                boar.bindUntil=Time.time+14f;
                 owner.fallenBoars.Add(boar);
             }
-            float remaining=3f;
+            float remaining=14f;
             while(remaining>0f && art!=null)
             {
                 remaining-=Time.deltaTime;

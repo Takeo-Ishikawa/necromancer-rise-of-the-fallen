@@ -56,6 +56,7 @@ namespace Necromancer.EditorTools
             NecroExplorationEditorCheck.Verify();
             NecroEncounterEditorCheck.Verify();
             NecroRegionEditorCheck.Verify();
+            NecroDownedEditorCheck.Verify();
             NecroVisualEditorCheck.Verify();
             NecroIllustratedAssetEditorCheck.Verify();
             NecroFrameEditorCheck.Verify();
@@ -89,8 +90,8 @@ namespace Necromancer.EditorTools
                     "com.takeo.necromancer.unity");
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
-            PlayerSettings.bundleVersion = "0.9.19";
-            PlayerSettings.Android.bundleVersionCode = 27;
+            PlayerSettings.bundleVersion = "0.9.20";
+            PlayerSettings.Android.bundleVersionCode = 28;
             if(preview)
             {
                 // A unique, monotonically increasing versionCode is required
