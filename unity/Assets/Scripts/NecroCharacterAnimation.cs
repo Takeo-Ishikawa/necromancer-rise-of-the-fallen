@@ -34,14 +34,18 @@ namespace Necromancer
                     SelectedCharacter.walkSixResource);
                 walk.filterMode=FilterMode.Bilinear;
                 sixFrameWalkSprites=new Sprite[48];
+                int cellWidth=walk.width/6;
+                int cellHeight=walk.height/8;
                 for(int direction=0;direction<8;direction++)
                 {
                     for(int step=0;step<6;step++)
                     {
-                        Rect region=new Rect(step*128f,
-                            walk.height-(direction+1)*128f,128f,128f);
+                        Rect region=new Rect(step*cellWidth,
+                            walk.height-(direction+1)*cellHeight,
+                            cellWidth,cellHeight);
                         sixFrameWalkSprites[direction*6+step]=Sprite.Create(
-                            walk,region,new Vector2(.5f,.07f),69f,0,
+                            walk,region,new Vector2(.5f,.07f),
+                            cellHeight*69f/128f,0,
                             SpriteMeshType.FullRect);
                     }
                     heroSprites[direction]=sixFrameWalkSprites[direction*6+1];
@@ -121,6 +125,43 @@ namespace Necromancer
             shadow.transform.localPosition=Vector3.zero;
             Fit(shadow,.70f,.19f);
             shadow.color=new Color(.16f,.13f,.23f,.43f);
+        }
+
+        // Character switching is purely visual. Destroy dynamically sliced
+        // sprites as well as the old avatar to avoid memory leaks on repeated
+        // changes; do not touch the hero collider or any world objects.
+        void ResetHeroAnimationForCharacterSwap()
+        {
+            if(witchArtRenderer!=null)
+            {
+                GameObject oldAvatar=witchArtRenderer.gameObject;
+                oldAvatar.SetActive(false);
+                Destroy(oldAvatar);
+                witchArtRenderer=null;
+            }
+            var sprites=new System.Collections.Generic.HashSet<Sprite>();
+            foreach(Sprite piece in heroSprites)
+                if(piece!=null)sprites.Add(piece);
+            if(dedicatedWalkSprites!=null)
+                foreach(Sprite piece in dedicatedWalkSprites)
+                    if(piece!=null)sprites.Add(piece);
+            if(physicalCombatSprites!=null)
+                foreach(Sprite piece in physicalCombatSprites)
+                    if(piece!=null)sprites.Add(piece);
+            if(sixFrameWalkSprites!=null)
+                foreach(Sprite piece in sixFrameWalkSprites)
+                    if(piece!=null)sprites.Add(piece);
+            if(skullSprite!=null)sprites.Add(skullSprite);
+            foreach(Sprite piece in sprites)Destroy(piece);
+            System.Array.Clear(heroSprites,0,heroSprites.Length);
+            dedicatedWalkSprites=null;
+            physicalCombatSprites=null;
+            sixFrameWalkSprites=null;
+            skullSprite=null;
+            heroineWalking=false;
+            walkCycle=0f;
+            walkClock=0f;
+            heroineHitPulse=0f;
         }
 
         // Sanctuary keeps the full portrait-room camera, so its painted

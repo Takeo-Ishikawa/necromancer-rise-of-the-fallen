@@ -99,3 +99,7 @@ Monstros caídos podem ser **extraídos por fragmentos** ou **capturados como se
 ### 0.9.21 — Necromante Sombria na seleção
 
 Adicionada uma quarta personagem jogável com 48 quadros próprios de caminhada (oito direções × seis quadros) e retrato de seleção gótico. Os três personagens originais e seus recursos permanecem inalterados. [Detalhes e testes](docs/NECROMANTE_SOMBRIA_0_9_21.md).
+
+### 0.9.22 — Menu de troca de personagem e correção da arte
+
+Botão **PERSONAGEM** durante o jogo para trocar a protagonista, com confirmação/cancelamento e sem reiniciar o mundo. Importação NPOT da Necromante Sombria corrigida, validação da animação mais robusta, e retrato ampliado sem deformar a imagem. As três personagens existentes, saves v1 e builds manuais permanecem preservados. [Procedimento de teste](docs/MENU_PERSONAGENS_0_9_22.md).

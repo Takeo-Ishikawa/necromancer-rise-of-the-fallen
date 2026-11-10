@@ -6,6 +6,8 @@ namespace Necromancer
     {
         const string SelectedCharacterKey="necro.selected-character.v1";
         bool characterSelectionOpen=true, characterStartRequested, characterHasSave;
+        bool inGameCharacterMenu;
+        int activeCharacterIndex;
         int selectedCharacterIndex;
         NecroCharacterDefinition[] characterDefinitions;
         Texture2D characterPreview, characterPortrait;
@@ -27,6 +29,7 @@ namespace Necromancer
                 selectedCharacterIndex=System.Array.FindIndex(characterDefinitions,c=>c.available);
             NecroSaveData saved;
             characterHasSave=NecroSaveStore.TryLoad(out saved);
+            activeCharacterIndex=selectedCharacterIndex;
             RefreshCharacterPreview();
         }
 
@@ -40,10 +43,46 @@ namespace Necromancer
             characterSelectionError=null;
         }
 
+        // Open the existing selection screen without reloading the world.
+        // The character in play is unchanged until APPLY is pressed.
+        void OpenInGameCharacterMenu()
+        {
+            if(characterSelectionOpen || player==null || current==null ||
+               gameOver || inventoryOpen || wardrobeOpen || meditationOpen)
+                return;
+            activeCharacterIndex=selectedCharacterIndex;
+            inGameCharacterMenu=true;
+            characterSelectionOpen=true;
+            characterStartRequested=false;
+            touchMove=Vector2.zero;
+            joystickFingerId=-1;
+            manualQueued=false;
+            characterListScroll.x=Mathf.Max(0f,
+                selectedCharacterIndex*124f-124f);
+            RefreshCharacterPreview();
+        }
+
+        void CancelInGameCharacterMenu()
+        {
+            if(!inGameCharacterMenu)return;
+            selectedCharacterIndex=activeCharacterIndex;
+            characterSelectionOpen=false;
+            inGameCharacterMenu=false;
+            characterStartRequested=false;
+            touchMove=Vector2.zero;
+            joystickFingerId=-1;
+            RefreshCharacterPreview();
+        }
+
         void UpdateCharacterSelection()
         {
             // Startup runs once, outside OnGUI's layout/repaint event passes.
             if(characterDefinitions==null)return;
+            if(inGameCharacterMenu && Input.GetKeyDown(KeyCode.Escape))
+            {
+                CancelInGameCharacterMenu();
+                return;
+            }
             if(Input.GetKeyDown(KeyCode.LeftArrow))CycleCharacter(-1);
             if(Input.GetKeyDown(KeyCode.RightArrow))CycleCharacter(1);
             if(Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
@@ -56,10 +95,14 @@ namespace Necromancer
             {
                 // The fourth character has a unique atlas contract, while
                 // the existing three still follow their original dimensions.
-                if(characterPreview==null || characterPreview.width!=768 ||
-                   characterPreview.height!=1024 || characterPortrait==null)
+                // Android may resample non-power-of-two textures. The importer
+                // now preserves NPOT dimensions, but never reject usable art
+                // merely because an imported texture was resized.
+                if(characterPreview==null || characterPreview.width<384 ||
+                   characterPreview.height<512)
                 {
-                    characterSelectionError="Arte da Necromante Sombria indisponível.";
+                    characterSelectionError=
+                        "Sprites da Necromante Sombria ausentes ou incompletos.";
                     return;
                 }
             }
@@ -88,8 +131,33 @@ namespace Necromancer
             touchMove=Vector2.zero;
             joystickFingerId=-1;
             manualQueued=false;
-            BeginSelectedCharacterWorld();
-            if(player==null || current==null)return;
+            if(inGameCharacterMenu)
+            {
+                if(selectedCharacterIndex!=activeCharacterIndex)
+                {
+                    if(!SaveProgress())
+                    {
+                        characterSelectionError=
+                            "Não foi possível salvar. Tente novamente.";
+                        return;
+                    }
+                    // Keep the position, equipment, companions, resources,
+                    // cleared regions and v1 saves. Replace only the avatar
+                    // renderer and its character-specific capabilities.
+                    ResetTravelCombat();
+                    ResetHeroAnimationForCharacterSwap();
+                    InitializeHeroAnimation();
+                    SetSanctuaryHeroAppearance(inSanctuary);
+                    Announce("Personagem alterada: "+selected.name+".");
+                }
+                inGameCharacterMenu=false;
+            }
+            else
+            {
+                BeginSelectedCharacterWorld();
+                if(player==null || current==null)return;
+            }
+            activeCharacterIndex=selectedCharacterIndex;
             PlayerPrefs.SetString(SelectedCharacterKey,selected.id);
             PlayerPrefs.Save();
             characterSelectionOpen=false;
@@ -138,7 +206,9 @@ namespace Necromancer
                 FillUi(new Rect(28,106,364,1),WardrobeMutedEdge);
                 GUI.Label(new Rect(20,24,380,42),"NECROMANCER",characterLogo);
                 GUI.Label(new Rect(20,65,380,22),"R I S E   O F   T H E   F A L L E N",characterTag);
-                GUI.Label(new Rect(20,116,380,24),"ESCOLHA SEU PERSONAGEM",characterTag);
+                GUI.Label(new Rect(20,116,380,24),
+                    inGameCharacterMenu?"TROCAR PERSONAGEM":"ESCOLHA SEU PERSONAGEM",
+                    characterTag);
 
                 // Use only the front-facing cell, never draw the whole spritesheet.
                 DrawWardrobeSurface(new Rect(84,151,252,244),WardrobeCardBackground,
@@ -146,8 +216,11 @@ namespace Necromancer
                 FillUi(new Rect(115,374,190,2),new Color(.41f,.76f,.68f));
                 if(characterPortrait!=null)
                 {
-                    GUI.DrawTexture(new Rect(97,152,226,236),
-                        characterPortrait,ScaleMode.ScaleToFit,true);
+                    // Crop the approved vertical artwork proportionally.
+                    // ScaleToFit made the woman a thin, tiny strip with black
+                    // sides in the nearly square character-selection frame.
+                    GUI.DrawTextureWithTexCoords(new Rect(94,152,232,236),
+                        characterPortrait,new Rect(.15f,.35f,.70f,.54f),true);
                 }
                 else if(characterPreview!=null)
                 {
@@ -170,7 +243,9 @@ namespace Necromancer
                         selected?new Color(.54f,.86f,.73f):WardrobeMutedEdge);
                     GUI.Label(new Rect(card.x+4,5,108,27),entry.name,wardrobeActiveButtonText);
                     GUI.Label(new Rect(card.x+4,33,108,20),entry.available?
-                        (selected?"SELECIONADA":"DISPONÍVEL"):"EM BREVE",wardrobeNoteStyle);
+                        (inGameCharacterMenu && i==activeCharacterIndex?
+                            "EM USO":selected?"ESCOLHIDA":"DISPONÍVEL"):
+                        "EM BREVE",wardrobeNoteStyle);
                     if(entry.available && GUI.Button(card,GUIContent.none,GUIStyle.none))
                     {
                         selectedCharacterIndex=i;
@@ -178,11 +253,22 @@ namespace Necromancer
                     }
                 }
                 GUI.EndScrollView();
-                if(WardrobeActionButton(new Rect(36,628,348,48),
+                if(inGameCharacterMenu)
+                {
+                    if(WardrobeActionButton(new Rect(36,628,204,48),
+                        "USAR PERSONAGEM",true))
+                        characterStartRequested=true;
+                    if(WardrobeActionButton(new Rect(252,628,132,48),
+                        "CANCELAR",true))
+                        CancelInGameCharacterMenu();
+                }
+                else if(WardrobeActionButton(new Rect(36,628,348,48),
                     characterHasSave?"CONTINUAR JORNADA":"INICIAR JORNADA",true))
                     characterStartRequested=true;
                 GUI.Label(new Rect(26,680,368,27),characterSelectionError ??
-                    (characterHasSave?"Seu progresso será mantido.":"Uma nova jornada começa no refúgio."),
+                    (inGameCharacterMenu?"Troque sem reiniciar sua jornada.":
+                        characterHasSave?"Seu progresso será mantido.":
+                        "Uma nova jornada começa no refúgio."),
                     wardrobeNoteStyle);
             }
             finally { GUI.matrix=previousMatrix; GUI.color=previousColor; }

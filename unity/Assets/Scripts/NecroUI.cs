@@ -29,6 +29,12 @@ namespace Necromancer
                 wordWrap=true
             };
         }
+        // Below top HUD, travel controls and notices: reachable at all times
+        // without overlapping the servant roster, attack or portal.
+        Rect CharacterMenuRect(float scale)
+        {
+            return new Rect(12f,244f,108f,38f);
+        }
         Vector2 joystickAnchor;
         Texture2D attackDisc,bindDisc,pearl;
 
@@ -40,6 +46,7 @@ namespace Necromancer
             if(!inSanctuary && TacticModeButtonRect(scale).Contains(gui))return false;
             if(NearbySanctuaryStation()!=null &&
                SanctuaryInteractionButtonRect(scale).Contains(gui))return false;
+            if(CharacterMenuRect(scale).Contains(gui))return false;
             if(FindNearbyDowned().Valid &&
                 (DownedHarvestRect(scale).Contains(gui) ||
                  DownedCaptureRect(scale).Contains(gui)))return false;
@@ -209,6 +216,11 @@ namespace Necromancer
             }
             DrawProgressOverlay(Screen.width/scale,Screen.height/scale);
             DrawRegionNavigation(scale);
+            if(GUI.Button(CharacterMenuRect(scale),"PERSONAGEM",buttonStyle))
+            {
+                OpenInGameCharacterMenu();
+                return;
+            }
             if(pearl==null)pearl=Resources.Load<Texture2D>("HUD/pearl");
             Rect button=AttackRect(scale);
             if(!inSanctuary)

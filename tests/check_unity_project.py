@@ -35,6 +35,8 @@ required = [
     "Assets/Editor/NecroEncounterEditorCheck.cs",
     "Assets/Editor/NecroRegionEditorCheck.cs",
     "Assets/Editor/NecroDownedEditorCheck.cs",
+    "Assets/Editor/NecroSombriaTextureImport.cs",
+    "Assets/Editor/NecroCharacterSwitchEditorCheck.cs",
     "Assets/Scripts/NecroCombatFx.cs",
     "Assets/Scripts/NecroScenery.cs",
     "Assets/Editor/NecroVisualEditorCheck.cs",
@@ -242,7 +244,7 @@ assert "UpdateResourceExploration();" in loop, "Explore visuals must update afte
 assert "!current.claimed" not in respawn and "current.respawnTimer=RespawnIntervalForStage();" in respawn
 assert 'Resources.Load<Texture2D>("Sprites/"+kind)' in scripts["NecroArt.cs"]
 assert "RitualCircle()" in scripts["NecroArt.cs"]
-assert "PlayerSettings.bundleVersion = \"0.9.21\"" in builder
+assert "PlayerSettings.bundleVersion = \"0.9.22\"" in builder
 assert "com.takeo.necromancer.unity.preview080" in builder
 assert "NecroFrameEditorCheck.Verify();" in builder
 assert "Assets/Resources/AnimationSheets/necromante_source.png" in required
@@ -411,7 +413,7 @@ assert "DrawSanctuaryInteractionUi(scale);" in ui
 assert "SanctuaryInteractionButtonRect(scale).Contains(gui)" in ui
 assert "FountainSpeedMultiplier*dt" in core
 assert "FountainDamageMultiplier" in gameplay
-assert "PlayerSettings.Android.bundleVersionCode = 29;" in builder
+assert "PlayerSettings.Android.bundleVersionCode = 30;" in builder
 
 
 # Direct APK download + stable signing: regression checks for future sessions.
@@ -549,8 +551,8 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreMeditationAllocations(save);" in crypt
 assert "public int vitalityPoints,powerPoints,agilityPoints;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 
 
@@ -638,8 +640,8 @@ assert "new Vector3(4.0f,4.0f,1f)" in fx_source
 assert "SpriteRenderer" in fx_source and "NecroArt.RitualCircle()" in fx_source
 assert "mana<cost" in raise_body and "mana-=cost;" in raise_body
 assert "mana" not in cast_body  # Basic attack stays free.
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -680,8 +682,8 @@ assert "new Vector3(1.75f,1.75f,1f)" in fx_source
 assert "new Color(.33f,.95f,.76f,.74f)" in fx_source
 assert 282-78 > 195 and 195-78 > 108, "Spell touch controls overlap"
 assert '"com.takeo.necromancer.unity.preview080"' in builder
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -716,8 +718,8 @@ assert "ToggleServantTactics);" in hud
 assert "huntOrder=saved.huntOrder;" in crypt
 assert "huntOrder=save.huntOrder;" in crypt
 assert "spellUnlocked=spellUnlocked,huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 
@@ -762,8 +764,8 @@ assert "else if(friendly)FollowNecromancer(self,dt);" in gameplay
 assert "FindServantTarget(self)" in gameplay
 assert "FindServantTarget(boar)" in boar_source
 assert "NecroSaveStore" in crypt and "huntOrder=huntOrder" in crypt
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -801,8 +803,8 @@ assert "type==5 || type==6 ? .82f" in fx_polish
 assert "type==5 || type==6 ? 10" in fx_polish
 assert "victim.ally);" in gameplay
 assert "const int Capacity=30;" in fx_polish
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 assert (root/"docs/POLIMENTO_COMBATE_0_9_7.md").is_file()
@@ -868,8 +870,8 @@ assert "type==7 ? new Vector2(0f,.65f)" in fx_source
 assert "type==0 || type==7 || type==8 || type==10?" in fx_source
 assert "const int Capacity=30;" in fx_source
 assert "NecroCombatFx.Emit(victim.body.position,current.root.transform,7," in gameplay
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
 assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
@@ -968,8 +970,8 @@ assert "CreateRestoredActor(record.kind," in crypt_audit
 assert "CreateRestoredActor(item.kind," in crypt_audit
 assert crypt_audit.count("CreateRestoredActor(record.kind,")>=2
 assert "if(!inSanctuary)SaveCompanions();" in crypt_audit
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -1018,8 +1020,8 @@ for token in ("if(!gameOver || player==null", "Mathf.Min(2,Mathf.Max(0,shards))"
               "SaveCompanions();", "SaveProgress()"):
     assert token in death_recovery, "Safe death recovery missing: "+token
 assert "LoadStage(" not in death_recovery, "Death must return to the refuge"
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "  push:" not in android_preview.split("jobs:",1)[0]
@@ -1077,7 +1079,7 @@ assert "current.respawnIndex++;" in respawn
 assert "current.enemies.Add(spawned);" in respawn
 assert "return stage==0 ? .82f" in balance_source, "First stage must be most accessible"
 assert "return stage==0 ? 19f" in balance_source, "First stage needs more room"
-assert "0.9.21" in builder and "0.9.21" in win_builder
+assert "0.9.22" in builder and "0.9.22" in win_builder
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
@@ -1115,9 +1117,9 @@ for token in ("MantleReduction(0)", "MantleReduction(3)",
               "FountainHealing(100f,100f)", "FountainHealing(60f,100f)",
               "FountainHealing(95f,100f)", "FountainHealing(20f,40f)"):
     assert token in editor_check, "Missing Unity C# check: "+token
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
-assert 'PlayerSettings.Android.bundleVersionCode = 29;' in builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
+assert 'PlayerSettings.Android.bundleVersionCode = 30;' in builder
 assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
@@ -1162,9 +1164,9 @@ assert "Time.time<heroHitFeedbackUntil" in polished
 assert "Mathf.CeilToInt(heroLastGuarded)" in polished
 assert "NecroTargetEditorCheck.Verify();" in builder
 assert "NecroTargetEditorCheck.Verify();" in win_builder
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
-assert 'PlayerSettings.Android.bundleVersionCode = 29;' in builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
+assert 'PlayerSettings.Android.bundleVersionCode = 30;' in builder
 assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
@@ -1211,9 +1213,9 @@ assert "resourcesInitialized=true" in save_editor
 assert "Legacy resource migration marker regression." in save_editor
 assert r'\"visited\"' in save_editor, "Legacy C# JSON string must escape quotes once"
 assert r'\\"visited\\"' not in save_editor, "Double-escaped JSON literal breaks Unity compilation"
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
-assert 'PlayerSettings.Android.bundleVersionCode = 29;' in builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
+assert 'PlayerSettings.Android.bundleVersionCode = 30;' in builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert "  push:" not in android_preview.split("jobs:",1)[0]
@@ -1259,9 +1261,9 @@ assert "resourceHint,wardrobeNoteStyle" in progress_source
 assert "if(!inSanctuary && Time.time<resourceToastUntil)" in progress_source
 assert "NecroExplorationEditorCheck.Verify();" in builder
 assert "NecroExplorationEditorCheck.Verify();" in win_builder
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
-assert 'PlayerSettings.Android.bundleVersionCode = 29;' in builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
+assert 'PlayerSettings.Android.bundleVersionCode = 30;' in builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert "  push:" not in android_preview.split("jobs:",1)[0]
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
@@ -1302,9 +1304,9 @@ assert "if(nearPickup)continue;" in respawn
 assert "int nearbyHostiles=0;" in exploration_source
 assert "if(nearbyHostiles>0)" in exploration_source
 assert '"ALERTA: INIMIGO PROXIMO"' in exploration_source
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
-assert 'PlayerSettings.Android.bundleVersionCode = 29;' in builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
+assert 'PlayerSettings.Android.bundleVersionCode = 30;' in builder
 assert "NecroEncounterEditorCheck.Verify();" in builder
 assert "NecroEncounterEditorCheck.Verify();" in win_builder
 assert '"com.takeo.necromancer.unity.preview080"' in builder
@@ -1314,7 +1316,7 @@ assert "  push:" not in windows_preview.split("jobs:",1)[0]
 assert (root/"docs/ENCONTROS_E_EXPLORACAO_0_9_17.md").is_file()
 
 
-# 0.9.21: access the actual four regions through the active cave GUI.
+# 0.9.22: access the actual four regions through the active cave GUI.
 region=(unity/"Assets/Scripts/NecroRegionTravel.cs").read_text()
 region_editor=(unity/"Assets/Editor/NecroRegionEditorCheck.cs").read_text()
 for token in ("class NecroRegionRules", "bool CanClaim(", "bool NeedsGuardian(",
@@ -1345,15 +1347,15 @@ assert "RegionTravelAvailable() && RegionTravelRect(scale).Contains(gui)" in ui
 assert "DrawRegionNavigation(scale);" in ui
 assert "NecroRegionEditorCheck.Verify();" in builder
 assert "NecroRegionEditorCheck.Verify();" in win_builder
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
-assert 'PlayerSettings.Android.bundleVersionCode = 29;' in builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
+assert 'PlayerSettings.Android.bundleVersionCode = 30;' in builder
 assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
 assert (root/"docs/ACESSO_REGIOES_0_9_18.md").is_file()
 
 
-# 0.9.21: remove UI skills, prayer/wardrobe interactions, keep saves safe.
+# 0.9.22: remove UI skills, prayer/wardrobe interactions, keep saves safe.
 scope=(unity/"Assets/Scripts/NecroInterfaceScope.cs").read_text()
 assert "public const bool SanctuaryProgressionEnabled=false;" in scope
 assert len(station_json["stations"])==1
@@ -1387,13 +1389,13 @@ assert "RestoreMeditationAllocations(saved);" in crypt
 assert "RestoreSkillTree(saved);" in crypt
 assert "public const int Version=1;" in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert '"com.takeo.necromancer.unity.preview080"' in builder
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
-assert 'PlayerSettings.Android.bundleVersionCode = 29;' in builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
+assert 'PlayerSettings.Android.bundleVersionCode = 30;' in builder
 assert (root/"docs/INTERFACE_SIMPLIFICADA_0_9_19.md").is_file()
 
 
-# 0.9.21: extract or capture from one downed creature.
+# 0.9.22: extract or capture from one downed creature.
 downed=(unity/"Assets/Scripts/NecroDownedChoices.cs").read_text()
 downed_editor=(unity/"Assets/Editor/NecroDownedEditorCheck.cs").read_text()
 for token in ("class NecroDownedRules", "OrdinaryReach=1.30f",
@@ -1432,11 +1434,54 @@ assert "DownedCaptureRect(scale).Contains(gui)" in ui
 assert "BindRect(scale).Contains(gui)" not in ui
 assert "NecroDownedEditorCheck.Verify();" in builder
 assert "NecroDownedEditorCheck.Verify();" in win_builder
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
-assert 'PlayerSettings.Android.bundleVersionCode = 29;' in builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
+assert 'PlayerSettings.Android.bundleVersionCode = 30;' in builder
 assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
 assert (root/"docs/ESCOLHAS_CRIATURA_CAIDA_0_9_20.md").is_file()
+
+
+# 0.9.22: in-game avatar selection, correct portrait crop and NPOT importer.
+switch_import=(unity/"Assets/Editor/NecroSombriaTextureImport.cs").read_text()
+switch_check=(unity/"Assets/Editor/NecroCharacterSwitchEditorCheck.cs").read_text()
+for token in ("assetPath.StartsWith(",
+              '"Assets/Resources/Characters/NecromanteSombria/"',
+              "importer.npotScale=TextureImporterNPOTScale.None",
+              "importer.maxTextureSize=2048;",
+              "importer.mipmapEnabled=false;",
+              "importer.textureCompression=TextureImporterCompression.Uncompressed;"):
+    assert token in switch_import, "Sombria import regression: "+token
+for token in ("NecroCharacterCatalog.Load()", "roster.Length==4",
+              "entry.id==\"necromante_sombria\"",
+              "atlas.width%6==0 && atlas.height%8==0",
+              "atlas.width*4==atlas.height*3"):
+    assert token in switch_check, "Missing native Unity character check: "+token
+for token in ("bool inGameCharacterMenu;", "int activeCharacterIndex;",
+              "void OpenInGameCharacterMenu()", "void CancelInGameCharacterMenu()",
+              "if(inGameCharacterMenu && Input.GetKeyDown(KeyCode.Escape))",
+              "if(inGameCharacterMenu)", "ResetTravelCombat();",
+              "ResetHeroAnimationForCharacterSwap();",
+              "InitializeHeroAnimation();",
+              "SetSanctuaryHeroAppearance(inSanctuary);",
+              "SaveProgress()", '"USAR PERSONAGEM"', '"CANCELAR"',
+              '"EM USO"', "new Rect(.15f,.35f,.70f,.54f)"):
+    assert token in selection, "Runtime character switch missing: "+token
+assert "BeginSelectedCharacterWorld();" in selection
+assert "if(selectedCharacterIndex!=activeCharacterIndex)" in selection
+assert "selectedCharacterIndex=activeCharacterIndex;" in selection
+assert "oldAvatar.SetActive(false);" in hero_anim
+assert "System.Array.Clear(heroSprites,0,heroSprites.Length);" in hero_anim
+assert "sixFrameWalkSprites=null;" in hero_anim
+assert 'GUI.Button(CharacterMenuRect(scale),"PERSONAGEM",buttonStyle)' in ui
+assert "CharacterMenuRect(scale).Contains(gui)" in ui
+assert "OpenInGameCharacterMenu();" in ui
+assert "NecroCharacterSwitchEditorCheck.Verify();" in builder
+assert "NecroCharacterSwitchEditorCheck.Verify();" in win_builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
+assert 'PlayerSettings.Android.bundleVersionCode = 30;' in builder
+assert 'public const int Version=1;' in (unity/"Assets/Scripts/NecroSaveData.cs").read_text()
+assert (root/"docs/MENU_PERSONAGENS_0_9_22.md").is_file()
 
 print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle/walk heroine, eight-direction animation, manual attacks, respawn, army, portrait PNG "
       f"({width}x{height}), HUD, animator, save and ARM64. "
@@ -1470,26 +1515,33 @@ assert core.index("if(characterSelectionOpen)") < core.index("ReadMovement(hudSc
 assert ui.index("if(characterSelectionOpen)") < ui.index("if(player==null || current==null)return;")
 assert "if(entry.available && GUI.Button" in selection
 assert selection.index("BeginSelectedCharacterWorld();") < selection.index("characterSelectionOpen=false;")
+assert "void OpenInGameCharacterMenu()" in selection
+assert "void CancelInGameCharacterMenu()" in selection
+assert "void ResetHeroAnimationForCharacterSwap()" in hero_anim
 assert "Screen.safeArea" in selection and "Time.unscaledTime" in selection
-# 0.9.21: fourth character has its own atlas without modifying original art.
+# 0.9.22: fourth character has its own atlas without modifying original art.
 assert [c["id"] for c in characters[:3]]==[
     "necromante","arlequina","necromante_fisica"]
 catalog_source=(unity/"Assets/Scripts/NecroCharacterCatalog.cs").read_text()
 assert "walkSixResource, portraitResource;" in catalog_source
 assert "characterPortrait=string.IsNullOrEmpty(SelectedCharacter.portraitResource)" in selection
-assert "characterPreview.width!=768" in selection
-assert "characterPreview.height!=1024" in selection
-assert "characterPortrait==null" in selection
-assert "GUI.DrawTexture(new Rect(97,152,226,236)," in selection
+assert "characterPreview.width<384" in selection
+assert "characterPreview.height<512" in selection
+assert "characterPortrait==null" not in selection.split(
+    "if(!string.IsNullOrEmpty(selected.walkSixResource))",1)[1].split(
+    "else",1)[0]
+assert "GUI.DrawTextureWithTexCoords(new Rect(94,152,232,236)," in selection
 assert "Sprite[] sixFrameWalkSprites;" in hero_anim
 assert "sixFrameWalkSprites=new Sprite[48];" in hero_anim
 assert "for(int direction=0;direction<8;direction++)" in hero_anim
 assert "for(int step=0;step<6;step++)" in hero_anim
-assert "walk.height-(direction+1)*128f" in hero_anim
+assert "walk.height-(direction+1)*cellHeight" in hero_anim
+assert "int cellWidth=walk.width/6;" in hero_anim
+assert "int cellHeight=walk.height/8;" in hero_anim
 assert "walkDirection*6+Mathf.Clamp(walkPose,0,5)" in hero_anim
-assert 'PlayerSettings.bundleVersion = "0.9.21";' in builder
-assert 'PlayerSettings.bundleVersion="0.9.21";' in win_builder
-assert 'PlayerSettings.Android.bundleVersionCode = 29;' in builder
+assert 'PlayerSettings.bundleVersion = "0.9.22";' in builder
+assert 'PlayerSettings.bundleVersion="0.9.22";' in win_builder
+assert 'PlayerSettings.Android.bundleVersionCode = 30;' in builder
 assert (root/"docs/NECROMANTE_SOMBRIA_0_9_21.md").is_file()
 print("Character selection: 4 selectable characters, 48 new walk frames, existing art unchanged.")
 
