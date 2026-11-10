@@ -4,7 +4,7 @@ O backup exato dos sprites e scripts antigos já existe em `archive/rotboar/pre_
 
 O jogo agora aceita até oito novas folhas de sprites, cada uma com **4 colunas × 8 linhas de 192 × 192**, em RGBA PNG (dimensões: **768 × 1536**), na pasta:
 
-`unity/Assets/Resources/Creatures/Rotboar/`
+`unity/Assets/Resources/Creatures/`
 
 Arquivos (nomes exatos):
 

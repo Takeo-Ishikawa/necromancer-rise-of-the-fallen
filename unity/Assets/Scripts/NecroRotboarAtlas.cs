@@ -21,10 +21,10 @@ namespace Necromancer
             string name=ally?"rotboar_ally":"rotboar";
             switch(action)
             {
-                case BoarWalk:return "Creatures/Rotboar/"+name+"_move";
-                case BoarAttack:return "Creatures/Rotboar/"+name+"_attack";
-                case BoarDeath:return "Creatures/Rotboar/"+name+"_death";
-                default:return "Creatures/Rotboar/"+name+"_reanimate";
+                case BoarWalk:return "Creatures/"+name+"_move";
+                case BoarAttack:return "Creatures/"+name+"_attack";
+                case BoarDeath:return "Creatures/"+name+"_death";
+                default:return "Creatures/"+name+"_reanimate";
             }
         }
 
