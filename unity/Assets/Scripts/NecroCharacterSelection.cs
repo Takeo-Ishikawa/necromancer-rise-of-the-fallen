@@ -48,7 +48,8 @@ namespace Necromancer
             characterStartRequested=false;
             var selected=SelectedCharacter;
             if(!selected.available)return;
-            var spectral=Resources.Load<Texture2D>(selected.spectralResource);
+            bool physicalAtlas=!string.IsNullOrEmpty(selected.combatResource);
+            var spectral=Resources.Load<Texture2D>(physicalAtlas?selected.combatResource:selected.spectralResource);
             // The animation contract is eight 256px idle poses and the existing
             // 4-column spectral sheet. Reject incomplete additions before spawning.
             if(characterPreview==null || characterPreview.width!=1024 || characterPreview.height!=512 ||

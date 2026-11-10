@@ -21,9 +21,14 @@
       "walkResource": "Characters/Arlequina/walk"
     },
     {
-      "id": "future_2",
-      "name": "Em breve",
-      "available": false
+      "id": "necromante_fisica",
+      "name": "Necromante Física",
+      "subtitle": "A força antes da magia",
+      "description": "Lute com os próprios punhos. Sem projéteis, rituais de combate ou reanimação.",
+      "idleResource": "Characters/Unarmed/idle",
+      "combatResource": "Characters/Unarmed/combat",
+      "meleeOnly": true,
+      "available": true
     }
   ]
 }

@@ -1365,10 +1365,10 @@ print(f"Unity source verified: {len(levels)} regions, 0.7.5 high resolution idle
 selection=(unity/"Assets/Scripts/NecroCharacterSelection.cs").read_text()
 characters=json.loads((unity/"Assets/Resources/Data/characters.json").read_text())["characters"]
 assert len({c["id"] for c in characters})==len(characters)
-assert [c["id"] for c in characters if c["available"]]==["necromante","arlequina"]
+assert [c["id"] for c in characters if c["available"]]==["necromante","arlequina","necromante_fisica"]
 for c in characters:
     if not c["available"]: continue
-    for field, size in (("idleResource", (1024,512)), ("spectralResource", (1024,2048))):
+    for field, size in (("idleResource", (1024,512)), ("combatResource" if c.get("combatResource") else "spectralResource", (1024,2048))):
         data=(unity/"Assets/Resources"/(c[field]+".png")).read_bytes()
         assert struct.unpack(">II",data[16:24])==size
 startup=core.split("void Start()",1)[1].split("void BeginSelectedCharacterWorld()",1)[0]
@@ -1379,3 +1379,18 @@ assert "if(entry.available && GUI.Button" in selection
 assert selection.index("BeginSelectedCharacterWorld();") < selection.index("characterSelectionOpen=false;")
 assert "Screen.safeArea" in selection and "Time.unscaledTime" in selection
 print("Character selection: catalog, sprite contract, startup/input gates and safe-area layout verified.")
+
+# A shared save with unlocked magic must not bypass the physical character.
+physical = next(c for c in json.loads((unity/'Assets/Resources/Data/characters.json').read_text())['characters'] if c['id'] == 'necromante_fisica')
+assert physical['meleeOnly'] and physical['available']
+assert 'if(!HeroCanUseMagic || !spellUnlocked)' in gameplay
+assert 'range=Mathf.Min(range,EffectiveManualRange)' in gameplay
+for filename, signatures in {
+    'NecroGameplay.cs': ['bool CanBindNearby()', 'void BindNearbyCreature()', 'void BindNearbyPup()', 'void Raise()', 'void ReleaseSkull()'],
+    'NecroSkillTree.cs': ['void UnlockSkillTreeNode(int index)'],
+}.items():
+    source = (root/'unity/Assets/Scripts'/filename).read_text()
+    for signature in signatures:
+        body = source.split(signature, 1)[1].split('{', 1)[1].lstrip()
+        assert body.startswith('if(!HeroCanUseMagic)return'), signature
+print('Physical character: selection, melee override and magic capability gates verified.')

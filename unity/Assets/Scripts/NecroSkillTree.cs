@@ -100,6 +100,7 @@ namespace Necromancer
 
         void ResetLearnedSkills()
         {
+            if(!HeroCanUseMagic)return;
             if(!inSanctuary || !meditationOpen || !meditationSkillsTab ||
                 !skillRespecConfirm || gameOver || LearnedSkillCount()==0)return;
             int price=SkillRespecCost();
@@ -128,6 +129,7 @@ namespace Necromancer
 
         void UnlockSkillTreeNode(int index)
         {
+            if(!HeroCanUseMagic)return;
             if(!inSanctuary || !meditationOpen || !meditationSkillsTab ||
                 gameOver || player==null || index<0 || index>=SkillTreeNodeCount ||
                 AvailableSkillPoints()<=0 || SkillUnlocked(index))return;
@@ -166,6 +168,11 @@ namespace Necromancer
 
         void DrawSkillTreeContent(Rect view)
         {
+            if(!HeroCanUseMagic)
+            {
+                GUI.Label(view,"Esta personagem não utiliza magia. Os atributos continuam disponíveis na outra aba.",wardrobeNoteStyle);
+                return;
+            }
             const float rowHeight=151f;
             const float totalHeight=560f;
             float innerWidth=Mathf.Max(220f,view.width-20f);

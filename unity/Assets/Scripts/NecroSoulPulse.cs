@@ -35,6 +35,7 @@ namespace Necromancer
 
         bool CanCastSoulPulse()
         {
+            if(!HeroCanUseMagic)return false;
             return !inSanctuary && player!=null && player.hp>0f &&
                 !gameOver && !inventoryOpen && !wardrobeOpen &&
                 !meditationOpen && !cryptOpen && !upgradeOpen &&
@@ -45,6 +46,7 @@ namespace Necromancer
 
         bool TryCastSoulPulse()
         {
+            if(!HeroCanUseMagic)return false;
             if(inSanctuary || player==null || gameOver || player.hp<=0f ||
                 inventoryOpen || wardrobeOpen || meditationOpen ||
                 cryptOpen || upgradeOpen || armyInspect || gearInspect)return false;
@@ -123,6 +125,11 @@ namespace Necromancer
 
         void ReadActiveSkillInput(float scale)
         {
+            if(!HeroCanUseMagic)
+            {
+                if(!inSanctuary && !gameOver && player!=null)ReadServantTacticsInput(scale);
+                return;
+            }
             if(inSanctuary || gameOver || player==null)return;
             bool pressed=Input.GetKeyDown(KeyCode.Q);
             Rect rect=SoulPulseButtonRect(scale);
@@ -147,6 +154,7 @@ namespace Necromancer
 
         void DrawSoulPulseButton(float scale)
         {
+            if(!HeroCanUseMagic)return;
             EnsureHudArt();
             float remaining=Mathf.Max(0f,soulPulseCooldownUntil-Time.time);
             Rect button=SoulPulseButtonRect(scale);

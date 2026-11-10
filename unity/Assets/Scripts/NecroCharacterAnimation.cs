@@ -11,6 +11,7 @@ namespace Necromancer
         readonly Sprite[] heroSprites=new Sprite[32];
         SpriteRenderer witchArtRenderer;
         Sprite[] dedicatedWalkSprites;
+        Sprite[] physicalCombatSprites;
         Vector2 lastAnimatedHeroPosition;
         float walkCycle;
         const float WalkStrideDistance=1.6f;
@@ -26,36 +27,58 @@ namespace Necromancer
 
         void InitializeHeroAnimation()
         {
-            var texture=Resources.Load<Texture2D>(SelectedCharacter.spectralResource);
-            texture.filterMode=FilterMode.Bilinear;
-            for(int i=0;i<24;i++)
+            if(!string.IsNullOrEmpty(SelectedCharacter.combatResource))
             {
-                if(i>=12 && i<16 && !(i==13 && SelectedCharacter.previewMotion))continue;
-                Rect region=new Rect(i%4*256,texture.height-(1+i/4)*256,256,256);
-                heroSprites[i]=Sprite.Create(texture,region,new Vector2(.5f,14f/256f),
-                    138f,0,SpriteMeshType.FullRect);
-            }
-            var idle=Resources.Load<Texture2D>(SelectedCharacter.idleResource);
-            for(int i=0;i<8;i++)
-            {
-                Rect rect=new Rect(i%4*256,idle.height-(1+i/4)*256,256,256);
-                heroSprites[24+i]=Sprite.Create(idle,rect,new Vector2(.5f,14f/256f),
-                    138f,0,SpriteMeshType.FullRect);
-            }
-            if(!string.IsNullOrEmpty(SelectedCharacter.walkResource))
-            {
-                var walking=Resources.Load<Texture2D>(SelectedCharacter.walkResource);
-                dedicatedWalkSprites=new Sprite[32];
+                var combat=Resources.Load<Texture2D>(SelectedCharacter.combatResource);
+                physicalCombatSprites=new Sprite[32];
                 for(int i=0;i<32;i++)
                 {
-                    Rect region=new Rect(i%4*256,walking.height-(1+i/4)*256,256,256);
-                    dedicatedWalkSprites[i]=Sprite.Create(walking,region,
+                    Rect region=new Rect(i%4*256,combat.height-(1+i/4)*256,256,256);
+                    physicalCombatSprites[i]=Sprite.Create(combat,region,
                         new Vector2(.5f,14f/256f),138f,0,SpriteMeshType.FullRect);
                 }
+                for(int d=0;d<8;d++)
+                {
+                    heroSprites[24+d]=physicalCombatSprites[d*4];
+                    heroSprites[d]=physicalCombatSprites[d*4+1];
+                    heroSprites[16+d]=physicalCombatSprites[d*4+2];
+                }
+                lastAnimatedHeroPosition=player.body.position;
             }
-            lastAnimatedHeroPosition=player.body.position;
-            var skullRegion=new Rect(0,texture.height-1024+14,256,72);
-            skullSprite=Sprite.Create(texture,skullRegion,new Vector2(.5f,.5f),270f,0,SpriteMeshType.FullRect);
+            else
+            {
+                var texture=Resources.Load<Texture2D>(SelectedCharacter.spectralResource);
+                texture.filterMode=FilterMode.Bilinear;
+                for(int i=0;i<24;i++)
+                {
+                    if(i>=12 && i<16 && !(i==13 && SelectedCharacter.previewMotion))continue;
+                    Rect region=new Rect(i%4*256,texture.height-(1+i/4)*256,256,256);
+                    heroSprites[i]=Sprite.Create(texture,region,new Vector2(.5f,14f/256f),
+                        138f,0,SpriteMeshType.FullRect);
+                }
+                var idle=Resources.Load<Texture2D>(SelectedCharacter.idleResource);
+                for(int i=0;i<8;i++)
+                {
+                    Rect rect=new Rect(i%4*256,idle.height-(1+i/4)*256,256,256);
+                    heroSprites[24+i]=Sprite.Create(idle,rect,new Vector2(.5f,14f/256f),
+                        138f,0,SpriteMeshType.FullRect);
+                }
+                if(!string.IsNullOrEmpty(SelectedCharacter.walkResource))
+                {
+                    var walking=Resources.Load<Texture2D>(SelectedCharacter.walkResource);
+                    dedicatedWalkSprites=new Sprite[32];
+                    for(int i=0;i<32;i++)
+                    {
+                        Rect region=new Rect(i%4*256,walking.height-(1+i/4)*256,256,256);
+                        dedicatedWalkSprites[i]=Sprite.Create(walking,region,
+                            new Vector2(.5f,14f/256f),138f,0,SpriteMeshType.FullRect);
+                    }
+                }
+                lastAnimatedHeroPosition=player.body.position;
+                var skullRegion=new Rect(0,texture.height-1024+14,256,72);
+                skullSprite=Sprite.Create(texture,skullRegion,new Vector2(.5f,.5f),270f,0,SpriteMeshType.FullRect);
+
+            }
 
             var root=player.body.GetComponent<SpriteRenderer>();
             root.enabled=false;
@@ -99,7 +122,7 @@ namespace Necromancer
             heroineRaisePulse=Mathf.Max(0f,heroineRaisePulse-dt);
             float traveled=Vector2.Distance(lastAnimatedHeroPosition,player.body.position);
             lastAnimatedHeroPosition=player.body.position;
-            if(dedicatedWalkSprites!=null)
+            if(dedicatedWalkSprites!=null || physicalCombatSprites!=null)
             {
                 // Advance by real displacement: slow joystick movement slows the
                 // steps; pushing against a wall does not run the animation in place.
@@ -182,6 +205,22 @@ namespace Necromancer
                 ? dedicatedWalkSprites[walkDirection*4+Mathf.FloorToInt(walkCycle*4f)]
                 : heroSprites[frame];
             if(useWalk)flip=false;
+            if(physicalCombatSprites!=null)
+            {
+                int pose=0;
+                if(heroineStrikePulse>0f)
+                {
+                    float strikePhase=Mathf.Clamp01(strikeElapsed/StrikeVisualDuration);
+                    pose=strikePhase>=.20f && strikePhase<.78f?3:0;
+                }
+                else if(heroineWalking)
+                {
+                    int phase=Mathf.FloorToInt(walkCycle*4f);
+                    pose=phase==0?1:phase==2?2:0;
+                }
+                witchArtRenderer.sprite=physicalCombatSprites[walkDirection*4+pose];
+                flip=false;
+            }
             witchArtRenderer.flipX=flip;
             bool invulnerable=!inSanctuary &&
                 Time.time<heroDamageImmuneUntil;

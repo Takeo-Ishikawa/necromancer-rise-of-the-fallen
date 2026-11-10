@@ -51,6 +51,7 @@ namespace Necromancer
 
         bool CanCastGraveCommand()
         {
+            if(!HeroCanUseMagic)return false;
             return !inSanctuary && current!=null &&
                 player!=null && player.hp>0f && !gameOver &&
                 !inventoryOpen && !wardrobeOpen && !meditationOpen &&
@@ -61,6 +62,7 @@ namespace Necromancer
 
         bool TryCastGraveCommand()
         {
+            if(!HeroCanUseMagic)return false;
             if(inSanctuary || current==null || player==null ||
                 player.hp<=0f || gameOver || inventoryOpen || wardrobeOpen ||
                 meditationOpen || cryptOpen || upgradeOpen ||
@@ -115,6 +117,7 @@ namespace Necromancer
 
         void ReadGraveCommandInput(float scale)
         {
+            if(!HeroCanUseMagic)return;
             bool pressed=Input.GetKeyDown(KeyCode.R);
             Rect button=GraveCommandButtonRect(scale);
             for(int i=0;i<Input.touchCount;i++)
@@ -136,6 +139,7 @@ namespace Necromancer
 
         void DrawGraveCommandButton(float scale)
         {
+            if(!HeroCanUseMagic)return;
             EnsureHudArt();
             Rect button=GraveCommandButtonRect(scale);
             float active=Mathf.Max(0f,graveCommandUntil-Time.time);

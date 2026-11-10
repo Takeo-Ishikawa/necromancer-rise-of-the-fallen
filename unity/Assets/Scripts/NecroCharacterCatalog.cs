@@ -6,8 +6,9 @@ namespace Necromancer
     [Serializable]
     public class NecroCharacterDefinition
     {
-        public string id, name, subtitle, description, idleResource, spectralResource, walkResource;
+        public string id, name, subtitle, description, idleResource, spectralResource, walkResource, combatResource;
         public bool available;
+        public bool meleeOnly;
         // Enables the character-specific strike in spectral cell 13.
         public bool previewMotion;
     }

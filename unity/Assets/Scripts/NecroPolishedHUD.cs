@@ -187,8 +187,10 @@ namespace Necromancer
             DrawMeterUi(new Rect(meterX,8,meterWidth,17),
                 player.hp/player.maxHp,
                 recentHit?new Color(.98f,.39f,.43f):UiPink,healthLabel);
-            DrawMeterUi(new Rect(meterX,29,meterWidth,16),
-                (float)mana/maxMana,UiMana,mana+"/"+maxMana);
+            if(HeroCanUseMagic)
+                DrawMeterUi(new Rect(meterX,29,meterWidth,16),
+                    (float)mana/maxMana,UiMana,mana+"/"+maxMana);
+            else GUI.Label(new Rect(meterX,29,meterWidth,16),"COMBATE FÍSICO",hudSmall);
             GUI.Label(new Rect(83,47,meterWidth+5,19),
                 "NÍVEL "+playerLevel+" · XP "+experience+
                 "/"+ExperienceThreshold(),hudValue);

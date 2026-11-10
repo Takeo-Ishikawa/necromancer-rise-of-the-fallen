@@ -470,12 +470,14 @@ namespace Necromancer
 
         bool CanBindNearby()
         {
+            if(!HeroCanUseMagic)return false;
             return NearbyCorpse()!=null || NearbyFallenPup()!=null ||
                 NearbyFallenBoar()!=null;
         }
 
         void BindNearbyCreature()
         {
+            if(!HeroCanUseMagic)return;
             var corpse=NearbyCorpse();
             var boar=NearbyFallenBoar();
             var pup=NearbyFallenPup();
@@ -515,6 +517,7 @@ namespace Necromancer
 
         void BindNearbyPup()
         {
+            if(!HeroCanUseMagic)return;
             var pup=NearbyFallenPup();
             if(pup==null)return;
             if(CommandUsed()+CommandCost("grave_pup")>CommandLimit)
@@ -550,11 +553,12 @@ namespace Necromancer
 
         void CastAtRange(float range)
         {
+            if(!HeroCanUseMagic)range=Mathf.Min(range,EffectiveManualRange);
             if(player.hp<=0 || upgradeOpen || castCooldown>Time.time)return;
             Actor target=Closest(range);
             if(target==null){Announce("Nenhum alvo ao alcance.");return;}
             if(servants.Count>0)servantOrder=target;
-            if(!spellUnlocked)
+            if(!HeroCanUseMagic || !spellUnlocked)
             {
                 heroineStrikePulse=.53f;
                 castCooldown=Time.time+.47f;
@@ -580,6 +584,7 @@ namespace Necromancer
 
         void ReleaseSkull()
         {
+            if(!HeroCanUseMagic)return;
             Vector2 center=player.body.position;
             Vector2 hands=center+new Vector2(castAim.x<0?-.43f:.43f,.19f);
             if(Blocked(hands,.05f) || !Visible(center,hands))hands=center;
@@ -668,6 +673,7 @@ namespace Necromancer
         }
         void Raise()
         {
+            if(!HeroCanUseMagic)return;
             if(player.hp<=0 || upgradeOpen)return;
             Corpse nearest=NearbyCorpse();
             if(nearest==null){Announce("Aproxime-se de um cadaver.");return;}

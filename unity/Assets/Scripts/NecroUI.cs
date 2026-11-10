@@ -37,8 +37,8 @@ namespace Necromancer
             Vector2 gui=new Vector2(point.x,Screen.height-point.y)/scale;
             if(SanctuaryTravelAvailable() && SanctuaryTravelRect(scale).Contains(gui))return false;
             if(RegionTravelAvailable() && RegionTravelRect(scale).Contains(gui))return false;
-            if(!inSanctuary && SoulPulseButtonRect(scale).Contains(gui))return false;
-            if(!inSanctuary && GraveCommandButtonRect(scale).Contains(gui))return false;
+            if(HeroCanUseMagic && !inSanctuary && SoulPulseButtonRect(scale).Contains(gui))return false;
+            if(HeroCanUseMagic && !inSanctuary && GraveCommandButtonRect(scale).Contains(gui))return false;
             if(!inSanctuary && TacticModeButtonRect(scale).Contains(gui))return false;
             if(NearbySanctuaryStation()!=null &&
                SanctuaryInteractionButtonRect(scale).Contains(gui))return false;
@@ -142,7 +142,7 @@ namespace Necromancer
                 BindNearbyCreature();
             if(pressed)manualQueued=true;
             if(!manualQueued)return;
-            if(Closest(ManualRange)==null)
+            if(Closest(EffectiveManualRange)==null)
             {
                 noTargetUntil=Time.time+.45f;
                 manualQueued=false;
