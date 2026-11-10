@@ -1515,7 +1515,10 @@ assert "InitializeCharacterSelection();" in startup and "Create(" not in startup
 assert core.index("if(characterSelectionOpen)") < core.index("ReadMovement(hudScale)")
 assert ui.index("if(characterSelectionOpen)") < ui.index("if(player==null || current==null)return;")
 assert "if(entry.available && GUI.Button" in selection
-assert selection.index("BeginSelectedCharacterWorld();") < selection.index("characterSelectionOpen=false;")
+selection_start=selection.split("void UpdateCharacterSelection()",1)[1].split(
+    "void CycleCharacter(",1)[0]
+assert selection_start.index("BeginSelectedCharacterWorld();") < (
+    selection_start.rindex("characterSelectionOpen=false;"))
 assert "void OpenInGameCharacterMenu()" in selection
 assert "void CancelInGameCharacterMenu()" in selection
 assert "void ResetHeroAnimationForCharacterSwap()" in hero_anim
