@@ -294,6 +294,9 @@ namespace Necromancer
             // All servants survive transitions with their HP and level intact.
             Vector2 start=NecroLevels.At(level,level.startX,level.startY);
             player.body.position=start;
+            miniMapExpanded=false;
+            EnsureMiniMapRegion();
+            RevealMiniMapAtPlayer();
             // A short arrival grace period prevents portal ambushes.
             heroDamageImmuneUntil=Time.time+HeroArrivalGraceSeconds;
             for(int i=0;i<servants.Count;i++) {
@@ -343,6 +346,14 @@ namespace Necromancer
                 if(Input.GetKeyDown(KeyCode.Escape))CloseSanctuaryMeditation();
                 return;
             }
+            if(Input.GetKeyDown(KeyCode.M))miniMapExpanded=!miniMapExpanded;
+            if(miniMapExpanded)
+            {
+                if(Input.GetKeyDown(KeyCode.Escape))miniMapExpanded=false;
+                touchMove=Vector2.zero;
+                joystickFingerId=-1;
+                return;
+            }
             float dt=Mathf.Min(.045f,Time.deltaTime);
             Vector2 keyboard=new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"));
             float hudScale=Mathf.Clamp(Screen.width/420f,.5f,2.5f);
@@ -355,6 +366,7 @@ namespace Necromancer
                 facing=control.normalized;
                 Move(player,control*player.speed*(1f+agilityPoints*.06f)*FountainSpeedMultiplier*dt);
             }
+            RevealMiniMapAtPlayer();
             if(inSanctuary)ReadSanctuaryInteractionKey();
             else
             {
