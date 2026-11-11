@@ -14,7 +14,8 @@ namespace Necromancer
         {
             if(!inSanctuary)
             {
-                float x=124f, w=Mathf.Max(120f,width-138f);
+                // Reserve the upper-right corner for the actual live minimap.
+                float x=124f, w=Mathf.Max(110f,width-235f);
                 Rect panel=new Rect(x,12f,w,77f);
                 DrawWardrobeSurface(panel,
                     new Color(.09f,.065f,.13f,.94f),WardrobeMutedEdge);
