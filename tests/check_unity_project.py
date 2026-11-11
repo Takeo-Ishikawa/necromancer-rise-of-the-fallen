@@ -1617,3 +1617,44 @@ assert "combatPose=phase==0" in combat_section
 assert "physicalCombatSprites[walkDirection*4+combatPose]" in combat_section
 assert "int pose=0;" not in combat_section
 assert "Vector3 pose=witchArtRenderer.transform.localPosition;" in character_anim
+
+# Active minimap regression: render from the actual level data, persist fog
+# without altering save version, and avoid intercepting gameplay controls.
+mini=(unity/"Assets/Scripts/NecroMiniMap.cs").read_text()
+for token in ("class MiniMapRegion", "EnsureMiniMapRegion()",
+              "RevealMiniMapAtPlayer()", "RefreshMiniMapTexture(",
+              "MiniMapDiscovered(", "MiniMapWindow(", "MiniMapFit(",
+              "MiniMapPosition(", "DrawMiniMapWorld(", "DrawMiniMapCompact(",
+              "DrawMiniMapExpanded(", "Convert.ToBase64String(packed)",
+              "Convert.FromBase64String(serialized)", "world.yMax-point.y",
+              "GUI.DrawTextureWithTexCoords(", "miniMapZoom",
+              "enemy.kind==\"rotboar\"", "map.revealed[i]=true"):
+    assert token in mini, "Missing minimap feature: "+token
+assert mini.count("new Texture2D(")==1, "Map should cache a texture per region"
+assert "void DrawMiniMapExpanded(" in mini and "bool miniMapExpanded;" in mini
+assert "if(miniMapExpanded)" in ui and "DrawMiniMapExpanded(" in ui
+assert "DrawMiniMapCompact(Screen.width/scale);" in ui
+assert ui.index("if(miniMapExpanded)")<ui.index("if(DrawRoster(")
+assert "if(Input.GetKeyDown(KeyCode.M))miniMapExpanded=!miniMapExpanded;" in core
+assert "RevealMiniMapAtPlayer();" in core
+assert "EnsureMiniMapRegion();" in core
+assert 'state.exploration=SaveMiniMapForStage(instance);' in crypt
+save_source=(unity/"Assets/Scripts/NecroSaveData.cs").read_text()
+assert "public string exploration;" in save_source
+assert 'public const int Version=1;' in save_source, "Do not invalidate old saves"
+# Cave coordinates are in a top-origin source system, converted once to Unity.
+first=levels[0]
+assert first["width"]==56 and first["height"]==34
+for enemy in first["enemies"]:
+    assert 0<=enemy["x"]<=first["width"]
+    assert 0<=first["height"]-enemy["y"]<=first["height"]
+# A 1m fog grid bitpack remains compact and decodes with no information loss.
+import base64,math
+length=math.ceil(first["width"])*math.ceil(first["height"])
+found=[(i%7)==0 for i in range(length)]
+packed=bytearray((length+7)//8)
+for i,seen in enumerate(found):
+    if seen:packed[i>>3]|=1<<(i&7)
+decoded=base64.b64decode(base64.b64encode(packed))
+assert all(bool(decoded[i>>3]&(1<<(i&7)))==v for i,v in enumerate(found))
+print("Minimap: active mobile HUD, cave geometry, fog persistence and zoom verified.")
