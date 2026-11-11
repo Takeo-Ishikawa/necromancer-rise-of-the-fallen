@@ -199,6 +199,11 @@ namespace Necromancer
                 DrawSanctuaryMeditationPanel(Screen.width/scale,Screen.height/scale);
                 return;
             }
+            if(miniMapExpanded)
+            {
+                DrawMiniMapExpanded(Screen.width/scale,Screen.height/scale);
+                return;
+            }
             if(DrawRoster(Screen.width/scale,Screen.height/scale))return;
             DrawSanctuaryNavigation(scale);
             DrawSanctuaryInteractionUi(scale);
@@ -216,6 +221,7 @@ namespace Necromancer
             }
             DrawProgressOverlay(Screen.width/scale,Screen.height/scale);
             DrawRegionNavigation(scale);
+            DrawMiniMapCompact(Screen.width/scale);
             if(GUI.Button(CharacterMenuRect(scale),"PERSONAGEM",buttonStyle))
             {
                 OpenInGameCharacterMenu();
