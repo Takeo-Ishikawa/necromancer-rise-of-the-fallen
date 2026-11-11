@@ -537,7 +537,13 @@ windows_preview=(root/".github/workflows/unity-windows.yml").read_text()
 legacy_android=(root/".github/workflows/android.yml").read_text()
 assert "workflow_dispatch:" in android_preview
 assert "workflow_dispatch:" in windows_preview
-assert "  push:" not in android_preview.split("jobs:",1)[0]
+# A workflow-file-only push may be used for an explicit build request.
+# It must never auto-compile on gameplay source edits.
+if "  push:" in android_preview.split("jobs:",1)[0]:
+    android_events=android_preview.split("jobs:",1)[0]
+    assert "      - '.github/workflows/unity-android.yml'" in android_events
+    assert "      - 'unity/**'" not in android_events
+    assert "      - 'app/**'" not in android_events
 assert "  push:" not in windows_preview.split("jobs:",1)[0]
 assert "targetPlatform: Android" in android_preview
 assert "targetPlatform: StandaloneWindows64" in windows_preview
