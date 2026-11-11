@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   # Explicit rat integration build request (2026-11-11); workflow-only push
   # without compiling on ordinary Unity source changes.
-  push:
+  'push':
     branches: [main]
     paths:
       - '.github/workflows/unity-android.yml'
