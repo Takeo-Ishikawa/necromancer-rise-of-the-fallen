@@ -225,12 +225,17 @@ namespace Necromancer
 
         void DrawMiniMapWorld(MiniMapRegion map,Rect canvas,bool expanded)
         {
+            float localWidth=Mathf.Min(level.width,17.5f);
+            float localHeight=Mathf.Min(level.height,17.5f);
+            Vector2 hero=player.body.position;
+            Rect local=new Rect(
+                Mathf.Clamp(hero.x-localWidth*.5f,0f,level.width-localWidth),
+                Mathf.Clamp(hero.y-localHeight*.5f,0f,level.height-localHeight),
+                localWidth,localHeight);
             Rect view=expanded?
-                MiniMapWindow(level,player.body.position,
+                MiniMapWindow(level,hero,
                     miniMapZoom==0?1f:miniMapZoom==1?1.7f:2.7f,
-                    miniMapZoom!=0):
-                MiniMapWindow(level,player.body.position,
-                    Mathf.Max(level.width,level.height)/17.5f,true);
+                    miniMapZoom!=0):local;
             Rect draw=MiniMapFit(canvas,view);
             FillUi(canvas,MapBackdrop);
             Rect uv=new Rect(view.x/level.width,view.y/level.height,
