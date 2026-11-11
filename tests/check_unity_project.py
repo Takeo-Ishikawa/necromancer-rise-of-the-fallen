@@ -97,8 +97,10 @@ for area in levels:
         ), f"Blocked start/spawn in {area['id']}: {entity}"
 assert {"rat", "bat", "slime", "spider", "snake", "skeleton",
         "wisp", "grave_pup", "grave_lord", "marsh_lord"} <= kinds
-assert len(levels[0]["enemies"])==3
-assert {e["kind"] for e in levels[0]["enemies"]}=={"grave_pup"}
+assert len(levels[0]["enemies"])>=10
+assert {"grave_pup","rat","bat","slime","spider"} <= {e["kind"] for e in levels[0]["enemies"]}
+assert levels[0]["width"]>=54 and levels[0]["height"]>=32
+assert levels[0]["background"]=="entrada_da_caverna_bonehollow"
 pup_art=(unity/"Assets/Resources/Creatures/grave_pup.png").read_bytes()
 assert struct.unpack(">II",pup_art[16:24])==(1024,256) and pup_art[24:26]==bytes([8,6])
 
@@ -1047,7 +1049,7 @@ for token in ("float IncomingHeroDamageMultiplier()",
               "stage==0 ? 19f", "stage==1 ? 15f",
               "stage==2 ? 12f : 11f",
               "int RespawnPopulationLimitForStage()",
-              "stage==0 ? 3", "stage==1 ? 4",
+              "stage==0 ? 7", "stage==1 ? 4",
               "stage==2 ? 5 : 6",
               "float SpawnMinDistanceForStage()",
               "float SpawnMaxDistanceForStage()",
@@ -1201,7 +1203,7 @@ assert "HealFromGatheredResource()" in pickup
 assert "if(collected)SaveProgress();" in pickup
 assert "current.resources.RemoveAt(i);" in pickup
 assert pickup.count("SaveProgress();")==1, "Batch saves once for collected items"
-assert len(levels[0]["resources"])==5, "First cave must support first mantle upgrade"
+assert len(levels[0]["resources"])>=10, "First cave must reward exploration"
 assert all(r["type"]=="cristal" for r in levels[0]["resources"])
 assert sum(2 for _ in levels[0]["resources"])>=10, "Starter resources fund one mantle rank"
 progress_source=(unity/"Assets/Scripts/NecroProgressHud.cs").read_text()

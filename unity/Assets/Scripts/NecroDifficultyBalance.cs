@@ -54,7 +54,7 @@ namespace Necromancer
 
         int RespawnPopulationLimitForStage()
         {
-            return stage==0 ? 3 :
+            return stage==0 ? 7 :
                 stage==1 ? 4 :
                 stage==2 ? 5 : 6;
         }

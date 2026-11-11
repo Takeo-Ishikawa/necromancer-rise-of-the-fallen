@@ -8,6 +8,7 @@ namespace Necromancer
     {
         public string id,title,background,baseBackground,objective;
         public float width,height,startX,startY,sealX,sealY;
+        public float rotboarX,rotboarY;
         public bool requiresGuardian;
         public Obstacle[] obstacles;
         public Spawn[] enemies;

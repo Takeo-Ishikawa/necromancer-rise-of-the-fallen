@@ -270,7 +270,10 @@ namespace Necromancer
                     if(next.claimed)ActivateRegionSeal();
                 }
                 if(level.id=="bonehollow")
-                    next.enemies.Add(CreateRotboar(NecroLevels.At(level,12.8f,6.3f),next.root.transform));
+                    next.enemies.Add(CreateRotboar(NecroLevels.At(level,
+                        level.rotboarX>0f?level.rotboarX:12.8f,
+                        level.rotboarY>0f?level.rotboarY:6.3f),
+                        next.root.transform));
                 foreach(Spawn spawn in level.enemies)
                 {
                     if(IsBoss(spawn.kind) &&

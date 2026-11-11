@@ -32,9 +32,9 @@ namespace Necromancer
             int seed=8161;
             foreach(char c in area.id)seed=unchecked(seed*31+c);
             System.Random random=new System.Random(seed&0x7fffffff);
-            int wanted=area.id=="bonehollow"?14:area.id=="necropolis"?32:area.id=="marsh"?27:25;
+            int wanted=area.id=="bonehollow"?64:area.id=="necropolis"?32:area.id=="marsh"?27:25;
             int created=0;
-            for(int tries=0;tries<230 && created<wanted;tries++)
+            for(int tries=0;tries<(area.id=="bonehollow"?720:230) && created<wanted;tries++)
             {
                 float x=1.0f+(float)random.NextDouble()*(area.width-2.0f);
                 float y=1.0f+(float)random.NextDouble()*(area.height-2.0f);
@@ -56,8 +56,19 @@ namespace Necromancer
                         new Vector2(resource.x,resource.y))<.72f)
                         {tooClose=true;break;}
                 if(tooClose)continue;
-
+                if(area.id=="bonehollow" &&
+                   Vector2.Distance(new Vector2(x,y),new Vector2(area.rotboarX,area.rotboarY))<2.5f)
+                    continue;
                 string kind=variants[random.Next(variants.Length)];
+                if(area.id=="bonehollow")
+                {
+                    if(x<26f && y<17f)
+                        kind=random.Next(4)==0?"stalagmite":"crystal";
+                    else if(x>27f && y>22f)
+                        kind=random.Next(4)==0?"pool":"fungus";
+                    else if(x>39f && y<22f)
+                        kind=random.Next(3)==0?"rune":"bones";
+                }
                 Sprite sprite=Get(kind);
                 GameObject prop=new GameObject("Decor: "+kind);
                 prop.transform.SetParent(root,false);
