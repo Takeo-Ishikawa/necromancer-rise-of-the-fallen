@@ -25,6 +25,7 @@ namespace Necromancer
         const float FallenHold = 14f;
         const float DissolveDuration = .8f;
         int pupAction;
+        int ratFacing8;
         bool fallen;
         float fallenAt;
         bool corpseMode,corpseAutoCleanup;
@@ -120,8 +121,35 @@ namespace Necromancer
             revivalClock=ReanimationSeconds;
         }
 
+        void AnimateRatCorpse(float dt)
+        {
+            corpseAge+=dt;
+            float ease=Mathf.Clamp01(corpseAge/NecroRatAtlas.DeathDuration);
+            Sprite frame=NecroRatAtlas.Death(corpseAge);
+            if(frame!=null)artRenderer.sprite=frame;
+            artRenderer.flipX=ratFacing8==5 || ratFacing8==6 || ratFacing8==7;
+            art.localRotation=Quaternion.identity;
+            art.localPosition=Vector3.down*.09f;
+            art.localScale=animationScale;
+
+            float alpha=corpseAutoCleanup ?
+                Mathf.Clamp01((.95f-corpseAge)/.40f) :
+                Mathf.Clamp01(corpseRemaining/.85f);
+            Color tone=Color.Lerp(baseTint,new Color(.54f,.53f,.62f,1f),ease);
+            tone.a=alpha;
+            artRenderer.color=tone;
+            haloRenderer.color=new Color(.06f,.07f,.09f,.30f*alpha);
+            if(corpseAutoCleanup && corpseAge>=.95f)
+                Destroy(gameObject);
+        }
+
         void AnimateOrdinaryCorpse(float dt)
         {
+            if(type=="rat" && NecroRatAtlas.HasDeath)
+            {
+                AnimateRatCorpse(dt);
+                return;
+            }
             corpseAge+=dt;
             float ratio=Mathf.Clamp01(corpseAge/CorpseSettleSeconds);
             float ease=ratio*ratio*(3f-2f*ratio);
@@ -190,7 +218,8 @@ namespace Necromancer
             v.artRenderer.sortingOrder=original.sortingOrder;
             v.artRenderer.color=v.baseTint;
             original.enabled=false;
-            if(kind!="grave_pup")v.frames=NecroFrameLibrary.Get(kind,original.sprite);
+            if(kind!="grave_pup" && !(kind=="rat" && NecroRatAtlas.HasWalk))
+                v.frames=NecroFrameLibrary.Get(kind,original.sprite);
             if(v.frames!=null)
             {
                 Vector2 normalSize=original.sprite.bounds.size;
@@ -200,6 +229,15 @@ namespace Necromancer
                     normalSize.x/sheetSize.x,normalSize.y/sheetSize.y,1f);
             }
 
+            if(kind=="rat" && NecroRatAtlas.HasWalk)
+            {
+                Sprite ratIdle=NecroRatAtlas.Walk(0,0f,false);
+                Vector2 originalSize=original.sprite.bounds.size;
+                Vector2 atlasSize=ratIdle.bounds.size;
+                v.animationScale=new Vector3(
+                    originalSize.x/atlasSize.x,originalSize.y/atlasSize.y,1f);
+            }
+
             GameObject circle=new GameObject(ally?"Summoned Soul Mark":"Creature Shadow");
             circle.transform.SetParent(original.transform,false);
             v.halo=circle.transform;
@@ -207,7 +245,8 @@ namespace Necromancer
             v.haloRenderer.sprite=ally?NecroArt.RitualCircle():NecroArt.Shadow();
             v.haloRenderer.sortingOrder=original.sortingOrder-1;
             // Pup paws end 16 pixels above the atlas cell bottom, with a 31% pivot.
-            float shadowY=kind=="grave_pup" && !ally ? -.22f : -.32f;
+            float shadowY=kind=="grave_pup" && !ally ? -.22f :
+                kind=="rat" && NecroRatAtlas.HasWalk ? -.12f : -.32f;
             v.halo.localPosition=new Vector3(0,shadowY,0);
             v.halo.localScale=new Vector3(v.boss ? 1.55f : 1.05f,.34f,1);
             v.haloRenderer.color=ally?new Color(.50f,.91f,.80f,.38f):
@@ -230,13 +269,16 @@ namespace Necromancer
             if(direction.sqrMagnitude>.0001f)
             {
                 currentDirection=Direction(direction,currentDirection);
+                if(type=="rat")
+                    ratFacing8=NecroRatAtlas.Facing8(direction,ratFacing8);
                 if(frames==null && Mathf.Abs(direction.x)>.01f)
                     artRenderer.flipX=direction.x<0f;
             }
             currentPose=NecroPose.Attack;
             frameClock=0f;
-            attackTimer=frames!=null ?
-                Mathf.Min(.32f,frames.Duration(NecroPose.Attack)) : .24f;
+            attackTimer=type=="rat" && NecroRatAtlas.HasWalk && NecroRatAtlas.HasAttack ?
+                NecroRatAtlas.AttackDuration :
+                frames!=null ? Mathf.Min(.32f,frames.Duration(NecroPose.Attack)) : .24f;
         }
 
         void LateUpdate()
@@ -293,6 +335,46 @@ namespace Necromancer
                 ApplyReanimationVisual(dt);
                 return;
             }
+            if(type=="rat" && NecroRatAtlas.HasWalk)
+            {
+                if(moving && attackTimer<=0f)
+                    ratFacing8=NecroRatAtlas.Facing8(delta,ratFacing8);
+                bool ratAttacking=attackTimer>0f && NecroRatAtlas.HasAttack;
+                Sprite ratSprite;
+                if(ratAttacking)
+                {
+                    frameClock+=dt;
+                    ratSprite=NecroRatAtlas.Attack(frameClock);
+                }
+                else
+                {
+                    frameClock=0f;
+                    ratSprite=NecroRatAtlas.Walk(ratFacing8,t,moving);
+                }
+                if(ratSprite!=null)
+                {
+                    artRenderer.sprite=ratSprite;
+                    artRenderer.flipX=ratAttacking &&
+                        (ratFacing8==5||ratFacing8==6||ratFacing8==7);
+                    art.localRotation=Quaternion.identity;
+                    art.localPosition=new Vector3(0,
+                        moving && !ratAttacking ? .015f*Mathf.Sin(t*14f) : 0f,0);
+                    float scale=impactTimer>0f?1.035f:1f;
+                    art.localScale=animationScale*scale;
+                    artRenderer.color=impactTimer>0f?
+                        (friendly?new Color(.90f,.99f,1f):
+                            new Color(1f,.65f,.67f)):baseTint;
+                    if(friendly)
+                    {
+                        float pulse=.24f+.13f*(.5f+.5f*Mathf.Sin(t*3f));
+                        haloRenderer.color=new Color(.51f,.91f,.81f,pulse);
+                        halo.localRotation=Quaternion.Euler(0,0,t*18f);
+                    }
+                    ApplyReanimationVisual(dt);
+                    return;
+                }
+            }
+
             if(moving && attackTimer<=0f)
                 currentDirection=Direction(delta,currentDirection);
 
