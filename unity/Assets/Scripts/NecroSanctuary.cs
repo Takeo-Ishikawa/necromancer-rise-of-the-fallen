@@ -37,6 +37,8 @@ namespace Necromancer
             touchMove=Vector2.zero;
             joystickFingerId=-1;
             UpdateWorldCamera();
+            miniMapExpanded=false;
+            EnsureMiniMapRegion();
         }
 
         void ResetTravelCombat()
@@ -121,8 +123,8 @@ namespace Necromancer
         void DrawSanctuaryNavigation(float scale)
         {
             EnsureStyles();
-            if(inSanctuary)GUI.Label(new Rect(125,16,Screen.width/scale-137,35),
-                "REFÚGIO · ÁREA SEGURA",smallStyle);
+            if(inSanctuary)GUI.Label(new Rect(125,16,Screen.width/scale-235,35),
+                "REFÚGIO",smallStyle);
             if(!SanctuaryTravelAvailable())
             {
                 if(inSanctuary)GUI.Label(new Rect(24,60,Screen.width/scale-48,30),
