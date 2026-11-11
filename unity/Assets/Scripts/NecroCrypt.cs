@@ -156,6 +156,7 @@ namespace Necromancer
             if(instance==null)return state;
             state.visited=true;
             state.resourcesInitialized=true;
+            state.exploration=SaveMiniMapForStage(instance);
             state.claimed=instance.claimed;
             state.bossDefeated=instance.bossDefeated;
             state.bossBound=instance.bossBound;
