@@ -4,12 +4,6 @@ name: Unity Android Preview APK
 # structure workflow continues to run automatically on source changes.
 on:
   workflow_dispatch:
-  # Explicit rat integration build request (2026-11-11); workflow-only push
-  # without compiling on ordinary Unity source changes.
-  'push':
-    branches: [main]
-    paths:
-      - '.github/workflows/unity-android.yml'
 
 concurrency:
   group: unity-android-${{ github.ref }}
