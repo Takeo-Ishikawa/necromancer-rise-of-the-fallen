@@ -251,6 +251,8 @@ namespace Necromancer
                 // The painted cave already includes its walls and scenery.
                 if(level.background!="forgotten_cave")
                 {
+                    if(level.id=="bonehollow")
+                        NecroCaveZones.Populate(level,next.root.transform);
                     NecroScenery.Populate(level,next.root.transform);
                     foreach(Obstacle rock in level.obstacles) {
                         SpriteRenderer stone=Visual("Rock",NecroLevels.At(level,rock.x,rock.y),

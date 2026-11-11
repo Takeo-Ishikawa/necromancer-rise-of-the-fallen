@@ -101,6 +101,46 @@ assert len(levels[0]["enemies"])>=10
 assert {"grave_pup","rat","bat","slime","spider"} <= {e["kind"] for e in levels[0]["enemies"]}
 assert levels[0]["width"]>=54 and levels[0]["height"]>=32
 assert levels[0]["background"]=="entrada_da_caverna_bonehollow"
+
+# Cave-scale regression: all encounter and pickup sites must be reachable
+# with 0.6 units of clearance. Tests geometry, not visual decoration.
+from collections import deque
+first=levels[0]
+assert len(first["obstacles"])>=60
+def cave_blocked(x,y,r=.6):
+    return (x<r or y<r or x>first["width"]-r or
+            y>first["height"]-r or any(
+                (x-o["x"])**2+(y-o["y"])**2<(r+o["r"])**2
+                for o in first["obstacles"]))
+step=.5
+width=int(first["width"]/step)+1
+height=int(first["height"]/step)+1
+start=(round(first["startX"]/step),round(first["startY"]/step))
+assert not cave_blocked(start[0]*step,start[1]*step), "Cave entry obstructed"
+seen={start}
+pending=deque([start])
+while pending:
+    x,y=pending.popleft()
+    for dx,dy in ((0,1),(0,-1),(1,0),(-1,0)):
+        nx,ny=x+dx,y+dy
+        if not (0<=nx<width and 0<=ny<height):
+            continue
+        if (nx,ny) in seen or cave_blocked(nx*step,ny*step):
+            continue
+        seen.add((nx,ny)); pending.append((nx,ny))
+targets=[("selo",first["sealX"],first["sealY"]),
+         ("rotboar",first["rotboarX"],first["rotboarY"])]
+targets += [(p.get("kind","cristal"),p["x"],p["y"])
+            for p in first["enemies"]+first["resources"]]
+for kind,x,y in targets:
+    assert not cave_blocked(x,y), f"Spawn inside rock: {kind} {(x,y)}"
+    cx,cy=round(x/step),round(y/step)
+    assert any((cx+dx,cy+dy) in seen for dx in (-1,0,1)
+               for dy in (-1,0,1)), f"Isolated cave location: {kind} {(x,y)}"
+assert "NecroCaveZones.Populate(level,next.root.transform);" in (
+    unity/"Assets/Scripts/NecroPrototype.cs").read_text()
+assert (unity/"Assets/Scripts/NecroCaveZones.cs").is_file()
+
 pup_art=(unity/"Assets/Resources/Creatures/grave_pup.png").read_bytes()
 assert struct.unpack(">II",pup_art[16:24])==(1024,256) and pup_art[24:26]==bytes([8,6])
 

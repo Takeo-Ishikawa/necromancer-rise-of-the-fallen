@@ -83,9 +83,14 @@ namespace Necromancer
             if(inSanctuary)return SanctuaryBlocked(point,radius);
             if(point.x<radius || point.y<radius ||
                 point.x>level.width-radius || point.y>level.height-radius)return true;
-            foreach(Obstacle obstacle in level.obstacles)
-                if(Vector2.Distance(point,NecroLevels.At(level,obstacle.x,obstacle.y)) <
-                    radius+obstacle.r)return true;
+            if(level.obstacles!=null)foreach(Obstacle obstacle in level.obstacles)
+            {
+                // Fast circle collision for complex maps and many following servants.
+                float dx=point.x-obstacle.x;
+                float dy=point.y-(level.height-obstacle.y);
+                float safe=radius+obstacle.r;
+                if(dx*dx+dy*dy<safe*safe)return true;
+            }
             return false;
         }
         bool Visible(Vector2 from,Vector2 to)
