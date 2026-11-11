@@ -52,6 +52,8 @@ namespace Necromancer
         // Optional v1 field: false for snapshots from before resource spawning
         // was enabled; true means an empty resources array is intentional.
         public bool resourcesInitialized;
+        // Optional discovery mask: older saves safely begin with fresh fog.
+        public string exploration;
         public NecroActorRecord[] enemies=new NecroActorRecord[0];
         public NecroCorpseRecord[] corpses=new NecroCorpseRecord[0];
         public NecroItemRecord[] drops=new NecroItemRecord[0];
