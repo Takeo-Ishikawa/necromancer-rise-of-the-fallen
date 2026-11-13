@@ -109,12 +109,12 @@ Dados verificados na branch main em 13/11/2026:
 
 **Tarefas:**
 - [ ] Registrar commit-base, versão do APK, tamanho real do APK e plataforma de teste.
-- [ ] Documentar posições de entrada, selo, Rotboar, mobs, recursos e obstáculos a partir do JSON.
+- [x] Documentar posições de entrada, selo, Rotboar, mobs, recursos e obstáculos a partir do JSON (ver auditoria 00).
 - [ ] Registrar screenshots de entrada, poço, cristais, fungos, ossadas, covil e câmara segura, com resolução do aparelho.
-- [ ] Verificar os caminhos realmente utilizados por Resources.Load e os scripts responsáveis por criar rochas e decorações.
+- [x] Verificar os caminhos realmente utilizados por Resources.Load e os scripts responsáveis por criar rochas e decorações (ver auditoria 00).
 - [ ] Confirmar a localização de cada zona e conferir se as regiões visuais coincidem com a navegação real.
 - [ ] Medir, em um aparelho disponível, FPS, tempo de entrada, uso de memória quando possível e tamanho do APK antes da mudança.
-- [ ] Preparar rollback isolado do conjunto de arquivos de cenário.
+- [x] Preparar rollback isolado do conjunto de arquivos de cenário (branch temática criada; main e Assets intactos).
 
 **Entregável:** documento de auditoria com baseline e lista de riscos; referência ao commit-base.
 
@@ -393,14 +393,14 @@ A tabela é uma sequência lógica, **não uma estimativa de horas ou promessa d
 
 ## 7. Registro de tarefas em andamento — atualizar sempre
 
-**ETAPA ATIVA:** 00 — Auditoria, baseline e proteção da fase atual.  
-**PRIMEIRA AÇÃO CONCRETA NA PRÓXIMA SESSÃO:** comparar a árvore atual e o arquivo levels.json com este plano; extrair a planta navegável de Bonehollow, inventariar os obstáculos, identificar o recorte adequado da entrada para a vertical slice e registrar o commit-base. **Não começar ilustrando o mapa inteiro.**
+**ETAPA ATIVA:** 00 — Auditoria em andamento. Commit-base, inventário e planta preliminar registrados em branch temática. Faltam evidências do APK/aparelho e QA de navegação.  
+**PRIMEIRA AÇÃO CONCRETA NA PRÓXIMA SESSÃO:** obter capturas e métricas do APK atual no aparelho; depois verificar em execução o recorte preliminar X=4–22, Y=19–33, especialmente passagens com servos, e desenvolver a bíblia visual da ETAPA 01. O inventário e a planta estática já foram produzidos na branch `feature/bonehollow-baseline-mapa-01`. **Não começar ilustrando o mapa inteiro.**
 
 | Etapa | Status inicial | Evidência necessária |
 | --- | --- | --- |
-| 00 — Auditoria | [ ] Pendente | Commit-base + baseline |
+| 00 — Auditoria | [~] Em andamento; auditoria documental e planta criadas, APK/QA pendentes | Commit-base + baseline |
 | 01 — Bíblia visual | [ ] Pendente | Guia + amostras |
-| 02 — Planta | [ ] Pendente | Mapa técnico navegável |
+| 02 — Planta | [ ] Pendente; mapa geométrico preliminar registrado, jogabilidade não validada | Mapa técnico navegável |
 | 03 — Vertical slice | [ ] Pendente | Captura jogável + validação |
 | 04 — Piso | [ ] Pendente | Kit modular aprovado |
 | 05 — Paredes | [ ] Pendente | Kit e colisões validados |
@@ -422,6 +422,16 @@ A tabela é uma sequência lógica, **não uma estimativa de horas ou promessa d
 - Nenhuma mudança de terreno, colisões, posicionamento, iluminação ou inimigos foi efetuada por este documento.
 - Não foi executada compilação Android ou Windows para criar o plano.
 - Próxima tarefa: ETAPA 00, seguida de ETAPA 01 e da planta da ETAPA 02.
+
+**13/11/2026 — Início efetivo da ETAPA 00 (auditoria documental)**
+- Commit-base de `main`: `9aa2ac673c781cd76825f8ec9c3a5a5243069021` (último commit do plano antes desta execução).
+- Branch isolada: `feature/bonehollow-baseline-mapa-01`. Nenhum asset, JSON de fase, script ou workflow foi alterado; compilação não solicitada.
+- Auditoria criada: [docs/bonehollow/BONEHOLLOW_MAPA_01_AUDITORIA_00.md](bonehollow/BONEHOLLOW_MAPA_01_AUDITORIA_00.md). Inclui coordenadas, 80 obstáculos (54 de contorno e 26 internos), 12 inimigos comuns, 12 cristais, Rotboar, zonas, caminhos `Resources.Load`, riscos e indicadores pendentes.
+- Planta técnica inicial: [docs/bonehollow/BONEHOLLOW_MAPA_01_PLANTA_AUDITORIA.svg](bonehollow/BONEHOLLOW_MAPA_01_PLANTA_AUDITORIA.svg), gerada a partir do JSON; recorte provisório de entrada X=4–22, Y=19–33. Não é prévia de arte final nem prova de passagem com servos.
+- Verificação geométrica preliminar: caminho em grade com raio de segurança 0,40 e 0,65 entre entrada e selo; nenhuma alteração de obstáculos ou spawns. Centro da zona de ossadas coincide com rocha bloqueada, exigindo waypoints reais.
+- Testes executados: conferência estática das definições de JSON e rotinas de cenário, checagem geométrica amostrada. **Não** houve execução do Unity, do `tests/check_unity_project.py`, de build Android/Windows ou teste em celular.
+- Métricas em aberto: FPS, memória, tempo de entrada, versão e tamanho real do APK, resolução do aparelho, screenshots e QA da movimentação.
+- **Status:** ETAPA 00 em andamento; ainda sem aceite. Próxima ação: coletar baseline no aparelho / no último workflow e validar passagens do recorte; elaborar a ETAPA 01 sem substituir o cenário ativo.
 
 **Modelo de próxima anotação (copiar ao finalizar uma sessão):**
 
