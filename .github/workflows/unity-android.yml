@@ -20,7 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Verify Unity project structure
-        run: python tests/check_unity_project.py
+        run: |
+          python tests/check_unity_project.py
+          python tests/check_bonehollow_geometry.py
       - name: Verify Unity license configured
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
