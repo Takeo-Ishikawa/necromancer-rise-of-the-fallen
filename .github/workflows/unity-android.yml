@@ -4,6 +4,13 @@ name: Unity Android Preview APK
 # structure workflow continues to run automatically on source changes.
 on:
   workflow_dispatch:
+  # Temporary single-branch trigger for explicitly requested Bonehollow build.
+  # Removed immediately after run is queued; default workflow remains manual.
+  push:
+    branches:
+      - feature/bonehollow-baseline-mapa-01
+    paths:
+      - 'docs/bonehollow/BUILD_REQUEST_ANDROID_2026_11_13.md'
 
 concurrency:
   group: unity-android-${{ github.ref }}
