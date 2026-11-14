@@ -162,6 +162,13 @@ namespace Necromancer
                     int noise=(x*73+y*151+x*y*17)&15;
                     Color32 color=new Color32((byte)(59+noise),
                         (byte)(54+noise),(byte)(69+noise),255);
+                    if(NecroCaveNetwork.HasNetwork(zone))
+                    {
+                        // Texture Y is Unity-up; cave rows are JSON-down.
+                        if(NecroCaveNetwork.IsWall(zone,x,map.rows-1-y))
+                            color=new Color32((byte)(101+noise),
+                                (byte)(91+noise),(byte)(107+noise),255);
+                    }
                     if(zone.obstacles!=null)
                         foreach(Obstacle rock in zone.obstacles)
                         {
