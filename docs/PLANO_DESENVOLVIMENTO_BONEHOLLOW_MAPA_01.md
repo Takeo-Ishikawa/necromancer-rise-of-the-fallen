@@ -393,14 +393,14 @@ A tabela é uma sequência lógica, **não uma estimativa de horas ou promessa d
 
 ## 7. Registro de tarefas em andamento — atualizar sempre
 
-**ETAPA ATIVA:** 00 — Auditoria em andamento. Commit-base, inventário e planta preliminar registrados em branch temática. Faltam evidências do APK/aparelho e QA de navegação.  
-**PRIMEIRA AÇÃO CONCRETA NA PRÓXIMA SESSÃO:** obter capturas e métricas do APK atual no aparelho; depois verificar em execução o recorte preliminar X=4–22, Y=19–33, especialmente passagens com servos, e desenvolver a bíblia visual da ETAPA 01. O inventário e a planta estática já foram produzidos na branch `feature/bonehollow-baseline-mapa-01`. **Não começar ilustrando o mapa inteiro.**
+**ETAPA ATIVA:** 00 — Auditoria em andamento (baseline físico e QA pendentes). Etapa 01 possui guia e seis amostras esquemáticas; Etapa 02 possui mapa preliminar e teste automático de acessibilidade. Não expandir o cenário antes da aprovação da vertical slice.  
+**PRIMEIRA AÇÃO CONCRETA NA PRÓXIMA SESSÃO:** conferir o resultado final da [compilação Android #118](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43533138914), coletar screenshots e desempenho do mapa atual no aparelho e testar a movimentação dos servos no trecho da entrada (JSON X=4–22, Y=19–33). Em seguida avaliar os materiais da Etapa 01 contra sprites reais. **Não começar ilustrando o mapa inteiro.**
 
 | Etapa | Status inicial | Evidência necessária |
 | --- | --- | --- |
 | 00 — Auditoria | [~] Em andamento; auditoria documental e planta criadas, APK/QA pendentes | Commit-base + baseline |
 | 01 — Bíblia visual | [~] Em andamento; guia e amostras esquemáticas criados, QA pendente | Guia + amostras |
-| 02 — Planta | [ ] Pendente; mapa geométrico preliminar registrado, jogabilidade não validada | Mapa técnico navegável |
+| 02 — Planta | [~] Planta preliminar e teste automático de objetivos implementados; validação dinâmica de servos ainda pendente | Mapa técnico navegável |
 | 03 — Vertical slice | [ ] Pendente | Captura jogável + validação |
 | 04 — Piso | [ ] Pendente | Kit modular aprovado |
 | 05 — Paredes | [ ] Pendente | Kit e colisões validados |
@@ -437,7 +437,16 @@ A tabela é uma sequência lógica, **não uma estimativa de horas ou promessa d
 - [Bíblia visual v0.1](bonehollow/BONEHOLLOW_MAPA_01_BIBLIA_VISUAL_01.md): paleta sRGB, perspectiva, luz, pivôs, sorting, densidade, contraste, escala e protocolo de integração sem modificar o gameplay.
 - [Amostras esquemáticas](bonehollow/BONEHOLLOW_MAPA_01_AMOSTRAS_VISUAIS.svg): seis estudos autorais (piso, parede, rocha, cristal, fungo e ossadas), ainda **não integrados** como sprites de produção.
 - Etapa 01 permanece **em andamento** até referências próprias/licenciadas, capturas dos personagens e verificação de nitidez/oclusão no aparelho.
-- Build Android: solicitado ao final desta rodada; `.github/workflows/unity-android.yml` exige `workflow_dispatch`. Se a integração conectada não expuser ação de disparo, registrar impedimento em vez de afirmar que compilou.
+- Build Android: a solicitação foi finalmente despachada pelo workflow manual na execução #118, após um primeiro teste #117 bloqueado pelo guardrail do projeto; resultado final é registrado no diário seguinte.
+
+**13/11/2026 — Proteção geométrica e compilação solicitada**
+- Criado `tests/check_bonehollow_geometry.py` para checar a acessibilidade estática de selo, Rotboar, 12 inimigos e 12 cristais, em grade com raio de folga 0,40 e 0,65. Integrado ao workflow estrutural e à pré-verificação de build Android. O teste **não** valida movimento real de servos ou iluminação.
+- Verificações estruturais aprovadas: [#191](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43532745160), [pós-restauração do workflow](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43533019644).
+- Tentativa Android [#117](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43532951400) **falhou antes de compilar Unity** porque a proteção existente proíbe gatilhos por `push` no workflow Android. A proteção **não foi removida**, e o fluxo foi restaurado ao modo exclusivamente `workflow_dispatch`.
+- Um workflow auxiliar temporário, restrito a um marcador na branch temática, despachou o workflow Android manual com sucesso: [dispatcher](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43533129796). O workflow auxiliar e seus marcadores foram **excluídos** da branch imediatamente após o despacho.
+- Compilação Android válida [#118](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43533138914), commit de execução `c47b241fce705bb9a2e55ac0d773efcdb738fde8`. No momento do registro: execução **em andamento**, com estrutura, licença Unity e assinatura de preview aprovadas; resultado final e APK ainda não verificados.
+- Não houve build Windows. Não foram alterados os scripts de gameplay, o JSON, os assets de runtime ou os saves. Etapas 00 e 01 permanecem sem aceite no aparelho.
+- **Próxima ação concreta:** verificar a conclusão de #118 e testar o cenário no telefone antes de criar sprites definitivos para a vertical slice.
 
 **Modelo de próxima anotação (copiar ao finalizar uma sessão):**
 
