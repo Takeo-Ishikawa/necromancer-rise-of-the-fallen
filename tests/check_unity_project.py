@@ -1669,7 +1669,7 @@ assert "public string exploration;" in save_source
 assert 'public const int Version=1;' in save_source, "Do not invalidate old saves"
 # Cave coordinates are in a top-origin source system, converted once to Unity.
 first=levels[0]
-assert first["width"]==56 and first["height"]==34
+assert first["width"]==160 and first["height"]==104
 for enemy in first["enemies"]:
     assert 0<=enemy["x"]<=first["width"]
     assert 0<=first["height"]-enemy["y"]<=first["height"]
