@@ -98,28 +98,49 @@ namespace Necromancer
         static Color32 CellColor(LevelDefinition level,int x,int row)
         {
             bool wall=IsWall(level,x,row);
-            int variation=(int)(Hash(x*7,row*11)&15u)-7;
+            // Slow geological bands mixed with fine variations avoid a rigid
+            // single-color grid, without spawning per-cell GameObjects.
+            int fine=(int)(Hash(x*7,row*11)&15u)-7;
+            int stratum=(int)((Hash(x/5,row/4)>>8)&11u)-5;
+            int variation=fine+stratum;
+            bool openNorth=!IsWall(level,x,row-1);
+            bool openSouth=!IsWall(level,x,row+1);
+            bool openWest=!IsWall(level,x-1,row);
+            bool openEast=!IsWall(level,x+1,row);
             if(wall)
             {
-                bool exposed=!IsWall(level,x,row-1) ||
-                    !IsWall(level,x,row+1) ||
-                    !IsWall(level,x-1,row) ||
-                    !IsWall(level,x+1,row);
+                // Light from the cave mouth reaches the upper-left rims.
+                // The south-facing wall has a darker vertical face.
+                bool exposed=openNorth || openSouth || openWest || openEast;
                 if(exposed)
-                    return new Color32((byte)(75+variation),
-                        (byte)(65+variation),(byte)(84+variation),255);
+                {
+                    int highlight=openNorth?12:openWest?7:
+                        openEast?0:-7;
+                    return new Color32((byte)(74+variation+highlight),
+                        (byte)(65+variation+highlight),
+                        (byte)(83+variation+highlight),255);
+                }
                 return new Color32((byte)(24+variation/2),
                     (byte)(22+variation/2),(byte)(32+variation/2),255);
             }
 
             int biome=NearestBiome(level,x+.5f,row+.5f);
             Color32 baseColor=BiomeColors[Mathf.Clamp(biome,0,BiomeColors.Length-1)];
-            bool nearEdge=IsWall(level,x-1,row) || IsWall(level,x+1,row) ||
-                IsWall(level,x,row-1) || IsWall(level,x,row+1);
-            int shade=nearEdge?-12:0;
-            return new Color32((byte)(baseColor.r+variation+shade),
-                (byte)(baseColor.g+variation+shade),
-                (byte)(baseColor.b+variation+shade),255);
+            bool nearWall=!openNorth || !openSouth || !openWest || !openEast;
+            int shade=nearWall?-13:0;
+
+            // The first chamber is adjacent to the surface. A small warm
+            // daylight gradient disappears gradually into the tunnel network.
+            float dx=(x+.5f-level.startX)/12f;
+            float dy=(row+.5f-level.startY)/10f;
+            int daylight=Mathf.RoundToInt(23f*
+                Mathf.Clamp01(1f-dx*dx-dy*dy));
+            int red=baseColor.r+variation+shade+daylight;
+            int green=baseColor.g+variation+shade+daylight*3/4;
+            int blue=baseColor.b+variation+shade+daylight/3;
+            return new Color32((byte)Mathf.Clamp(red,0,255),
+                (byte)Mathf.Clamp(green,0,255),
+                (byte)Mathf.Clamp(blue,0,255),255);
         }
 
         public static Sprite Ground(LevelDefinition level)
@@ -146,10 +167,13 @@ namespace Necromancer
                 {
                     Color32 baseColor=palette[paletteRow+x/PixelsPerUnit];
                     int grain=(int)(Hash(x,y)&7u)-3;
+                    // Fine low-contrast specks and sediment lines break the
+                    // flat material without making silhouettes hard to read.
+                    int mineral=(Hash(x/9,y/7)&63u)==0u ? 5 : 0;
                     pixels[pixelRow+x]=new Color32(
-                        (byte)(baseColor.r+grain),
-                        (byte)(baseColor.g+grain),
-                        (byte)(baseColor.b+grain),255);
+                        (byte)(baseColor.r+grain+mineral),
+                        (byte)(baseColor.g+grain+mineral),
+                        (byte)(baseColor.b+grain+mineral),255);
                 }
             }
             Texture2D texture=new Texture2D(width,height,TextureFormat.RGB24,false);
