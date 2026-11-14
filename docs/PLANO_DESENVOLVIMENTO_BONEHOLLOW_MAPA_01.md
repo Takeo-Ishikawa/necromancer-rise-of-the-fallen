@@ -121,16 +121,16 @@ Dados verificados na branch main em 13/11/2026:
 **Aceite:** mapa atual ainda compila; colisões, travessias, respawn, servos, minimapa e save mantêm o comportamento anterior. Nenhum asset foi substituído nesta etapa.
 
 ### ETAPA 01 — Bíblia visual e padrão de escala
-**Prioridade:** P0. **Dependências:** 00. **Estado:** pendente.
+**Prioridade:** P0. **Dependências:** 00. **Estado:** em andamento (direção de arte e estudos esquemáticos produzidos; testes e referências pendentes).
 
 **Tarefas:**
 - [ ] Definir três a cinco imagens de referência próprias ou licenciadas para consulta, sem importar conteúdo de terceiros sem autorização.
-- [ ] Fixar perspectiva top-down/3⁄4 compatível com personagens, escala de piso, direção da luz-base e tamanho das sombras.
-- [ ] Definir paleta de rochas cinza-violeta, ossos marfim envelhecido, fungos verde-azulados e cristais azuis/violetas.
-- [ ] Criar guia de contraste: centro do caminho mais limpo; bordas mais detalhadas; silhuetas do jogador e inimigos destacadas.
-- [ ] Definir regras de espessura das paredes, densidade de detritos, transparência e oclusão.
-- [ ] Produzir uma folha de amostras com chão, parede, rocha, cristal, fungo e sombra alinhados à mesma perspectiva.
-- [ ] Definir pivô, pixels por unidade e faixa de dimensões dos props; medir no tamanho realmente exibido em dispositivo, em vez de adotar resolução máxima por hábito.
+- [x] Fixar perspectiva top-down/3⁄4 compatível com personagens, escala de piso, direção da luz-base e tamanho das sombras.
+- [x] Definir paleta de rochas cinza-violeta, ossos marfim envelhecido, fungos verde-azulados e cristais azuis/violetas.
+- [x] Criar guia de contraste: centro do caminho mais limpo; bordas mais detalhadas; silhuetas do jogador e inimigos destacadas.
+- [x] Definir regras de espessura das paredes, densidade de detritos, transparência e oclusão.
+- [x] Produzir uma folha de amostras com chão, parede, rocha, cristal, fungo e sombra alinhados à mesma perspectiva. (amostras esquemáticas, não sprites finais)
+- [x] Definir pivô, pixels por unidade e faixa de dimensões dos props; medir no tamanho realmente exibido em dispositivo, em vez de adotar resolução máxima por hábito. (regras documentadas; medição no aparelho pendente)
 
 **Entregável:** guia de estilo com paleta, proporções, pivôs, exemplos de luz/sombra e regras de legibilidade.
 
@@ -399,7 +399,7 @@ A tabela é uma sequência lógica, **não uma estimativa de horas ou promessa d
 | Etapa | Status inicial | Evidência necessária |
 | --- | --- | --- |
 | 00 — Auditoria | [~] Em andamento; auditoria documental e planta criadas, APK/QA pendentes | Commit-base + baseline |
-| 01 — Bíblia visual | [ ] Pendente | Guia + amostras |
+| 01 — Bíblia visual | [~] Em andamento; guia e amostras esquemáticas criados, QA pendente | Guia + amostras |
 | 02 — Planta | [ ] Pendente; mapa geométrico preliminar registrado, jogabilidade não validada | Mapa técnico navegável |
 | 03 — Vertical slice | [ ] Pendente | Captura jogável + validação |
 | 04 — Piso | [ ] Pendente | Kit modular aprovado |
@@ -432,6 +432,12 @@ A tabela é uma sequência lógica, **não uma estimativa de horas ou promessa d
 - Testes executados: conferência estática das definições de JSON e rotinas de cenário, checagem geométrica amostrada. **Não** houve execução do Unity, do `tests/check_unity_project.py`, de build Android/Windows ou teste em celular.
 - Métricas em aberto: FPS, memória, tempo de entrada, versão e tamanho real do APK, resolução do aparelho, screenshots e QA da movimentação.
 - **Status:** ETAPA 00 em andamento; ainda sem aceite. Próxima ação: coletar baseline no aparelho / no último workflow e validar passagens do recorte; elaborar a ETAPA 01 sem substituir o cenário ativo.
+
+**13/11/2026 — ETAPA 01: direção de arte especificada**
+- [Bíblia visual v0.1](bonehollow/BONEHOLLOW_MAPA_01_BIBLIA_VISUAL_01.md): paleta sRGB, perspectiva, luz, pivôs, sorting, densidade, contraste, escala e protocolo de integração sem modificar o gameplay.
+- [Amostras esquemáticas](bonehollow/BONEHOLLOW_MAPA_01_AMOSTRAS_VISUAIS.svg): seis estudos autorais (piso, parede, rocha, cristal, fungo e ossadas), ainda **não integrados** como sprites de produção.
+- Etapa 01 permanece **em andamento** até referências próprias/licenciadas, capturas dos personagens e verificação de nitidez/oclusão no aparelho.
+- Build Android: solicitado ao final desta rodada; `.github/workflows/unity-android.yml` exige `workflow_dispatch`. Se a integração conectada não expuser ação de disparo, registrar impedimento em vez de afirmar que compilou.
 
 **Modelo de próxima anotação (copiar ao finalizar uma sessão):**
 
