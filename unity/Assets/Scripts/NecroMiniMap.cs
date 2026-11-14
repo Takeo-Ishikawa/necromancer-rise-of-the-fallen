@@ -137,6 +137,10 @@ namespace Necromancer
                 {
                     float dx=x+.5f-point.x,dy=y+.5f-point.y;
                     if(dx*dx+dy*dy>28.1f)continue;
+                    // The cavern's stone walls block visibility: fog
+                    // should not reveal adjacent sealed-off tunnels.
+                    if(NecroCaveNetwork.HasNetwork(level) &&
+                       !Visible(point,new Vector2(x+.5f,y+.5f)))continue;
                     int i=y*map.columns+x;
                     if(map.revealed[i])continue;
                     map.revealed[i]=true;
