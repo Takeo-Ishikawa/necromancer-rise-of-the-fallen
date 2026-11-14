@@ -4,12 +4,14 @@ on:
     paths:
       - 'unity/**'
       - 'tests/check_unity_project.py'
+      - 'tests/check_bonehollow_geometry.py'
       - '.github/workflows/unity-structure.yml'
       - 'README.md'
   pull_request:
     paths:
       - 'unity/**'
       - 'tests/check_unity_project.py'
+      - 'tests/check_bonehollow_geometry.py'
       - '.github/workflows/unity-structure.yml'
 jobs:
   data-check:
@@ -20,3 +22,4 @@ jobs:
         with:
           python-version: '3.11'
       - run: python tests/check_unity_project.py
+      - run: python tests/check_bonehollow_geometry.py
