@@ -59,6 +59,7 @@ Não foi alterado o arquivo-base `necro-save-v1.json`, a versão serializada de 
 - Os novos testes Python protegem o espaço de surgimento; o `NecroRegionEditorCheck.Verify()` testa a importação real do JSON no Unity, colisor de parede, entradas, boss e spawns.
 - Alterações mantidas em `feature/bonehollow-caverna-unificada`; refúgio, arte de criaturas, UI de inventário e salvamentos de atributos preservados.
 - **O que permanece pendente:** teste do APK em aparelho, circulação de servos em túneis curvos, performance e uma etapa posterior de ilustrações finais de materiais separados por bioma.
+- **Build de validação desta revisão:** Android Preview [#120](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43594586540), solicitado no commit `5e288328118f5a1b68f39384df4653c3c9bb404c` após alterações de código e testes. Estado na abertura do registro: **em andamento**, com verificação inicial concluída e Unity Builder pendente. Não confundir com o APK #119, anterior ao polimento. O disparador auxiliar foi excluído; workflow Android e Windows voltaram a ser manuais.
 
 ### Próximos marcos de qualidade
 
