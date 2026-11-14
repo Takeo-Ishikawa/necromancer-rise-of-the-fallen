@@ -54,6 +54,9 @@ namespace Necromancer
 
         int RespawnPopulationLimitForStage()
         {
+            // The unified cave spans nine chambers; the old small-area cap
+            // would leave almost its entire length empty after one sweep.
+            if(NecroCaveNetwork.HasNetwork(level))return 26;
             return stage==0 ? 7 :
                 stage==1 ? 4 :
                 stage==2 ? 5 : 6;
@@ -61,12 +64,14 @@ namespace Necromancer
 
         float SpawnMinDistanceForStage()
         {
+            if(NecroCaveNetwork.HasNetwork(level))return 7.0f;
             return stage==0 ? 4.3f :
                 stage==1 ? 3.9f : 3.6f;
         }
 
         float SpawnMaxDistanceForStage()
         {
+            if(NecroCaveNetwork.HasNetwork(level))return 13.0f;
             return stage==0 ? 5.3f :
                 stage==1 ? 5.0f : 4.7f;
         }
