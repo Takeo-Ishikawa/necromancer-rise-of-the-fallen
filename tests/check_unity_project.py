@@ -125,6 +125,15 @@ sites.extend((e["type"],e["x"],e["y"]) for e in first["resources"])
 for kind,x,y in sites:
     assert 0<x<W and 0<y<H, f"Out of cave bounds: {kind}"
     assert not cave_blocked(x,y), f"Spawn in solid rock: {kind} at {(x,y)}"
+# A creature is larger than a map pixel. Reserve clearance for animation,
+# knockback and followers before publishing edits to the underground network.
+for enemy in first["enemies"]:
+    assert not cave_blocked(enemy["x"],enemy["y"],1.0), (
+        f"Enemy too close to a cave wall: {enemy}"
+    )
+assert not cave_blocked(first["rotboarX"],first["rotboarY"],1.6), (
+    "Rotboar arena requires extra collision space"
+)
 for biome in first["biomes"]:
     assert not cave_blocked(biome["x"],biome["y"]), (
         f"Biome hub buried in rock: {biome['id']}"
@@ -165,6 +174,14 @@ assert "NecroCaveNetwork.IsWall(zone,x,map.rows-1-y)" in (
 assert "NecroCaveZones.Populate(level,next.root.transform);" in (
     unity/"Assets/Scripts/NecroPrototype.cs").read_text()
 assert (unity/"Assets/Scripts/NecroCaveZones.cs").is_file()
+cave_art=(unity/"Assets/Scripts/NecroCaveNetwork.cs").read_text()
+cave_zones=(unity/"Assets/Scripts/NecroCaveZones.cs").read_text()
+for token in ("static Color32 CellColor(", "daylight", "openNorth",
+              "texture.Apply(false,true)", "new Texture2D(width,height,TextureFormat.RGB24,false)"):
+    assert token in cave_art, f"Missing cave material feature: {token}"
+for token in ("MaskedHaze(", "NecroCaveNetwork.IsWall(level,cellX,cellY)",
+              "Fenda de luz solar"):
+    assert token in cave_zones, f"Missing cave lighting mask feature: {token}"
 
 pup_art=(unity/"Assets/Resources/Creatures/grave_pup.png").read_bytes()
 assert struct.unpack(">II",pup_art[16:24])==(1024,256) and pup_art[24:26]==bytes([8,6])
