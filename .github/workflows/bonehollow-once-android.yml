@@ -1,0 +1,24 @@
+name: One-time unified Bonehollow Android build request
+# Disposable command workflow: existing Android and Windows jobs stay manual.
+on:
+  push:
+    branches:
+      - feature/bonehollow-caverna-unificada
+    paths:
+      - 'docs/REQUEST_UNIFIED_BONEHOLLOW_ANDROID_ONCE.md'
+permissions:
+  actions: write
+  contents: read
+jobs:
+  invoke-manual-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch existing Android preview for this branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_REF: ${{ github.ref_name }}
+          TARGET_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh api -X POST "repos/${TARGET_REPO}/actions/workflows/unity-android.yml/dispatches" -f ref="${TARGET_REF}"
+          echo "Manually dispatched existing Android workflow for ${TARGET_REF}"
