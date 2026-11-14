@@ -40,8 +40,33 @@ Não foi alterado o arquivo-base `necro-save-v1.json`, a versão serializada de 
 - [ ] Comparação de desempenho Android (geração da textura RGB24, memória, FPS, tempo de carga).
 - [ ] Capturas do jogo com efeitos, iluminação e UI reais.
 - [ ] Qualidade artística final dos biomas: a matriz e o material procedural são **primeira versão funcional**.
+- [x] Deslocamento dos quatro spawns mais próximos de paredes para distância de colisão de pelo menos 1,0 unidade.
+- [x] Diferença de relevo entre parede e piso, estratos minerais discretos, iluminação vinda do alto/esquerda.
+- [x] Luz de entrada da superfície com diminuição gradual e atmosferas restritas ao piso navegável (não atravessam rochas).
+- [x] Checagem pelo Editor da leitura real do JSON, dos nove biomas e das folgas de colisão.
+- [ ] Revisão em dispositivo do contraste, FPS, memória e iluminação em movimento.
 
 **Política de recuperação:** as outras regiões continuam recuperáveis na branch `main` / histórico do Git. Nenhum PNG, rig, sprite, save ou componente do santuário foi removido. O trabalho só pode ser mesclado à main após revisão do PR e testes Android.
+
+## Diário de execução — 14/11/2026
+
+**Baseline do novo mapa:** o [Android Preview #119](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43539188110) terminou **com sucesso**, incluindo o Unity Builder e a publicação do APK direto. Artifact `necromancer-unity.apk`: **29.612.388 bytes** (~29,6 MB), armazenado no GitHub Actions. O sucesso de build não prova jogabilidade, FPS ou uso de memória no aparelho.
+
+**Continuidade — ambientação e passagem segura:**
+- Quatro pontos de spawn de inimigos foram deslocados localmente para garantir pelo menos **1,0 unidade** de espaço diante de paredes: rato nos Jardins de Fungos, wisp do Ossuário, slime do Lago e Grave Pup do Lago. Não foram movidos os biomas, recursos, pontos principais nem os muros.
+- O piso procedural agora usa faixas minerais suaves e pequenas variações de sedimento. As bordas das paredes distinguem arestas iluminadas de faces voltadas para o interior.
+- A entrada tem uma iluminação mais quente que **enfraquece ao avançar para o subsolo**. A névoa colorida e a abertura de luz foram recortadas pela matriz de colisão, evitando que luz de bioma apareça dentro de rocha sólida.
+- Os novos testes Python protegem o espaço de surgimento; o `NecroRegionEditorCheck.Verify()` testa a importação real do JSON no Unity, colisor de parede, entradas, boss e spawns.
+- Alterações mantidas em `feature/bonehollow-caverna-unificada`; refúgio, arte de criaturas, UI de inventário e salvamentos de atributos preservados.
+- **O que permanece pendente:** teste do APK em aparelho, circulação de servos em túneis curvos, performance e uma etapa posterior de ilustrações finais de materiais separados por bioma.
+
+### Próximos marcos de qualidade
+
+1. **QA físico da entrada:** testar a personagem andando pelas primeiras bifurcações com 0, 2 e 6 servos; observar alinhamento de sombra e oclusão.
+2. **Teste de navegação:** alcançar Cristais, Poço, Lago, Rotboar e selo sem teletransporte involuntário, verificar respawn fora de paredes, coleta e minimapa.
+3. **Revisão do solo e paredes:** comparar contraste dos nove biomas em capturas reais e só então trocar materiais procedurais por sprites de produção aprovados.
+4. **Otimização Android:** medir tempo de carregamento, memória de pico, estabilidade de 60 FPS, tamanho real do APK e política de compactação.
+5. **Aprovação:** somente depois desses testes, preparar a mesclagem do PR #2 à `main`.
 
 ## Próximas melhorias visuais
 
