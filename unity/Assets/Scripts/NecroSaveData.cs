@@ -11,6 +11,8 @@ namespace Necromancer
     [Serializable] public sealed class NecroSaveData
     {
         public int version=1;
+        // Missing/zero in old saves: world map snapshot is incompatible, hero progression is not.
+        public int worldLayoutRevision;
         public int stage,level,experience,mana,maxMana,shards,kills,gathered;
         public int staffTier,mantleTier,lifeRitual,vaultRitual,spiritRitual;
         // Optional 0.9.0 attributes: prior v1 save JSON loads these as zero.
