@@ -1,3 +1,5 @@
+> **ATUALIZAÇÃO DE ESCOPO — 13/11/2026:** a pedido do usuário, Bonehollow deixa de ser somente o primeiro entre quatro mapas. As três outras fases (`lower_tunnels`, `necropolis` e `marsh`) foram retiradas de `levels.json` em favor de **um único mundo subterrâneo contínuo, de 160 × 104 unidades e nove grandes biomas interligados**. A câmara segura permanece. Os marcos e coordenadas de 56 × 34 apresentados neste documento são históricos e foram **substituídos** pela implantação descrita em [BONEHOLLOW_CAVERNA_UNIFICADA.md](BONEHOLLOW_CAVERNA_UNIFICADA.md) e [planta atual](BONEHOLLOW_CAVERNA_UNIFICADA_PLANTA.svg). Antes de expandir arte, testar a nova malha e as passagens com servos no Android. O plano anterior permanece como referência histórica, não como especificação vigente. 
+
 # PLANO DE PRODUÇÃO — BONEHOLLOW / MAPA 01
 ## Necromancer: Rise of the Fallen — cenário 2D de fantasia sombria
 
