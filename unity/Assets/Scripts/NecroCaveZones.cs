@@ -37,6 +37,41 @@ namespace Necromancer
             return haze;
         }
 
+        // Each network biome has a small, one-time 128px atmospheric mask.
+        // Painting haze only onto walkable cells keeps solid cave walls dark.
+        static Sprite MaskedHaze(LevelDefinition level,float x,float y,
+            float w,float h)
+        {
+            const int size=128;
+            Texture2D texture=new Texture2D(size,size,TextureFormat.RGBA32,false);
+            Color32[] pixels=new Color32[size*size];
+            for(int j=0;j<size;j++)
+                for(int i=0;i<size;i++)
+                {
+                    float fx=(i+.5f)/size;
+                    float fy=(j+.5f)/size;
+                    float dx=(fx-.5f)*2f;
+                    float dy=(fy-.5f)*2f;
+                    float distance=Mathf.Sqrt(dx*dx+dy*dy);
+                    float falloff=Mathf.Pow(Mathf.Clamp01(1f-distance),2f);
+                    // Cave-row coordinates grow down; sprite Y grows up.
+                    float worldX=x+(fx-.5f)*w;
+                    float jsonY=y+(.5f-fy)*h;
+                    int cellX=Mathf.FloorToInt(worldX);
+                    int cellY=Mathf.FloorToInt(jsonY);
+                    if(NecroCaveNetwork.IsWall(level,cellX,cellY))
+                        falloff=0f;
+                    pixels[j*size+i]=new Color32(255,255,255,
+                        (byte)Mathf.RoundToInt(255f*falloff));
+                }
+            texture.SetPixels32(pixels);
+            texture.filterMode=FilterMode.Bilinear;
+            texture.wrapMode=TextureWrapMode.Clamp;
+            texture.Apply(false,true);
+            return Sprite.Create(texture,new Rect(0,0,size,size),
+                new Vector2(.5f,.5f),100f,0,SpriteMeshType.FullRect);
+        }
+
         static void Patch(LevelDefinition level,Transform parent,
             string label,float x,float y,float w,float h,Color tint)
         {
@@ -45,7 +80,8 @@ namespace Necromancer
             Vector2 point=NecroLevels.At(level,x,y);
             patch.transform.position=new Vector3(point.x,point.y,0f);
             SpriteRenderer art=patch.AddComponent<SpriteRenderer>();
-            art.sprite=Haze();
+            art.sprite=NecroCaveNetwork.HasNetwork(level) ?
+                MaskedHaze(level,x,y,w,h) : Haze();
             art.sortingOrder=-49;
             art.color=tint;
             Vector2 spriteSize=art.sprite.bounds.size;
@@ -72,6 +108,50 @@ namespace Necromancer
         public static void Populate(LevelDefinition level,Transform parent)
         {
             if(level==null||parent==null||level.id!="bonehollow")return;
+            if(NecroCaveNetwork.HasNetwork(level) && level.biomes!=null)
+            {
+                for(int i=0;i<level.biomes.Length;i++)
+                {
+                    CaveBiome biome=level.biomes[i];
+                    Color tint=biome.id=="surface" ?
+                        new Color(.62f,.53f,.39f,.19f) :
+                        biome.id=="ossadas" || biome.id=="ossuario" ?
+                        new Color(.67f,.49f,.45f,.16f) :
+                        biome.id=="fungos" ?
+                        new Color(.27f,.66f,.51f,.18f) :
+                        biome.id=="poco" ?
+                        new Color(.44f,.34f,.65f,.17f) :
+                        biome.id=="cristais" ?
+                        new Color(.32f,.65f,.81f,.19f) :
+                        biome.id=="lago" ?
+                        new Color(.24f,.55f,.62f,.18f) :
+                        biome.id=="covil" ?
+                        new Color(.67f,.31f,.37f,.15f) :
+                        new Color(.52f,.48f,.82f,.20f);
+                    Patch(level,parent,biome.title,biome.x,biome.y,
+                        biome.rx*1.8f,biome.ry*1.8f,tint);
+                    if(biome.id=="surface")
+                    {
+                        // Visible daylight fades as the player leaves the
+                        // rock opening; the mask excludes solid tunnel walls.
+                        Patch(level,parent,"Fenda de luz solar",
+                            biome.x+2f,biome.y-3.5f,14f,17f,
+                            new Color(1f,.84f,.58f,.28f));
+                    }
+                    // A handful of landmarks, safely outside the spawn center.
+                    if(biome.id=="covil" || biome.id=="selo")continue;
+                    string kind=biome.id=="surface"?"lantern":
+                        biome.id=="fungos"?"fungus":
+                        biome.id=="cristais"?"crystal":
+                        biome.id=="lago"?"pool":
+                        biome.id=="poco"?"rune":"bones";
+                    float landmarkX=biome.x+3.5f,landmarkY=biome.y+2.5f;
+                    if(NecroCaveNetwork.HasClearance(level,landmarkX,
+                        landmarkY,.75f))
+                        Landmark(level,parent,kind,landmarkX,landmarkY);
+                }
+                return;
+            }
             Patch(level,parent,"Entrada",8f,28.9f,15f,11f,
                 new Color(.40f,.39f,.56f,.25f));
             Patch(level,parent,"Ossadas",18f,24f,20f,13f,

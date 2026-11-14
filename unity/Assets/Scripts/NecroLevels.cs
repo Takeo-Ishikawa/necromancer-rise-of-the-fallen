@@ -10,9 +10,19 @@ namespace Necromancer
         public float width,height,startX,startY,sealX,sealY;
         public float rotboarX,rotboarY;
         public bool requiresGuardian;
+        // Bonehollow v2: one continuous cavern. Rows are north-to-south at 1 world unit/cell.
+        // '#' = solid cave wall, '.' = navigable rock floor.
+        public int layoutRevision;
+        public string[] caveRows;
+        public CaveBiome[] biomes;
         public Obstacle[] obstacles;
         public Spawn[] enemies;
         public ResourceSpawn[] resources;
+    }
+    [Serializable] public class CaveBiome
+    {
+        public string id,title;
+        public float x,y,rx,ry;
     }
     [Serializable] public class Obstacle { public float x,y,r; }
     [Serializable] public class Spawn { public string kind; public float x,y; }
