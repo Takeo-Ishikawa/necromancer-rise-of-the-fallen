@@ -160,7 +160,12 @@ namespace Necromancer
 
         static void FitGround(SpriteRenderer renderer,LevelDefinition area)
         {
-            if(area.background=="entrada_da_caverna_bonehollow")
+            if(NecroCaveNetwork.HasNetwork(area))
+            {
+                renderer.drawMode=SpriteDrawMode.Simple;
+                Fit(renderer,area.width,area.height);
+            }
+            else if(area.background=="entrada_da_caverna_bonehollow")
             {
                 // Tile the imported floor at its native pixel density.
                 // FullRect sprites allow SpriteRenderer tiled draw mode.
@@ -237,7 +242,9 @@ namespace Necromancer
                 next.root=new GameObject("Region "+(stage+1)+": "+level.title);
                 stages[stage]=next;
                 current=next;
-                Sprite background=NecroArt.Environment(level.background);
+                Sprite background=NecroCaveNetwork.HasNetwork(level) ?
+                    NecroCaveNetwork.Ground(level) :
+                    NecroArt.Environment(level.background);
                 next.backdrop=Visual("Ground",new Vector2(level.width*.5f,level.height*.5f),
                     background,-50,next.root.transform);
                 FitGround(next.backdrop,level);
