@@ -15,6 +15,7 @@ required = [
     "Assets/Editor/NecromancerAndroidBuild.cs",
     "Assets/Editor/NecromancerWindowsBuild.cs",
     "Assets/Scripts/NecroLevels.cs",
+    "Assets/Scripts/NecroCaveNetwork.cs",
     "Assets/Scripts/NecroArt.cs",
     "Assets/Scripts/NecroPrototype.cs",
     "Assets/Scripts/NecroGameplay.cs",
@@ -74,69 +75,93 @@ manifest = json.loads((unity / "Packages/manifest.json").read_text())
 assert "com.unity.2d.sprite" in manifest["dependencies"]
 
 levels = json.loads((unity / "Assets/Resources/Data/levels.json").read_text())["levels"]
-assert [area["id"] for area in levels] == [
-    "bonehollow", "lower_tunnels", "necropolis", "marsh"
-]
-kinds = set()
-for area in levels:
-    assert area["width"] > 20 and area["height"] > 15
-    assert area["objective"] and len(area["enemies"]) >= (3 if area["id"]=="bonehollow" else 6)
-    assert len(area["resources"]) >= 3
-    kinds.update(entity["kind"] for entity in area["enemies"])
-    assert area["startX"] > 0 and area["startY"] > 0
-    for entity in [
-        *area["enemies"], *area["resources"],
-        {"kind": "player", "x": area["startX"], "y": area["startY"]},
-    ]:
-        x, y = entity["x"], entity["y"]
-        assert 0 < x < area["width"] and 0 < y < area["height"]
-        assert all(
-            (x - obstacle["x"]) ** 2 + (y - obstacle["y"]) ** 2
-            > (obstacle["r"] + .2) ** 2
-            for obstacle in area["obstacles"]
-        ), f"Blocked start/spawn in {area['id']}: {entity}"
-assert {"rat", "bat", "slime", "spider", "snake", "skeleton",
-        "wisp", "grave_pup", "grave_lord", "marsh_lord"} <= kinds
-assert len(levels[0]["enemies"])>=10
-assert {"grave_pup","rat","bat","slime","spider"} <= {e["kind"] for e in levels[0]["enemies"]}
-assert levels[0]["width"]>=54 and levels[0]["height"]>=32
-assert levels[0]["background"]=="entrada_da_caverna_bonehollow"
-
-# Cave-scale regression: all encounter and pickup sites must be reachable
-# with 0.6 units of clearance. Tests geometry, not visual decoration.
-from collections import deque
+assert [area["id"] for area in levels] == ["bonehollow"], "Three former zones must be removed"
+assert len(levels)==1, "Only the one connected Bonehollow map is playable"
 first=levels[0]
-assert len(first["obstacles"])>=60
-def cave_blocked(x,y,r=.6):
-    return (x<r or y<r or x>first["width"]-r or
-            y>first["height"]-r or any(
-                (x-o["x"])**2+(y-o["y"])**2<(r+o["r"])**2
-                for o in first["obstacles"]))
+assert first["width"]==160 and first["height"]==104
+assert first["layoutRevision"]==2
+assert first["background"]=="entrada_da_caverna_bonehollow"
+assert first["objective"] and len(first["enemies"])>=35
+assert len(first["resources"])>=25
+assert {"rat","bat","slime","spider","snake","skeleton","wisp","grave_pup"} <= {
+    monster["kind"] for monster in first["enemies"]
+}
+assert {"cristal","ossos","fungo"} <= {r["type"] for r in first["resources"]}
+assert len(first["biomes"])>=9, "Need biomes connected inside a single cave"
+assert len({b["id"] for b in first["biomes"]})==len(first["biomes"])
+rows=first["caveRows"]
+W=int(first["width"])
+H=int(first["height"])
+assert len(rows)==H and all(len(row)==W for row in rows)
+assert set("".join(rows))=={"#","."}
+assert first["rotboarX"]>0 and first["rotboarY"]>0
+assert (unity/"Assets/Scripts/NecroCaveNetwork.cs").is_file()
+
+# Authoritative grid collision in the new one-map world. Use the same
+# circle-vs-cell AABB rule as NecroCaveNetwork.Blocked (JSON Y down).
+def cave_blocked(x,y,r=.60):
+    if x<=r or y<=r or x>=W-r or y>=H-r:
+        return True
+    from math import floor
+    for cy in range(floor(y-r),floor(y+r)+1):
+        for cx in range(floor(x-r),floor(x+r)+1):
+            if not (0<=cx<W and 0<=cy<H) or rows[cy][cx]=="#":
+                near_x=max(cx,min(x,cx+1))
+                near_y=max(cy,min(y,cy+1))
+                if (x-near_x)**2+(y-near_y)**2<=r*r:
+                    return True
+    for rock in first["obstacles"]:
+        if (x-rock["x"])**2+(y-rock["y"])**2<(r+rock["r"])**2:
+            return True
+    return False
+
+sites=[
+    ("entrance",first["startX"],first["startY"]),
+    ("seal",first["sealX"],first["sealY"]),
+    ("rotboar",first["rotboarX"],first["rotboarY"]),
+]
+sites.extend((e["kind"],e["x"],e["y"]) for e in first["enemies"])
+sites.extend((e["type"],e["x"],e["y"]) for e in first["resources"])
+for kind,x,y in sites:
+    assert 0<x<W and 0<y<H, f"Out of cave bounds: {kind}"
+    assert not cave_blocked(x,y), f"Spawn in solid rock: {kind} at {(x,y)}"
+for biome in first["biomes"]:
+    assert not cave_blocked(biome["x"],biome["y"]), (
+        f"Biome hub buried in rock: {biome['id']}"
+    )
+
+from collections import deque
 step=.5
-width=int(first["width"]/step)+1
-height=int(first["height"]/step)+1
-start=(round(first["startX"]/step),round(first["startY"]/step))
-assert not cave_blocked(start[0]*step,start[1]*step), "Cave entry obstructed"
-seen={start}
-pending=deque([start])
-while pending:
-    x,y=pending.popleft()
-    for dx,dy in ((0,1),(0,-1),(1,0),(-1,0)):
+cols=int(W/step)
+lines=int(H/step)
+def grid_point(i,j):
+    return ((i+.5)*step,(j+.5)*step)
+def is_open(i,j):
+    return 0<=i<cols and 0<=j<lines and not cave_blocked(*grid_point(i,j))
+start=(int(first["startX"]/step),int(first["startY"]/step))
+assert is_open(*start),"Cave entrance obstructed"
+visited={start}
+queue=deque([start])
+while queue:
+    x,y=queue.popleft()
+    for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
         nx,ny=x+dx,y+dy
-        if not (0<=nx<width and 0<=ny<height):
+        if (nx,ny) in visited or not is_open(nx,ny):
             continue
-        if (nx,ny) in seen or cave_blocked(nx*step,ny*step):
-            continue
-        seen.add((nx,ny)); pending.append((nx,ny))
-targets=[("selo",first["sealX"],first["sealY"]),
-         ("rotboar",first["rotboarX"],first["rotboarY"])]
-targets += [(p.get("kind","cristal"),p["x"],p["y"])
-            for p in first["enemies"]+first["resources"]]
-for kind,x,y in targets:
-    assert not cave_blocked(x,y), f"Spawn inside rock: {kind} {(x,y)}"
-    cx,cy=round(x/step),round(y/step)
-    assert any((cx+dx,cy+dy) in seen for dx in (-1,0,1)
-               for dy in (-1,0,1)), f"Isolated cave location: {kind} {(x,y)}"
+        visited.add((nx,ny))
+        queue.append((nx,ny))
+for kind,x,y in sites:
+    cx,cy=int(x/step),int(y/step)
+    assert (cx,cy) in visited or any(
+        (cx+dx,cy+dy) in visited for dx in (-1,0,1)
+        for dy in (-1,0,1)
+    ), f"Unreachable cavern objective: {kind} {(x,y)}"
+assert "NecroCaveNetwork.Blocked(level,point,radius)" in (
+    unity/"Assets/Scripts/NecroGameplay.cs").read_text()
+assert "NecroCaveNetwork.Ground(level)" in (
+    unity/"Assets/Scripts/NecroPrototype.cs").read_text()
+assert "NecroCaveNetwork.IsWall(zone,x,map.rows-1-y)" in (
+    unity/"Assets/Scripts/NecroMiniMap.cs").read_text()
 assert "NecroCaveZones.Populate(level,next.root.transform);" in (
     unity/"Assets/Scripts/NecroPrototype.cs").read_text()
 assert (unity/"Assets/Scripts/NecroCaveZones.cs").is_file()
@@ -1244,7 +1269,7 @@ assert "if(collected)SaveProgress();" in pickup
 assert "current.resources.RemoveAt(i);" in pickup
 assert pickup.count("SaveProgress();")==1, "Batch saves once for collected items"
 assert len(levels[0]["resources"])>=10, "First cave must reward exploration"
-assert all(r["type"]=="cristal" for r in levels[0]["resources"])
+assert {"cristal","ossos","fungo"} <= {r["type"] for r in levels[0]["resources"]}
 assert sum(2 for _ in levels[0]["resources"])>=10, "Starter resources fund one mantle rank"
 progress_source=(unity/"Assets/Scripts/NecroProgressHud.cs").read_text()
 assert '"FRAGMENTOS "+shards+" | RECURSOS "+' in progress_source
