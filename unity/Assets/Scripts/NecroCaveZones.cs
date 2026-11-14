@@ -72,6 +72,42 @@ namespace Necromancer
         public static void Populate(LevelDefinition level,Transform parent)
         {
             if(level==null||parent==null||level.id!="bonehollow")return;
+            if(NecroCaveNetwork.HasNetwork(level) && level.biomes!=null)
+            {
+                for(int i=0;i<level.biomes.Length;i++)
+                {
+                    CaveBiome biome=level.biomes[i];
+                    Color tint=biome.id=="surface" ?
+                        new Color(.62f,.53f,.39f,.19f) :
+                        biome.id=="ossadas" || biome.id=="ossuario" ?
+                        new Color(.67f,.49f,.45f,.16f) :
+                        biome.id=="fungos" ?
+                        new Color(.27f,.66f,.51f,.18f) :
+                        biome.id=="poco" ?
+                        new Color(.44f,.34f,.65f,.17f) :
+                        biome.id=="cristais" ?
+                        new Color(.32f,.65f,.81f,.19f) :
+                        biome.id=="lago" ?
+                        new Color(.24f,.55f,.62f,.18f) :
+                        biome.id=="covil" ?
+                        new Color(.67f,.31f,.37f,.15f) :
+                        new Color(.52f,.48f,.82f,.20f);
+                    Patch(level,parent,biome.title,biome.x,biome.y,
+                        biome.rx*1.8f,biome.ry*1.8f,tint);
+                    // A handful of landmarks, safely outside the spawn center.
+                    if(biome.id=="covil" || biome.id=="selo")continue;
+                    string kind=biome.id=="surface"?"lantern":
+                        biome.id=="fungos"?"fungus":
+                        biome.id=="cristais"?"crystal":
+                        biome.id=="lago"?"pool":
+                        biome.id=="poco"?"rune":"bones";
+                    float landmarkX=biome.x+3.5f,landmarkY=biome.y+2.5f;
+                    if(NecroCaveNetwork.HasClearance(level,landmarkX,
+                        landmarkY,.75f))
+                        Landmark(level,parent,kind,landmarkX,landmarkY);
+                }
+                return;
+            }
             Patch(level,parent,"Entrada",8f,28.9f,15f,11f,
                 new Color(.40f,.39f,.56f,.25f));
             Patch(level,parent,"Ossadas",18f,24f,20f,13f,
