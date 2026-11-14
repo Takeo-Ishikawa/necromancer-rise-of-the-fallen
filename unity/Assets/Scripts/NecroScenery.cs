@@ -32,9 +32,11 @@ namespace Necromancer
             int seed=8161;
             foreach(char c in area.id)seed=unchecked(seed*31+c);
             System.Random random=new System.Random(seed&0x7fffffff);
-            int wanted=area.id=="bonehollow"?64:area.id=="necropolis"?32:area.id=="marsh"?27:25;
+            bool expansive=NecroCaveNetwork.HasNetwork(area);
+            int wanted=expansive?250:area.id=="bonehollow"?64:
+                area.id=="necropolis"?32:area.id=="marsh"?27:25;
             int created=0;
-            for(int tries=0;tries<(area.id=="bonehollow"?720:230) && created<wanted;tries++)
+            for(int tries=0;tries<(expansive?3500:area.id=="bonehollow"?720:230) && created<wanted;tries++)
             {
                 float x=1.0f+(float)random.NextDouble()*(area.width-2.0f);
                 float y=1.0f+(float)random.NextDouble()*(area.height-2.0f);
@@ -42,6 +44,10 @@ namespace Necromancer
                    Vector2.Distance(new Vector2(x,y),new Vector2(area.sealX,area.sealY))<2.2f)
                     continue;
 
+                // Props only appear on accessible floor, away from corridor
+                // pinch points and solid cave walls.
+                if(expansive && !NecroCaveNetwork.HasClearance(area,x,y,1.1f))
+                    continue;
                 bool tooClose=false;
                 if(area.obstacles!=null)foreach(Obstacle obstacle in area.obstacles)
                     if(Vector2.Distance(new Vector2(x,y),new Vector2(obstacle.x,obstacle.y)) <
@@ -60,7 +66,32 @@ namespace Necromancer
                    Vector2.Distance(new Vector2(x,y),new Vector2(area.rotboarX,area.rotboarY))<2.5f)
                     continue;
                 string kind=variants[random.Next(variants.Length)];
-                if(area.id=="bonehollow")
+                if(expansive)
+                {
+                    CaveBiome biome=area.biomes[
+                        NecroCaveNetwork.NearestBiome(area,x,y)];
+                    switch(biome.id)
+                    {
+                        case "surface":
+                            kind=random.Next(3)==0?"lantern":"stalagmite";break;
+                        case "ossadas":
+                        case "ossuario":
+                            kind=random.Next(3)==0?"headstone":"bones";break;
+                        case "fungos":
+                            kind=random.Next(5)==0?"pool":"fungus";break;
+                        case "poco":
+                            kind=random.Next(4)==0?"rune":"stalagmite";break;
+                        case "cristais":
+                            kind=random.Next(4)==0?"stalagmite":"crystal";break;
+                        case "lago":
+                            kind=random.Next(4)==0?"reeds":"pool";break;
+                        case "covil":
+                            kind=random.Next(4)==0?"bones":"stalagmite";break;
+                        default:
+                            kind=random.Next(2)==0?"rune":"crystal";break;
+                    }
+                }
+                else if(area.id=="bonehollow")
                 {
                     if(x<26f && y<17f)
                         kind=random.Next(4)==0?"stalagmite":"crystal";
