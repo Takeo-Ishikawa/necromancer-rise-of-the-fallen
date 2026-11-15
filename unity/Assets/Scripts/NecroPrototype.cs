@@ -26,6 +26,9 @@ namespace Necromancer
             public Vector2 pupHeading;
             public bool pupHit,catchingUp;
             public float followStragglerSeconds;
+            // Disposable follower navigation cache. Never included in saves.
+            public NecroCaveRoute caveRoute;
+            public float caveRepathAt;
             public bool ally;
             // Transient hostile AI focus: never serialized into the v1 save.
             public Actor hostileFocus;
