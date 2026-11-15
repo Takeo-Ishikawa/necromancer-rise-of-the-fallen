@@ -39,4 +39,6 @@ Para quaisquer problemas, registrar: build, bioma, posição aproximada do minim
 5. Recursos, Rotboar, selo, salvamento e refúgio continuam acessíveis.
 6. A arte final dos biomas só será substituída após observar o protótipo em dispositivo; o objetivo é manter um cenário harmônico e modular.
 
-**Situação inicial:** somente os itens 1 e, para a versão anterior #120, 2 estão confirmados. O roteador está integrado na branch e a compilação Android #121 foi solicitada, ainda sem resultado definitivo na abertura desta ficha.
+**Verificação geométrica adicional (14/11/2026):** comparação independente da matriz `caveRows` com rotas cardinais em grade de 1 unidade, verificando segmentos pelo mesmo critério circular contra paredes: **18/18 rotas válidas** (nove biomas × dois raios, 0,28 e 0,52 unidade). Nenhuma passagem observada através de células sólidas. É um teste matemático da geometria, **não** um teste de IA em tempo real ou no Android.
+
+**Situação inicial:** os testes estáticos foram aprovados e a versão anterior, Android #120, compilou. O navegador está integrado na branch e a compilação Android #121 foi solicitada, ainda sem resultado definitivo na abertura desta ficha. Os casos N0–N9 permanecem pendentes em aparelho.
