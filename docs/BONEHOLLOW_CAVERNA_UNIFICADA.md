@@ -83,7 +83,9 @@ A área explorável de Bonehollow é irregular; o seguidor anterior perseguia di
 
 **Limite da validação:** o sucesso dos testes estáticos demonstra conectividade da geometria e a presença da integração, **não** confirma o seguimento de vários servos sob combate, a variação de FPS no Android ou a ausência de pequenos travamentos em movimento. Esses itens exigem teste no aparelho.
 
-**Próximo marco:** compilar o Android com o novo navegador, conferir o teste do Unity Editor e, em seguida, avaliar grupos de 2 e 6 servos atravessando Cristais → Poço → Lago → Covil. Caso haja aglomeração nos gargalos, melhorar a reserva de posições entre os servos, sem mudar os atalhos e as paredes.
+**Build solicitada:** Android Preview [#121](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43666214958), acionada uma única vez para esta etapa. Até a última verificação a fase `Unity Builder - APK` estava em andamento, portanto **ainda não havia confirmação do APK #121**. O arquivo temporário para acionar o build foi excluído e os workflows originais continuam manuais.
+
+**Próximo marco:** confirmar a compilação #121, avaliar com dois e seis servos os caminhos do Poço, Cristais, Ossuário, Lago e Covil, e registrar os resultados no [protocolo de QA de navegação](BONEHOLLOW_QA_NAVEGACAO_SERVOS.md). Caso haja aglomeração nos gargalos, melhorar a reserva de posições entre os servos, sem mudar os atalhos e as paredes.
 
 ## Próximas melhorias visuais
 
