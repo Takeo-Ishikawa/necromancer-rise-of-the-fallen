@@ -116,6 +116,12 @@ namespace Necromancer
             if(slot<0)return;
             Vector2 target;
             bool free=TryFindFormationSpot(ally,slot,out target);
+            bool cave=!inSanctuary && NecroCaveNetwork.HasNetwork(level);
+            // When the formation slot is blocked, route toward the heroine
+            // instead of trying to walk through the solid wall.
+            if(cave && !free)target=player.body.position;
+            bool behindRock=cave && !NecroCaveNavigator.Direct(level,
+                ally.body.position,target,ally.radius);
             float leaderDistance=Vector2.Distance(ally.body.position,
                 player.body.position);
 
@@ -125,7 +131,11 @@ namespace Necromancer
                 ally.followStragglerSeconds=0f;
             // No recall near hostiles, through occupied slots, or on
             // short separation: normal movement handles those cases.
-            if(free && ally.followStragglerSeconds>=FormationRecoveryDelay &&
+            // Never teleport through a winding cave wall. On Bonehollow,
+            // real routes handle long separations; recall stays for the refuge
+            // and legacy open maps only.
+            if(free && (!cave) &&
+                ally.followStragglerSeconds>=FormationRecoveryDelay &&
                 FormationRecoverySafe(ally))
             {
                 ally.body.position=target;
@@ -135,12 +145,33 @@ namespace Necromancer
             }
 
             float distance=Vector2.Distance(ally.body.position,target);
-            if(distance>FormationFollowStart)ally.catchingUp=true;
-            if(distance<FormationFollowStop)ally.catchingUp=false;
+            if(distance>FormationFollowStart || behindRock)
+                ally.catchingUp=true;
+            if(distance<FormationFollowStop && !behindRock)
+                ally.catchingUp=false;
             if(!ally.catchingUp)return;
 
             float catchup=leaderDistance>7f?2f:
                 leaderDistance>4f?1.55f:1f;
+            if(cave && behindRock)
+            {
+                // A maximum of one BFS route per servant roughly every
+                // 1.4 seconds. Static wall masks and search buffers are reused.
+                if(Time.time>=ally.caveRepathAt)
+                {
+                    ally.caveRoute=NecroCaveNavigator.Build(level,
+                        ally.body.position,target,ally.radius);
+                    ally.caveRepathAt=Time.time+1.4f+(slot%4)*.13f;
+                }
+                if(ally.caveRoute!=null)
+                {
+                    Vector2 waypoint=NecroCaveNavigator.Next(level,
+                        ally.caveRoute,ally.body.position,ally.radius);
+                    MoveToward(ally,waypoint,dt,catchup);
+                    return;
+                }
+            }
+            else ally.caveRoute=null;
             MoveToward(ally,target,dt,catchup);
         }
     }
