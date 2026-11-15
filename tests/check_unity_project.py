@@ -174,6 +174,65 @@ assert "NecroCaveNetwork.IsWall(zone,x,map.rows-1-y)" in (
 assert "NecroCaveZones.Populate(level,next.root.transform);" in (
     unity/"Assets/Scripts/NecroPrototype.cs").read_text()
 assert (unity/"Assets/Scripts/NecroCaveZones.cs").is_file()
+
+# Bonehollow: companion routes use a cached solid-cell grid in Unity Y-up
+# coordinates. Mirror the clearance requirement on JSON Y-down cells and
+# confirm even larger followers can reach all nine biome hubs.
+navigator=(unity/"Assets/Scripts/NecroCaveNavigator.cs").read_text()
+formation=(unity/"Assets/Scripts/NecroServantFormation.cs").read_text()
+core_nav=(unity/"Assets/Scripts/NecroPrototype.cs").read_text()
+editor_nav=(unity/"Assets/Editor/NecroRegionEditorCheck.cs").read_text()
+for token in ("class NecroCaveNavigator", "class NecroCaveRoute",
+              "static bool[] FloorMask(", "int ClosestNode(",
+              "public static NecroCaveRoute Build(", "public static Vector2 Next(",
+              "if(!floor[adjacent] || seen[adjacent]==search)continue;",
+              "points[0]=CellCenter(origin);",
+              "Direct(level,from,route.waypoints[i],radius)"):
+    assert token in navigator, f"Missing cached cave navigation: {token}"
+for token in ("bool behindRock=cave && !NecroCaveNavigator.Direct(",
+              "ally.caveRoute=NecroCaveNavigator.Build(level,",
+              "NecroCaveNavigator.Next(level,", "if(free && (!cave) &&",
+              "ally.caveRepathAt=Time.time+1.4f+"):
+    assert token in formation, f"Missing cave follower integration: {token}"
+assert "public NecroCaveRoute caveRoute;" in core_nav
+assert "public float caveRepathAt;" in core_nav
+assert "float[] bodySizes={.28f,.52f};" in editor_nav
+assert "NecroCaveNavigator.Build(cave," in editor_nav
+
+from collections import deque
+for clearance in (.49,.72):
+    nav_open=[
+        not cave_blocked(x+.5,y+.5,clearance)
+        for y in range(H) for x in range(W)
+    ]
+    start_node=int(first["startY"])*W+int(first["startX"])
+    assert nav_open[start_node], "Follower cannot spawn on cave navigation grid"
+    seen_nav={start_node}
+    q=deque([start_node])
+    while q:
+        node=q.popleft()
+        x,y=node%W,node//W
+        for dx,dy in ((0,-1),(0,1),(-1,0),(1,0)):
+            xx,yy=x+dx,y+dy
+            if not (0<=xx<W and 0<=yy<H):
+                continue
+            neighbor=yy*W+xx
+            if neighbor in seen_nav or not nav_open[neighbor]:
+                continue
+            seen_nav.add(neighbor)
+            q.append(neighbor)
+    for biome in first["biomes"]:
+        node=int(biome["y"])*W+int(biome["x"])
+        assert node in seen_nav, (
+            f"Follower clearance {clearance} cannot reach {biome['id']}"
+        )
+    for landmark in [("Rotboar",first["rotboarX"],first["rotboarY"]),
+                     ("Selo",first["sealX"],first["sealY"])]:
+        name,x,y=landmark
+        assert int(y)*W+int(x) in seen_nav, (
+            f"Follower clearance {clearance} cannot reach {name}"
+        )
+
 cave_art=(unity/"Assets/Scripts/NecroCaveNetwork.cs").read_text()
 cave_zones=(unity/"Assets/Scripts/NecroCaveZones.cs").read_text()
 for token in ("static Color32 CellColor(", "daylight", "openNorth",
