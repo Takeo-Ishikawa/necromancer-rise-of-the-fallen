@@ -159,11 +159,15 @@ namespace Necromancer
             // The terminal target is a valid formation position, not a cell
             // center; only append it if the final segment is unobstructed.
             bool appendGoal=Direct(level,CellCenter(goal),destination,radius);
-            Vector2[] points=new Vector2[length+(appendGoal?1:0)];
-            int at=length;
+            // Include the starting grid center as a safe waypoint. The
+            // character may stand off-center and a diagonal leap to the
+            // *second* cell could otherwise cut a rocky corner.
+            Vector2[] points=new Vector2[length+1+(appendGoal?1:0)];
+            points[0]=CellCenter(origin);
+            int at=length+1;
             for(int node=goal;node!=origin;node=parent[node])
                 points[--at]=CellCenter(node);
-            if(appendGoal)points[length]=destination;
+            if(appendGoal)points[length+1]=destination;
             if(points.Length==0)return null;
             return new NecroCaveRoute{
                 destination=destination,waypoints=points,cursor=0
