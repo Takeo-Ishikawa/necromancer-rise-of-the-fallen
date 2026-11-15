@@ -76,6 +76,32 @@ namespace Necromancer.EditorTools
                     NecroCaveNetwork.HasClearance(cave,resource.x,
                     resource.y,.60f), "resource trapped in cave wall");
 
+            // Test the same cached routing used by followers at runtime.
+            // Both small and broad servants must cross the cave without
+            // crossing rock, including through its curved offshoots.
+            Vector2 entrance=NecroLevels.At(cave,cave.startX,cave.startY);
+            float[] bodySizes={.28f,.52f};
+            foreach(float radius in bodySizes)
+                foreach(CaveBiome biome in cave.biomes)
+                {
+                    Vector2 destination=NecroLevels.At(cave,biome.x,biome.y);
+                    NecroCaveRoute route=NecroCaveNavigator.Build(cave,
+                        entrance,destination,radius);
+                    Require(route!=null && route.waypoints.Length>0,
+                        "no cave route to biome "+biome.id);
+                    Vector2 previous=entrance;
+                    foreach(Vector2 point in route.waypoints)
+                    {
+                        Require(NecroCaveNavigator.Direct(cave,previous,
+                            point,radius),
+                            "route cuts cave wall near biome "+biome.id);
+                        previous=point;
+                    }
+                    Require(NecroCaveNavigator.Direct(cave,previous,
+                        destination,radius),
+                        "route cannot reach biome center "+biome.id);
+                }
+
         }
     }
 }
