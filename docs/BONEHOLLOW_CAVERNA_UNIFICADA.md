@@ -59,7 +59,7 @@ Não foi alterado o arquivo-base `necro-save-v1.json`, a versão serializada de 
 - Os novos testes Python protegem o espaço de surgimento; o `NecroRegionEditorCheck.Verify()` testa a importação real do JSON no Unity, colisor de parede, entradas, boss e spawns.
 - Alterações mantidas em `feature/bonehollow-caverna-unificada`; refúgio, arte de criaturas, UI de inventário e salvamentos de atributos preservados.
 - **O que permanece pendente:** teste do APK em aparelho, circulação de servos em túneis curvos, performance e uma etapa posterior de ilustrações finais de materiais separados por bioma.
-- **Build de validação desta revisão:** Android Preview [#120](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43594586540), solicitado no commit `5e288328118f5a1b68f39384df4653c3c9bb404c` após alterações de código e testes. Estado na abertura do registro: **em andamento**, com verificação inicial concluída e Unity Builder pendente. Não confundir com o APK #119, anterior ao polimento. O disparador auxiliar foi excluído; workflow Android e Windows voltaram a ser manuais.
+- **Build de validação anterior:** Android Preview [#120](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43594586540), concluído **com sucesso** em 14/11/2026. APK direto `necromancer-unity.apk` de **29.613.668 bytes**, compilado no commit `5e288328118f5a1b68f39384df4653c3c9bb404c`. Essa versão contém iluminação e correções de spawns, **não** o roteamento de servos desta nova etapa.
 
 ### Próximos marcos de qualidade
 
@@ -68,6 +68,22 @@ Não foi alterado o arquivo-base `necro-save-v1.json`, a versão serializada de 
 3. **Revisão do solo e paredes:** comparar contraste dos nove biomas em capturas reais e só então trocar materiais procedurais por sprites de produção aprovados.
 4. **Otimização Android:** medir tempo de carregamento, memória de pico, estabilidade de 60 FPS, tamanho real do APK e política de compactação.
 5. **Aprovação:** somente depois desses testes, preparar a mesclagem do PR #2 à `main`.
+
+## Continuidade — navegação de servos (14/11/2026, noite)
+
+A área explorável de Bonehollow é irregular; o seguidor anterior perseguia diretamente os slots da formação e só experimentava pequenos desvios angulares quando uma rocha o bloqueava. Em uma rede complexa de túneis, essa estratégia não encontra uma saída quando existe um corredor curvo ou uma bifurcação mais distante.
+
+**Mudanças na branch:**
+- Criado `unity/Assets/Scripts/NecroCaveNavigator.cs`: BFS **cardinal**, com rotas reproduzíveis que não atravessam quinas na diagonal, máscara reutilizada de piso navegável por três grupos de tamanho de criatura e buffers de busca reaproveitados.
+- O `NecroServantFormation.FollowNecromancer` mantém a formação original em espaço aberto e no refúgio; **quando há uma parede entre servo e destino**, segue pontos de rota por corredor. Segmentos retilíneos seguros são encurtados para suavizar a caminhada.
+- Cada servo guarda um plano temporário `caveRoute` e um tempo de recálculo `caveRepathAt`; cálculos são limitados a aproximadamente **uma rota a cada 1,4–1,8 s por servo**. O estado não entra no save.
+- Dentro da caverna, a recuperação de servos por **teletransporte** foi desativada para impedir o atravessamento de paredes. No refúgio e nos mapas legados, o mecanismo anterior permanece.
+- O teste automatizado em Python verifica os caminhos na malha de 1 unidade com folga **0,49 e 0,72** para os nove centros dos biomas, Rotboar e selo. O teste no Unity Editor valida a navegação real de dois tamanhos de criatura entre a entrada e cada bioma, verificando segmentos contra o colisor.
+- Nenhum sprite, animação de criatura, HP, dano ou economia de necromancia foi alterado.
+
+**Limite da validação:** o sucesso dos testes estáticos demonstra conectividade da geometria e a presença da integração, **não** confirma o seguimento de vários servos sob combate, a variação de FPS no Android ou a ausência de pequenos travamentos em movimento. Esses itens exigem teste no aparelho.
+
+**Próximo marco:** compilar o Android com o novo navegador, conferir o teste do Unity Editor e, em seguida, avaliar grupos de 2 e 6 servos atravessando Cristais → Poço → Lago → Covil. Caso haja aglomeração nos gargalos, melhorar a reserva de posições entre os servos, sem mudar os atalhos e as paredes.
 
 ## Próximas melhorias visuais
 
