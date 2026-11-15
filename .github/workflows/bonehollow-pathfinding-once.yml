@@ -1,0 +1,23 @@
+name: Bonehollow pathfinding Android one-shot dispatch
+on:
+  push:
+    branches:
+      - feature/bonehollow-caverna-unificada
+    paths:
+      - 'docs/REQUEST_BONEHOLLOW_PATHFINDING_ANDROID_ONCE.md'
+permissions:
+  actions: write
+  contents: read
+jobs:
+  dispatch-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger existing manually operated Android workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_REPO: ${{ github.repository }}
+          TARGET_REF: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          gh api -X POST "repos/${TARGET_REPO}/actions/workflows/unity-android.yml/dispatches" -f ref="${TARGET_REF}"
+          echo "Dispatched Android preview for ${TARGET_REF}"
