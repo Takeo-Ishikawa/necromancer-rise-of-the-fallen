@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="650" viewBox="0 0 1100 650">
+<rect width="1100" height="650" fill="#191922"/>
+<text x="30" y="30" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#efe4dc">Bonehollow · Entrada modular — planta técnica</text>
+<text x="30" y="47" font-family="Arial,sans-serif" font-size="12" fill="#b5aeba">Geometria real do JSON · verde = piso · escuro = rocha · 22 elementos em camadas independentes</text>
+<rect x="30" y="55" width="663" height="507" rx="3" fill="#292630" stroke="#746978" stroke-width="2"/>
+<rect x="108" y="94" width="39" height="13" fill="#80726d"/>
+<rect x="199" y="94" width="26" height="13" fill="#80726d"/>
+<rect x="277" y="94" width="39" height="13" fill="#80726d"/>
+<rect x="95" y="107" width="234" height="13" fill="#80726d"/>
+<rect x="95" y="120" width="234" height="13" fill="#80726d"/>
+<rect x="95" y="133" width="234" height="13" fill="#80726d"/>
+<rect x="82" y="146" width="273" height="13" fill="#80726d"/>
+<rect x="69" y="159" width="312" height="13" fill="#80726d"/>
+<rect x="82" y="172" width="312" height="13" fill="#80726d"/>
+<rect x="82" y="185" width="325" height="13" fill="#80726d"/>
+<rect x="69" y="198" width="338" height="13" fill="#80726d"/>
+<rect x="56" y="211" width="364" height="13" fill="#80726d"/>
+<rect x="56" y="224" width="364" height="13" fill="#80726d"/>
+<rect x="56" y="237" width="364" height="13" fill="#80726d"/>
+<rect x="550" y="237" width="39" height="13" fill="#5b5364"/>
+<rect x="56" y="250" width="364" height="13" fill="#80726d"/>
+<rect x="524" y="250" width="169" height="13" fill="#5b5364"/>
+<rect x="69" y="263" width="624" height="13" fill="#665d67"/>
+<rect x="82" y="276" width="611" height="13" fill="#665d67"/>
+<rect x="147" y="289" width="546" height="13" fill="#665d67"/>
+<rect x="147" y="302" width="546" height="13" fill="#665d67"/>
+<rect x="160" y="315" width="533" height="13" fill="#665d67"/>
+<rect x="173" y="328" width="520" height="13" fill="#665d67"/>
+<rect x="199" y="341" width="91" height="13" fill="#665d67"/>
+<rect x="316" y="341" width="377" height="13" fill="#5b5364"/>
+<rect x="199" y="354" width="104" height="13" fill="#665d67"/>
+<rect x="316" y="354" width="377" height="13" fill="#5b5364"/>
+<rect x="199" y="367" width="104" height="13" fill="#665d67"/>
+<rect x="316" y="367" width="377" height="13" fill="#5b5364"/>
+<rect x="199" y="380" width="104" height="13" fill="#665d67"/>
+<rect x="329" y="380" width="364" height="13" fill="#5b5364"/>
+<rect x="199" y="393" width="494" height="13" fill="#5b5364"/>
+<rect x="199" y="406" width="130" height="13" fill="#665d67"/>
+<rect x="342" y="406" width="351" height="13" fill="#5b5364"/>
+<rect x="199" y="419" width="143" height="13" fill="#665d67"/>
+<rect x="355" y="419" width="338" height="13" fill="#5b5364"/>
+<rect x="212" y="432" width="481" height="13" fill="#5b5364"/>
+<rect x="225" y="445" width="468" height="13" fill="#5b5364"/>
+<rect x="225" y="458" width="468" height="13" fill="#5b5364"/>
+<rect x="225" y="471" width="468" height="13" fill="#5b5364"/>
+<rect x="225" y="484" width="468" height="13" fill="#5b5364"/>
+<rect x="225" y="497" width="468" height="13" fill="#5b5364"/>
+<rect x="225" y="510" width="468" height="13" fill="#5b5364"/>
+<rect x="225" y="523" width="468" height="13" fill="#5b5364"/>
+<rect x="212" y="536" width="481" height="13" fill="#5b5364"/>
+<rect x="212" y="549" width="104" height="13" fill="#5b5364"/>
+<rect x="342" y="549" width="351" height="13" fill="#5b5364"/>
+<path d="M 30 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 95 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 160 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 225 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 290 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 355 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 420 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 485 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 550 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 615 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 680 55 v 507" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 30 55 h 663" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 30 120 h 663" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 30 185 h 663" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 30 250 h 663" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 30 315 h 663" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 30 380 h 663" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 30 445 h 663" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<path d="M 30 510 h 663" stroke="#a2a0a1" stroke-opacity=".13" stroke-width=".6"/>
+<g><title>sedimento_entrada_oeste · floor_silt (9, 7)</title><circle cx="147" cy="146" r="6.2" fill="#d1a079" stroke="#151219" stroke-width="1.4"/><text x="154" y="149" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">1</text></g>
+<g><title>sedimento_passagem_leste · floor_silt (16, 16)</title><circle cx="238" cy="263" r="6.2" fill="#d1a079" stroke="#151219" stroke-width="1.4"/><text x="245" y="266" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">2</text></g>
+<g><title>sedimento_saida_entrada · floor_silt (29, 20)</title><circle cx="407" cy="315" r="6.2" fill="#d1a079" stroke="#151219" stroke-width="1.4"/><text x="414" y="318" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">3</text></g>
+<g><title>fissura_01 · floor_fracture (10, 10)</title><circle cx="160" cy="185" r="6.2" fill="#dbc2b8" stroke="#151219" stroke-width="1.4"/><text x="167" y="188" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">4</text></g>
+<g><title>fissura_02 · floor_fracture (17, 8)</title><circle cx="251" cy="159" r="6.2" fill="#dbc2b8" stroke="#151219" stroke-width="1.4"/><text x="258" y="162" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">5</text></g>
+<g><title>fissura_03 · floor_fracture (25, 17)</title><circle cx="355" cy="276" r="6.2" fill="#dbc2b8" stroke="#151219" stroke-width="1.4"/><text x="362" y="279" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">6</text></g>
+<g><title>gravilha_01 · floor_grit (14, 6)</title><circle cx="212" cy="133" r="6.2" fill="#dbb99b" stroke="#151219" stroke-width="1.4"/><text x="219" y="136" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">7</text></g>
+<g><title>gravilha_02 · floor_grit (21, 9)</title><circle cx="303" cy="172" r="6.2" fill="#dbb99b" stroke="#151219" stroke-width="1.4"/><text x="310" y="175" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">8</text></g>
+<g><title>gravilha_03 · floor_grit (16, 22)</title><circle cx="238" cy="341" r="6.2" fill="#dbb99b" stroke="#151219" stroke-width="1.4"/><text x="245" y="344" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">9</text></g>
+<g><title>fragmentos_ossada_oeste · bone_shards (11, 19)</title><circle cx="173" cy="302" r="6.2" fill="#e3d6b0" stroke="#151219" stroke-width="1.4"/><text x="180" y="305" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">10</text></g>
+<g><title>fragmentos_ossada_leste · bone_shards (28, 23)</title><circle cx="394" cy="354" r="6.2" fill="#e3d6b0" stroke="#151219" stroke-width="1.4"/><text x="401" y="357" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">11</text></g>
+<g><title>costelas_entrada · bone_rib (8, 14)</title><circle cx="134" cy="237" r="6.2" fill="#e8dbaa" stroke="#151219" stroke-width="1.4"/><text x="141" y="240" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">12</text></g>
+<g><title>costelas_transicao · bone_rib (34, 18)</title><circle cx="472" cy="289" r="6.2" fill="#e8dbaa" stroke="#151219" stroke-width="1.4"/><text x="479" y="292" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">13</text></g>
+<g><title>seixos_borda_oeste · rock_chip (6, 12)</title><circle cx="108" cy="211" r="6.2" fill="#d6b1a5" stroke="#151219" stroke-width="1.4"/><text x="115" y="214" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">14</text></g>
+<g><title>seixos_borda_leste · rock_chip (22, 13)</title><circle cx="316" cy="224" r="6.2" fill="#d6b1a5" stroke="#151219" stroke-width="1.4"/><text x="323" y="227" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">15</text></g>
+<g><title>face_rochosa_norte_oeste · wall_facet (7.5, 2.5)</title><circle cx="127.5" cy="87.5" r="5.4" fill="#8e8cab" stroke="#151219" stroke-width="1.4"/><text x="134.5" y="90.5" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">16</text></g>
+<g><title>face_rochosa_norte_leste · wall_facet (24.5, 6.5)</title><circle cx="348.5" cy="139.5" r="5.4" fill="#8e8cab" stroke="#151219" stroke-width="1.4"/><text x="355.5" y="142.5" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">17</text></g>
+<g><title>face_rochosa_passagem · wall_facet (10.5, 21.5)</title><circle cx="166.5" cy="334.5" r="5.4" fill="#8e8cab" stroke="#151219" stroke-width="1.4"/><text x="173.5" y="337.5" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">18</text></g>
+<g><title>contorno_norte · wall_rim (22.5, 3.5)</title><circle cx="322.5" cy="100.5" r="5.4" fill="#b1aac0" stroke="#151219" stroke-width="1.4"/><text x="329.5" y="103.5" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">19</text></g>
+<g><title>contorno_leste · wall_rim (30.5, 13.5)</title><circle cx="426.5" cy="230.5" r="5.4" fill="#b1aac0" stroke="#151219" stroke-width="1.4"/><text x="433.5" y="233.5" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">20</text></g>
+<g><title>laje_falada_norte · rock_slate (12.5, 24.5)</title><circle cx="192.5" cy="373.5" r="5.4" fill="#71849b" stroke="#151219" stroke-width="1.4"/><text x="199.5" y="376.5" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">21</text></g>
+<g><title>laje_falada_entrada · rock_slate (17.5, 2.5)</title><circle cx="257.5" cy="87.5" r="5.4" fill="#71849b" stroke="#151219" stroke-width="1.4"/><text x="264.5" y="90.5" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff" stroke="#151219" stroke-width="2.2" paint-order="stroke">22</text></g>
+<g><title>Monstro: grave_pup (20,19)</title><circle cx="290" cy="302" r="6.5" fill="#bf585e" stroke="#ffd0ca" stroke-width="1.4"/></g>
+<g><title>Monstro: rat (24,14)</title><circle cx="342" cy="237" r="6.5" fill="#bf585e" stroke="#ffd0ca" stroke-width="1.4"/></g>
+<g><title>Monstro: rat (27,27)</title><circle cx="381" cy="406" r="6.5" fill="#bf585e" stroke="#ffd0ca" stroke-width="1.4"/></g>
+<g><title>Monstro: grave_pup (32,35)</title><circle cx="446" cy="510" r="6.5" fill="#bf585e" stroke="#ffd0ca" stroke-width="1.4"/></g>
+<g><title>Monstro: bat (44,19)</title><circle cx="602" cy="302" r="6.5" fill="#bf585e" stroke="#ffd0ca" stroke-width="1.4"/></g>
+<g><title>Monstro: skeleton (49,32)</title><circle cx="667" cy="471" r="6.5" fill="#bf585e" stroke="#ffd0ca" stroke-width="1.4"/></g>
+<g><title>Recurso: cristal (18,12)</title><path d="M 264 204 l 6 7 -6 7 -6 -7Z" fill="#7fd0ce" stroke="#d8ffff" stroke-width="1.2"/></g>
+<g><title>Recurso: cristal (28,17)</title><path d="M 394 269 l 6 7 -6 7 -6 -7Z" fill="#7fd0ce" stroke="#d8ffff" stroke-width="1.2"/></g>
+<g><title>Recurso: ossos (37,21)</title><path d="M 511 321 l 6 7 -6 7 -6 -7Z" fill="#7fd0ce" stroke="#d8ffff" stroke-width="1.2"/></g>
+<g><title>Recurso: ossos (44,36)</title><path d="M 602 516 l 6 7 -6 7 -6 -7Z" fill="#7fd0ce" stroke="#d8ffff" stroke-width="1.2"/></g>
+<g><title>Recurso: ossos (29,32)</title><path d="M 407 464 l 6 7 -6 7 -6 -7Z" fill="#7fd0ce" stroke="#d8ffff" stroke-width="1.2"/></g>
+<g><circle cx="212" cy="198" r="9" fill="#f8e5a8" stroke="#4f4038" stroke-width="2"/><text x="212" y="202" text-anchor="middle" font-size="12" font-weight="bold" fill="#35251e">E</text><title>Entrada do jogador: (14, 11)</title></g>
+<text x="732" y="70" font-family="Arial,sans-serif" font-size="17" fill="#f5ebe3" font-weight="bold">Legenda dos módulos</text>
+<circle cx="741" cy="87" r="5.4" fill="#d1a079"/><text x="756" y="91" font-family="Arial,sans-serif" font-size="13" fill="#d9d0d0">floor_silt (3)</text>
+<circle cx="741" cy="114" r="5.4" fill="#dbc2b8"/><text x="756" y="118" font-family="Arial,sans-serif" font-size="13" fill="#d9d0d0">floor_fracture (3)</text>
+<circle cx="741" cy="141" r="5.4" fill="#dbb99b"/><text x="756" y="145" font-family="Arial,sans-serif" font-size="13" fill="#d9d0d0">floor_grit (3)</text>
+<circle cx="741" cy="168" r="5.4" fill="#8e8cab"/><text x="756" y="172" font-family="Arial,sans-serif" font-size="13" fill="#d9d0d0">wall_facet (3)</text>
+<circle cx="741" cy="195" r="5.4" fill="#b1aac0"/><text x="756" y="199" font-family="Arial,sans-serif" font-size="13" fill="#d9d0d0">wall_rim (2)</text>
+<circle cx="741" cy="222" r="5.4" fill="#d6b1a5"/><text x="756" y="226" font-family="Arial,sans-serif" font-size="13" fill="#d9d0d0">rock_chip (2)</text>
+<circle cx="741" cy="249" r="5.4" fill="#71849b"/><text x="756" y="253" font-family="Arial,sans-serif" font-size="13" fill="#d9d0d0">rock_slate (2)</text>
+<circle cx="741" cy="276" r="5.4" fill="#e3d6b0"/><text x="756" y="280" font-family="Arial,sans-serif" font-size="13" fill="#d9d0d0">bone_shards (2)</text>
+<circle cx="741" cy="303" r="5.4" fill="#e8dbaa"/><text x="756" y="307" font-family="Arial,sans-serif" font-size="13" fill="#d9d0d0">bone_rib (2)</text>
+<g font-family="Arial,sans-serif" font-size="12" fill="#d9d0d0"><circle cx="741" cy="373" r="6" fill="#bf585e"/><text x="756" y="378">Criatura existente</text><path d="M 741 399 l 6 7 -6 7 -6 -7 Z" fill="#7fd0ce"/><text x="756" y="410">Recurso existente</text><circle cx="741" cy="439" r="7" fill="#f8e5a8"/><text x="756" y="443">Ponto inicial</text><text x="732" y="489">Prancheta técnica — não é captura do jogo.</text><text x="732" y="510">Paredes e passagens não foram alteradas.</text><text x="732" y="531">Os marcadores numerados são módulos editáveis.</text></g>
+<text x="30" y="592" font-family="Arial,sans-serif" font-size="13" fill="#c0b6bd">Amostra: primeiras 51 × 39 células. A entrada e a passagem para Ossadas ficam dentro deste recorte.</text>
+<text x="30" y="611" font-family="Arial,sans-serif" font-size="12" fill="#c0b6bd">Coordenadas JSON: X para a direita, Y para baixo · Fonte: levels.json + bonehollow_entrance_modules.json</text>
+</svg>
