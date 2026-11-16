@@ -83,9 +83,25 @@ A área explorável de Bonehollow é irregular; o seguidor anterior perseguia di
 
 **Limite da validação:** o sucesso dos testes estáticos demonstra conectividade da geometria e a presença da integração, **não** confirma o seguimento de vários servos sob combate, a variação de FPS no Android ou a ausência de pequenos travamentos em movimento. Esses itens exigem teste no aparelho.
 
-**Build solicitada:** Android Preview [#121](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43666214958), acionada uma única vez para esta etapa. Até a última verificação a fase `Unity Builder - APK` estava em andamento, portanto **ainda não havia confirmação do APK #121**. O arquivo temporário para acionar o build foi excluído e os workflows originais continuam manuais.
+**Build de navegação inicial aprovada:** Android Preview [#121](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43666214958), concluída **com sucesso** em 15/11/2026, com artefato `necromancer-unity.apk` de **29.626.760 bytes**. Essa build contém o primeiro roteador de servos, mas **não** as melhorias de fila e recálculo dinâmico descritas abaixo. Não houve teste de desempenho em aparelho.
 
 **Próximo marco:** confirmar a compilação #121, avaliar com dois e seis servos os caminhos do Poço, Cristais, Ossuário, Lago e Covil, e registrar os resultados no [protocolo de QA de navegação](BONEHOLLOW_QA_NAVEGACAO_SERVOS.md). Caso haja aglomeração nos gargalos, melhorar a reserva de posições entre os servos, sem mudar os atalhos e as paredes.
+
+## Continuidade — gargalos, aglomeração e atualização de rotas (15/11/2026)
+
+**Problema encontrado em revisão do código:** a formação radial posicionava vários servos lado a lado em corredores de largura reduzida. Quando a necromante virava uma esquina, os seguidores continuavam por até ~1,4 segundo em direção à rota anterior. Quando todos os pontos de formação estavam indisponíveis, a antiga posição-alvo era o próprio centro da heroína, o que podia causar tentativas repetidas de colisão com a personagem.
+
+**Implementado no ramo `feature/bonehollow-caverna-unificada`:**
+
+1. Novo `NecroCaveFollowerTrail.cs`, separado da IA de combate: histórico circular de até **160 pontos**, amostrados a cada **0,32 unidade** de caminhada real da heroína. O histórico é descartado ao trocar de mapa ou detectar teleporte superior a 6 unidades; não é salvo em disco.
+2. **Fila única em gargalos:** quando as duas laterais da passagem estão bloqueadas, cada servo tenta ocupar um ponto distinto ao longo do caminho já percorrido pela personagem. O espaçamento considera o raio do servo e dos anteriores; em câmaras abertas, a formação radial permanece como antes.
+3. **Objetivo de reunião seguro:** se não existir vaga na formação ou na trilha, procura-se um ponto livre ao redor da protagonista, nunca o centro exato dela. Se não houver nenhum ponto livre, o servo aguarda sem atravessar paredes.
+4. **Rotas menos obsoletas:** o caminho é recalculado quando o destino muda substancialmente (>1,2 unidade) ou quando um caminho foi concluído e deixou de fazer sentido; posições de grade e segmentos continuam verificados pela colisão real. O intervalo de atualização fica entre **1,15 e 1,54 segundo** por servo em condições normais, evitando recálculo contínuo na mesma posição.
+5. **Robustez:** o waypoint em uso é validado antes de seguir; se não for mais transitável, a rota é descartada e fica pronta para novo cálculo. O teletransporte de servos através de paredes segue desativado na caverna.
+
+**Verificação:** o teste estrutural GitHub Actions [run #43785795747](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43785795747) foi aprovado após atualizar as assertivas relacionadas à mudança de implementação. Essa aprovação **não garante** que o agrupamento esteja perfeito em dispositivo; a validação visual/funcional está documentada em [BONEHOLLOW_QA_NAVEGACAO_SERVOS.md](BONEHOLLOW_QA_NAVEGACAO_SERVOS.md). O Android #121 corresponde à versão anterior, sem esta melhoria.
+
+**Próxima etapa:** compilar a versão com histórico de trajetória e testá-la no aparelho, especialmente o grupo com seis servos e corpos grandes em curvas, bifurcações, combate próximo à parede e entrada/saída do santuário. Monitorar travamentos, oscilação dos pontos-alvo e FPS.
 
 ## Próximas melhorias visuais
 
