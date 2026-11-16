@@ -105,6 +105,22 @@ A área explorável de Bonehollow é irregular; o seguidor anterior perseguia di
 
 **Próxima etapa:** confirmar o APK #122 e testá-lo no aparelho, especialmente o grupo com seis servos e corpos grandes em curvas, bifurcações, combate próximo à parede e entrada/saída do santuário. Monitorar travamentos, oscilação dos pontos-alvo e FPS.
 
+## 16/11/2026 — estudos visuais e vertical slice modular da entrada
+
+O APK Android Preview [#122](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43786015299) foi concluído **com sucesso**, gerando `necromancer-unity.apk` de **29.631.788 bytes**. Esse APK valida a etapa anterior de navegação dos servos, **não** contém o novo kit de entrada.
+
+A revisão das imagens existentes encontrou um fundo violeta sem profundidade suficiente, um arco arquitetônico que pertence ao refúgio (não à boca da caverna) e um sprite de rochas com boa silhueta, porém acabamento esquemático. O estudo completo e o padrão de escala/paleta estão em [BONEHOLLOW_ENTRADA_ESTUDOS_E_KIT.md](BONEHOLLOW_ENTRADA_ESTUDOS_E_KIT.md).
+
+**Primeiro recorte implementado:**
+- `NecroEntranceKit.cs` cria nove recursos de `Sprite` cacheados, com 96×96 pixels de arte procedural transparente, organizados em sedimentos, fissuras, gravilha, faces/bordas de parede, duas rochas e dois tipos de ossada.
+- `Data/bonehollow_entrance_modules.json` cadastra **22 peças** por nome, tipo, posição, escala, rotação, opacidade e superfície. O código gera objetos individuais sob `Bonehollow / Entrance modular kit v1`, sem mudar a malha de colisões, o minimapa, spawns ou o santuário.
+- As 22 posições passaram pela checagem de superfície e afastamento dos primeiros spawns. A planta anotada e derivada das coordenadas reais pode ser aberta em [BONEHOLLOW_ENTRADA_KIT_PLANTA.svg](BONEHOLLOW_ENTRADA_KIT_PLANTA.svg).
+- `NecroEntranceEditorCheck` foi chamado nas rotinas de build Android e Windows, para conferir importação, integridade, e se nenhuma peça introduz um Collider/Rigidbody. CI estrutural passou na branch.
+
+**Build de revisão:** Android Preview [#123](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43797597003), solicitada a partir do commit `4dc37c0de5409f71984df2f60b9e2713ecad5946`. À última verificação, estava **em execução** no Unity Builder, sem APK final confirmado. Um reforço posterior do teste Editor (instanciação das 22 peças em memória) será exercitado na próxima compilação, pois foi adicionado após o dispatch #123.
+
+**GATE 1:** segue **aberto**. O guia de verificação no aparelho está em [BONEHOLLOW_ENTRADA_QA_GATE1.md](BONEHOLLOW_ENTRADA_QA_GATE1.md). Não há screenshots reais nem números medidos de FPS/memória para essa etapa, portanto não é correto declarar o resultado artístico final aprovado. Não expandir aos outros biomas antes da validação desta área.
+
 ## Próximas melhorias visuais
 
 Aumentar a variedade de piso e face de parede, colocar transições naturais de umidade e minerais, sombra de contato das rochas, pontos de entrada de luz da superfície e texturas modulares específicas por bioma. Usar a planta para avaliar se os túneis parecem uma caverna orgânica **na tela do celular**. Não introduzir obstáculos invisíveis: qualquer mudança no piso sólido deve atualizar a máscara e os testes.
