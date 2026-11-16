@@ -101,7 +101,9 @@ A área explorável de Bonehollow é irregular; o seguidor anterior perseguia di
 
 **Verificação:** o teste estrutural GitHub Actions [run #43785795747](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43785795747) foi aprovado após atualizar as assertivas relacionadas à mudança de implementação. Essa aprovação **não garante** que o agrupamento esteja perfeito em dispositivo; a validação visual/funcional está documentada em [BONEHOLLOW_QA_NAVEGACAO_SERVOS.md](BONEHOLLOW_QA_NAVEGACAO_SERVOS.md). O Android #121 corresponde à versão anterior, sem esta melhoria.
 
-**Próxima etapa:** compilar a versão com histórico de trajetória e testá-la no aparelho, especialmente o grupo com seis servos e corpos grandes em curvas, bifurcações, combate próximo à parede e entrada/saída do santuário. Monitorar travamentos, oscilação dos pontos-alvo e FPS.
+**Compilação desta etapa:** Android Preview [#122](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43786015299), solicitado a partir do commit `e2133d26563939595ce91ffd5202c98dff9e00a2`. Na última consulta, a execução estava **em andamento**; a etapa `Unity Builder - APK` ainda não tinha concluído e nenhum novo APK foi confirmado. O teste estrutural independente [#43785978005](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43785978005) havia passado. O gatilho auxiliar de compilação já foi removido.
+
+**Próxima etapa:** confirmar o APK #122 e testá-lo no aparelho, especialmente o grupo com seis servos e corpos grandes em curvas, bifurcações, combate próximo à parede e entrada/saída do santuário. Monitorar travamentos, oscilação dos pontos-alvo e FPS.
 
 ## Próximas melhorias visuais
 
