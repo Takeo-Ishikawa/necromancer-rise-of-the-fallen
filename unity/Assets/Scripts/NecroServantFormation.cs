@@ -92,6 +92,35 @@ namespace Necromancer
             return false;
         }
 
+        bool TryCaveRallySpot(Actor ally,int slot,out Vector2 target)
+        {
+            // The heroine's exact position is never a valid follower target.
+            // Deterministic rings avoid conflicting with the player's body,
+            // current creatures or the solid cave mask.
+            Vector2 origin=player.body.position;
+            Vector2 heading=facing.sqrMagnitude>.01f?
+                facing.normalized:Vector2.right;
+            for(int ring=0;ring<3;ring++)
+            {
+                float distance=Mathf.Max(player.radius+ally.radius+.35f,
+                    1f+ring*.55f);
+                for(int i=0;i<12;i++)
+                {
+                    float angle=(i+slot*3)%12*Mathf.PI/6f;
+                    Vector2 direction=Quaternion.Euler(0,0,angle*Mathf.Rad2Deg)*
+                        (-heading);
+                    Vector2 candidate=origin+direction*distance;
+                    if(FormationSpotOpen(ally,candidate))
+                    {
+                        target=candidate;
+                        return true;
+                    }
+                }
+            }
+            target=ally.body.position;
+            return false;
+        }
+
         bool FormationRecoverySafe(Actor ally)
         {
             if(inSanctuary)return true;
@@ -117,9 +146,21 @@ namespace Necromancer
             Vector2 target;
             bool free=TryFindFormationSpot(ally,slot,out target);
             bool cave=!inSanctuary && NecroCaveNetwork.HasNetwork(level);
-            // When the formation slot is blocked, route toward the heroine
-            // instead of trying to walk through the solid wall.
-            if(cave && !free)target=player.body.position;
+            RecordCaveHeroTrail();
+            if(cave && (NarrowCaveAroundHero() || !free) &&
+                TryCaveTrailSpot(ally,slot,out Vector2 trailSpot))
+            {
+                // A train of non-overlapping positions follows the route the
+                // heroine actually used, especially around blind corners.
+                target=trailSpot;
+                free=true;
+            }
+            // In a crowded dead end, a goal on the player causes a collision
+            // loop. Use a valid spot near the leader instead.
+            if(cave && !free)
+                free=TryCaveRallySpot(ally,slot,out target);
+            if(cave && !free)
+                target=ally.body.position;
             bool behindRock=cave && !NecroCaveNavigator.Direct(level,
                 ally.body.position,target,ally.radius);
             float leaderDistance=Vector2.Distance(ally.body.position,
@@ -145,6 +186,12 @@ namespace Necromancer
             }
 
             float distance=Vector2.Distance(ally.body.position,target);
+            if(cave && !free)
+            {
+                ally.catchingUp=false;
+                ally.caveRoute=null;
+                return;
+            }
             if(distance>FormationFollowStart || behindRock)
                 ally.catchingUp=true;
             if(distance<FormationFollowStop && !behindRock)
@@ -155,20 +202,39 @@ namespace Necromancer
                 leaderDistance>4f?1.55f:1f;
             if(cave && behindRock)
             {
-                // A maximum of one BFS route per servant roughly every
-                // 1.4 seconds. Static wall masks and search buffers are reused.
-                if(Time.time>=ally.caveRepathAt)
+                NecroCaveRoute route=ally.caveRoute;
+                bool destinationMoved=route!=null &&
+                    (route.destination-target).sqrMagnitude>1.44f;
+                bool exhausted=route!=null &&
+                    route.cursor>=route.waypoints.Length-1 &&
+                    ((Vector2)ally.body.position-route.waypoints[
+                        route.waypoints.Length-1]).sqrMagnitude<.36f;
+                bool needsRoute=route==null || destinationMoved || exhausted;
+
+                // Keep the path while its end point stays relevant. This
+                // avoids rerunning breadth-first search every second while
+                // the leader stands still on the other side of a wall.
+                if(needsRoute && Time.time>=ally.caveRepathAt)
                 {
-                    ally.caveRoute=NecroCaveNavigator.Build(level,
+                    route=NecroCaveNavigator.Build(level,
                         ally.body.position,target,ally.radius);
-                    ally.caveRepathAt=Time.time+1.4f+(slot%4)*.13f;
+                    ally.caveRoute=route;
+                    ally.caveRepathAt=Time.time+1.15f+(slot%4)*.13f;
                 }
-                if(ally.caveRoute!=null)
+                if(route!=null)
                 {
-                    Vector2 waypoint=NecroCaveNavigator.Next(level,
-                        ally.caveRoute,ally.body.position,ally.radius);
-                    MoveToward(ally,waypoint,dt,catchup);
-                    return;
+                    Vector2 waypoint=NecroCaveNavigator.Next(level,route,
+                        ally.body.position,ally.radius);
+                    if(NecroCaveNavigator.Direct(level,ally.body.position,
+                        waypoint,ally.radius))
+                    {
+                        MoveToward(ally,waypoint,dt,catchup);
+                        return;
+                    }
+                    // A cached route is invalid after forced movement or a
+                    // changed start cell: request a safe rebuild next tick.
+                    ally.caveRoute=null;
+                    ally.caveRepathAt=Time.time;
                 }
             }
             else ally.caveRoute=null;
