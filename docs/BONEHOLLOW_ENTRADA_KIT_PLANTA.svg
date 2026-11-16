@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="650" viewBox="0 0 1100 650">
 <rect width="1100" height="650" fill="#191922"/>
 <text x="30" y="30" font-family="Arial,sans-serif" font-size="21" font-weight="bold" fill="#efe4dc">Bonehollow · Entrada modular — planta técnica</text>
-<text x="30" y="47" font-family="Arial,sans-serif" font-size="12" fill="#b5aeba">Geometria real do JSON · verde = piso · escuro = rocha · 22 elementos em camadas independentes</text>
+<text x="30" y="47" font-family="Arial,sans-serif" font-size="12" fill="#b5aeba">Geometria real do JSON · claro = piso · escuro = rocha · 22 elementos em camadas independentes</text>
 <rect x="30" y="55" width="663" height="507" rx="3" fill="#292630" stroke="#746978" stroke-width="2"/>
 <rect x="108" y="94" width="39" height="13" fill="#80726d"/>
 <rect x="199" y="94" width="26" height="13" fill="#80726d"/>
