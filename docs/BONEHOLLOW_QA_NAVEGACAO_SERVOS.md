@@ -23,6 +23,9 @@
 | N7 | Fechar e reabrir aplicativo depois de explorar parte do mapa, coletar recursos e armazenar um servo | Posição válida, fog-of-war preservado, criaturas e inventário intactos |
 | N8 | Percorrer todo o mapa usando minimapa aberto/fechado e observando névoa atrás das paredes | Nenhum corredor oculto é revelado através de rochas sólidas |
 | N9 | Caminhar repetidamente em diagonal em curva estreita com um servo grande e outro pequeno | Sem quinas atravessadas, tremores excessivos ou servo preso indefinidamente |
+| N10 | Com seis servos, girar 180° no meio de uma bifurcação e voltar pelo corredor de origem | Servos abandonam o destino antigo, reorganizam a fila e não atravessam rocha |
+| N11 | Parar com seis servos diante de uma abertura estreita; dar pequenos passos, parar e acelerar novamente | Sem empilhamento permanente no centro da necromante; intervalos de fila adequados para criaturas grandes e pequenas |
+| N12 | Sair para o refúgio e retornar à mesma caverna com servos ativos | Nenhuma trilha antiga é reutilizada e o salvamento dos servos continua íntegro |
 
 ## Critérios de desempenho
 
@@ -41,4 +44,4 @@ Para quaisquer problemas, registrar: build, bioma, posição aproximada do minim
 
 **Verificação geométrica adicional (14/11/2026):** comparação independente da matriz `caveRows` com rotas cardinais em grade de 1 unidade, verificando segmentos pelo mesmo critério circular contra paredes: **18/18 rotas válidas** (nove biomas × dois raios, 0,28 e 0,52 unidade). Nenhuma passagem observada através de células sólidas. É um teste matemático da geometria, **não** um teste de IA em tempo real ou no Android.
 
-**Situação inicial:** os testes estáticos foram aprovados e a versão anterior, Android #120, compilou. O navegador está integrado na branch e a compilação Android #121 foi solicitada, ainda sem resultado definitivo na abertura desta ficha. Os casos N0–N9 permanecem pendentes em aparelho.
+**Histórico de builds:** Android [#120](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43594586540) aprovado (iluminação/geração), Android [#121](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43666214958) aprovado (primeira versão da navegação). Em 15/11/2026 foi integrada a fila por trilha e o recálculo de rotas; essa versão é posterior ao APK #121. Os testes N0–N12 permanecem **pendentes em dispositivo real**.
