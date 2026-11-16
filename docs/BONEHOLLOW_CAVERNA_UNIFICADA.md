@@ -1,0 +1,126 @@
+# Bonehollow — Caverna Unificada (mapa 01, revisão 2)
+
+**Decisão de escopo:** substituir as três regiões `lower_tunnels`, `necropolis` e `marsh` por uma única grande região contínua, `bonehollow`. A **câmara segura (santuário)** permanece separada e não foi apagada.
+
+## Mundo implementado
+
+- Dimensão: **160 × 104 unidades Unity**, aproximadamente 8,7 vezes a área do Bonehollow anterior (56 × 34).
+- Geometria: matriz determinística de 160 colunas × 104 linhas em `unity/Assets/Resources/Data/levels.json`. `#` é rocha sólida; `.` é piso transitável; a origem JSON é no canto superior esquerdo.
+- Topologia: **29 ligações autorais** entre os grandes salões, desvios alternativos, atalhos e ramificações sem saída. Câmaras com contornos irregulares, corredores sinuosos, regiões amplas e túneis menores.
+- Entrada: **(14, 11)**, no alto do mapa, representando a passagem da superfície para o subsolo. Destino final: **(145, 94)**, no Santuário do Abismo; **Rotboar (132, 77)** possui arena ampla.
+- Nove regiões interligadas: Entrada da Superfície, Salões das Ossadas, Jardins de Fungos, Abismo do Poço, Floresta de Cristais, Ossuário Profundo, Lago Subterrâneo, Covil das Presas e Santuário do Abismo.
+- **43 pontos de inimigos** autorais com Grave Pups, ratos, morcegos, slimes, aranhas, cobras, esqueletos e wisps; o Rotboar é criado separadamente pelo gameplay.
+- **28 recursos** distribuídos entre cristais, ossos e fungos.
+
+Planta: [BONEHOLLOW_CAVERNA_UNIFICADA_PLANTA.svg](BONEHOLLOW_CAVERNA_UNIFICADA_PLANTA.svg). É um desenho técnico derivado do JSON, **não** screenshot do APK nem ilustração final.
+
+## Arquitetura aplicada
+
+`NecroCaveNetwork.cs` é a fonte única para paredes sólidas, cores de terreno e compatibilidade de piso com os biomas:
+
+1. **Colisão real:** `NecroGameplay.Blocked` usa círculo contra células sólidas (sem milhares de `GameObjects` individuais). Limites exteriores continuam fechados.
+2. **Imagem de terreno:** o mapa é pintado em **uma textura RGB24** sem mipmaps, 16 pixels por unidade, com cor por bioma, ruído mineral leve e bordas rochosas. Isso é um protótipo de linguagem visual, não uma textura artística final.
+3. **Minimapa:** extrai a forma das mesmas células da colisão. Névoa de exploração verifica linha de visão para não descobrir corredores atrás de paredes.
+4. **Ambientação:** `NecroCaveZones` posiciona atmosferas sobre os nove salões; `NecroScenery` distribui até 250 props pequenos, apenas em piso livre e com vocabulário por bioma.
+5. **Encontrar monstros:** 43 encontros de partida e limite de população pós-derrota ampliado para a área; respawn não ocorre dentro de rochas nem sobre os personagens. A estrutura de combate e os sprites de criaturas não foram alterados.
+6. **Progressão:** não existe mais `AVANÇAR` para mapas 2, 3 e 4; o objetivo é percorrer um único mundo contínuo. O refúgio permanece acessível pela mecânica existente.
+
+## Compatibilidade de salvamentos
+
+Não foi alterado o arquivo-base `necro-save-v1.json`, a versão serializada de save nem o identificador do aplicativo Android. Foi acrescentado o campo **opcional** `worldLayoutRevision=2`. Em saves anteriores, o valor ausente é tratado como 0: os registros de posicionamento/exploração da geometria antiga são descartados, mas **nível, atributos, equipamentos, fragmentos, servos e cofre** são preservados. Isso evita ressuscitar mobs sob paredes ou carregar fog-of-war de um mapa com dimensões diferentes.
+
+## Validação e riscos
+
+- [x] O JSON contém exatamente um mapa e nove biomas.
+- [x] Colisão, renderização e minimapa compartilham a matriz de paredes.
+- [x] Grafo acessível com folga de 0,60 unidade para entrada, selo, Rotboar, 43 inimigos, 28 recursos e centros dos nove biomas, pelo verificador estático.
+- [x] Teste estrutural automatizado do Unity passou após atualização das assertivas de regiões e dimensões.
+- [ ] Visual de entradas, rochas e transição superfície/subsolo em gameplay real.
+- [ ] Passagem de múltiplos servos por gargalos, navegação e oito direções em APK.
+- [ ] Comparação de desempenho Android (geração da textura RGB24, memória, FPS, tempo de carga).
+- [ ] Capturas do jogo com efeitos, iluminação e UI reais.
+- [ ] Qualidade artística final dos biomas: a matriz e o material procedural são **primeira versão funcional**.
+- [x] Deslocamento dos quatro spawns mais próximos de paredes para distância de colisão de pelo menos 1,0 unidade.
+- [x] Diferença de relevo entre parede e piso, estratos minerais discretos, iluminação vinda do alto/esquerda.
+- [x] Luz de entrada da superfície com diminuição gradual e atmosferas restritas ao piso navegável (não atravessam rochas).
+- [x] Checagem pelo Editor da leitura real do JSON, dos nove biomas e das folgas de colisão.
+- [ ] Revisão em dispositivo do contraste, FPS, memória e iluminação em movimento.
+
+**Política de recuperação:** as outras regiões continuam recuperáveis na branch `main` / histórico do Git. Nenhum PNG, rig, sprite, save ou componente do santuário foi removido. O trabalho só pode ser mesclado à main após revisão do PR e testes Android.
+
+## Diário de execução — 14/11/2026
+
+**Baseline do novo mapa:** o [Android Preview #119](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43539188110) terminou **com sucesso**, incluindo o Unity Builder e a publicação do APK direto. Artifact `necromancer-unity.apk`: **29.612.388 bytes** (~29,6 MB), armazenado no GitHub Actions. O sucesso de build não prova jogabilidade, FPS ou uso de memória no aparelho.
+
+**Continuidade — ambientação e passagem segura:**
+- Quatro pontos de spawn de inimigos foram deslocados localmente para garantir pelo menos **1,0 unidade** de espaço diante de paredes: rato nos Jardins de Fungos, wisp do Ossuário, slime do Lago e Grave Pup do Lago. Não foram movidos os biomas, recursos, pontos principais nem os muros.
+- O piso procedural agora usa faixas minerais suaves e pequenas variações de sedimento. As bordas das paredes distinguem arestas iluminadas de faces voltadas para o interior.
+- A entrada tem uma iluminação mais quente que **enfraquece ao avançar para o subsolo**. A névoa colorida e a abertura de luz foram recortadas pela matriz de colisão, evitando que luz de bioma apareça dentro de rocha sólida.
+- Os novos testes Python protegem o espaço de surgimento; o `NecroRegionEditorCheck.Verify()` testa a importação real do JSON no Unity, colisor de parede, entradas, boss e spawns.
+- Alterações mantidas em `feature/bonehollow-caverna-unificada`; refúgio, arte de criaturas, UI de inventário e salvamentos de atributos preservados.
+- **O que permanece pendente:** teste do APK em aparelho, circulação de servos em túneis curvos, performance e uma etapa posterior de ilustrações finais de materiais separados por bioma.
+- **Build de validação anterior:** Android Preview [#120](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43594586540), concluído **com sucesso** em 14/11/2026. APK direto `necromancer-unity.apk` de **29.613.668 bytes**, compilado no commit `5e288328118f5a1b68f39384df4653c3c9bb404c`. Essa versão contém iluminação e correções de spawns, **não** o roteamento de servos desta nova etapa.
+
+### Próximos marcos de qualidade
+
+1. **QA físico da entrada:** testar a personagem andando pelas primeiras bifurcações com 0, 2 e 6 servos; observar alinhamento de sombra e oclusão.
+2. **Teste de navegação:** alcançar Cristais, Poço, Lago, Rotboar e selo sem teletransporte involuntário, verificar respawn fora de paredes, coleta e minimapa.
+3. **Revisão do solo e paredes:** comparar contraste dos nove biomas em capturas reais e só então trocar materiais procedurais por sprites de produção aprovados.
+4. **Otimização Android:** medir tempo de carregamento, memória de pico, estabilidade de 60 FPS, tamanho real do APK e política de compactação.
+5. **Aprovação:** somente depois desses testes, preparar a mesclagem do PR #2 à `main`.
+
+## Continuidade — navegação de servos (14/11/2026, noite)
+
+A área explorável de Bonehollow é irregular; o seguidor anterior perseguia diretamente os slots da formação e só experimentava pequenos desvios angulares quando uma rocha o bloqueava. Em uma rede complexa de túneis, essa estratégia não encontra uma saída quando existe um corredor curvo ou uma bifurcação mais distante.
+
+**Mudanças na branch:**
+- Criado `unity/Assets/Scripts/NecroCaveNavigator.cs`: BFS **cardinal**, com rotas reproduzíveis que não atravessam quinas na diagonal, máscara reutilizada de piso navegável por três grupos de tamanho de criatura e buffers de busca reaproveitados.
+- O `NecroServantFormation.FollowNecromancer` mantém a formação original em espaço aberto e no refúgio; **quando há uma parede entre servo e destino**, segue pontos de rota por corredor. Segmentos retilíneos seguros são encurtados para suavizar a caminhada.
+- Cada servo guarda um plano temporário `caveRoute` e um tempo de recálculo `caveRepathAt`; cálculos são limitados a aproximadamente **uma rota a cada 1,4–1,8 s por servo**. O estado não entra no save.
+- Dentro da caverna, a recuperação de servos por **teletransporte** foi desativada para impedir o atravessamento de paredes. No refúgio e nos mapas legados, o mecanismo anterior permanece.
+- O teste automatizado em Python verifica os caminhos na malha de 1 unidade com folga **0,49 e 0,72** para os nove centros dos biomas, Rotboar e selo. O teste no Unity Editor valida a navegação real de dois tamanhos de criatura entre a entrada e cada bioma, verificando segmentos contra o colisor.
+- Nenhum sprite, animação de criatura, HP, dano ou economia de necromancia foi alterado.
+
+**Limite da validação:** o sucesso dos testes estáticos demonstra conectividade da geometria e a presença da integração, **não** confirma o seguimento de vários servos sob combate, a variação de FPS no Android ou a ausência de pequenos travamentos em movimento. Esses itens exigem teste no aparelho.
+
+**Build de navegação inicial aprovada:** Android Preview [#121](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43666214958), concluída **com sucesso** em 15/11/2026, com artefato `necromancer-unity.apk` de **29.626.760 bytes**. Essa build contém o primeiro roteador de servos, mas **não** as melhorias de fila e recálculo dinâmico descritas abaixo. Não houve teste de desempenho em aparelho.
+
+**Próximo marco:** confirmar a compilação #121, avaliar com dois e seis servos os caminhos do Poço, Cristais, Ossuário, Lago e Covil, e registrar os resultados no [protocolo de QA de navegação](BONEHOLLOW_QA_NAVEGACAO_SERVOS.md). Caso haja aglomeração nos gargalos, melhorar a reserva de posições entre os servos, sem mudar os atalhos e as paredes.
+
+## Continuidade — gargalos, aglomeração e atualização de rotas (15/11/2026)
+
+**Problema encontrado em revisão do código:** a formação radial posicionava vários servos lado a lado em corredores de largura reduzida. Quando a necromante virava uma esquina, os seguidores continuavam por até ~1,4 segundo em direção à rota anterior. Quando todos os pontos de formação estavam indisponíveis, a antiga posição-alvo era o próprio centro da heroína, o que podia causar tentativas repetidas de colisão com a personagem.
+
+**Implementado no ramo `feature/bonehollow-caverna-unificada`:**
+
+1. Novo `NecroCaveFollowerTrail.cs`, separado da IA de combate: histórico circular de até **160 pontos**, amostrados a cada **0,32 unidade** de caminhada real da heroína. O histórico é descartado ao trocar de mapa ou detectar teleporte superior a 6 unidades; não é salvo em disco.
+2. **Fila única em gargalos:** quando as duas laterais da passagem estão bloqueadas, cada servo tenta ocupar um ponto distinto ao longo do caminho já percorrido pela personagem. O espaçamento considera o raio do servo e dos anteriores; em câmaras abertas, a formação radial permanece como antes.
+3. **Objetivo de reunião seguro:** se não existir vaga na formação ou na trilha, procura-se um ponto livre ao redor da protagonista, nunca o centro exato dela. Se não houver nenhum ponto livre, o servo aguarda sem atravessar paredes.
+4. **Rotas menos obsoletas:** o caminho é recalculado quando o destino muda substancialmente (>1,2 unidade) ou quando um caminho foi concluído e deixou de fazer sentido; posições de grade e segmentos continuam verificados pela colisão real. O intervalo de atualização fica entre **1,15 e 1,54 segundo** por servo em condições normais, evitando recálculo contínuo na mesma posição.
+5. **Robustez:** o waypoint em uso é validado antes de seguir; se não for mais transitável, a rota é descartada e fica pronta para novo cálculo. O teletransporte de servos através de paredes segue desativado na caverna.
+
+**Verificação:** o teste estrutural GitHub Actions [run #43785795747](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43785795747) foi aprovado após atualizar as assertivas relacionadas à mudança de implementação. Essa aprovação **não garante** que o agrupamento esteja perfeito em dispositivo; a validação visual/funcional está documentada em [BONEHOLLOW_QA_NAVEGACAO_SERVOS.md](BONEHOLLOW_QA_NAVEGACAO_SERVOS.md). O Android #121 corresponde à versão anterior, sem esta melhoria.
+
+**Compilação desta etapa:** Android Preview [#122](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43786015299), solicitado a partir do commit `e2133d26563939595ce91ffd5202c98dff9e00a2`. Na última consulta, a execução estava **em andamento**; a etapa `Unity Builder - APK` ainda não tinha concluído e nenhum novo APK foi confirmado. O teste estrutural independente [#43785978005](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43785978005) havia passado. O gatilho auxiliar de compilação já foi removido.
+
+**Próxima etapa:** confirmar o APK #122 e testá-lo no aparelho, especialmente o grupo com seis servos e corpos grandes em curvas, bifurcações, combate próximo à parede e entrada/saída do santuário. Monitorar travamentos, oscilação dos pontos-alvo e FPS.
+
+## 16/11/2026 — estudos visuais e vertical slice modular da entrada
+
+O APK Android Preview [#122](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43786015299) foi concluído **com sucesso**, gerando `necromancer-unity.apk` de **29.631.788 bytes**. Esse APK valida a etapa anterior de navegação dos servos, **não** contém o novo kit de entrada.
+
+A revisão das imagens existentes encontrou um fundo violeta sem profundidade suficiente, um arco arquitetônico que pertence ao refúgio (não à boca da caverna) e um sprite de rochas com boa silhueta, porém acabamento esquemático. O estudo completo e o padrão de escala/paleta estão em [BONEHOLLOW_ENTRADA_ESTUDOS_E_KIT.md](BONEHOLLOW_ENTRADA_ESTUDOS_E_KIT.md).
+
+**Primeiro recorte implementado:**
+- `NecroEntranceKit.cs` cria nove recursos de `Sprite` cacheados, com 96×96 pixels de arte procedural transparente, organizados em sedimentos, fissuras, gravilha, faces/bordas de parede, duas rochas e dois tipos de ossada.
+- `Data/bonehollow_entrance_modules.json` cadastra **22 peças** por nome, tipo, posição, escala, rotação, opacidade e superfície. O código gera objetos individuais sob `Bonehollow / Entrance modular kit v1`, sem mudar a malha de colisões, o minimapa, spawns ou o santuário.
+- As 22 posições passaram pela checagem de superfície e afastamento dos primeiros spawns. A planta anotada e derivada das coordenadas reais pode ser aberta em [BONEHOLLOW_ENTRADA_KIT_PLANTA.svg](BONEHOLLOW_ENTRADA_KIT_PLANTA.svg).
+- `NecroEntranceEditorCheck` foi chamado nas rotinas de build Android e Windows, para conferir importação, integridade, e se nenhuma peça introduz um Collider/Rigidbody. CI estrutural passou na branch.
+
+**Build de revisão:** Android Preview [#123](https://github.com/Takeo-Ishikawa/necromancer-rise-of-the-fallen/actions/runs/43797597003), solicitada a partir do commit `4dc37c0de5409f71984df2f60b9e2713ecad5946`. À última verificação, estava **em execução** no Unity Builder, sem APK final confirmado. Um reforço posterior do teste Editor (instanciação das 22 peças em memória) será exercitado na próxima compilação, pois foi adicionado após o dispatch #123.
+
+**GATE 1:** segue **aberto**. O guia de verificação no aparelho está em [BONEHOLLOW_ENTRADA_QA_GATE1.md](BONEHOLLOW_ENTRADA_QA_GATE1.md). Não há screenshots reais nem números medidos de FPS/memória para essa etapa, portanto não é correto declarar o resultado artístico final aprovado. Não expandir aos outros biomas antes da validação desta área.
+
+## Próximas melhorias visuais
+
+Aumentar a variedade de piso e face de parede, colocar transições naturais de umidade e minerais, sombra de contato das rochas, pontos de entrada de luz da superfície e texturas modulares específicas por bioma. Usar a planta para avaliar se os túneis parecem uma caverna orgânica **na tela do celular**. Não introduzir obstáculos invisíveis: qualquer mudança no piso sólido deve atualizar a máscara e os testes.

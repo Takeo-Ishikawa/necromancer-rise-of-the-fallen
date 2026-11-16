@@ -64,6 +64,15 @@ namespace Necromancer
                     buttonStyle))Retreat();
                 return;
             }
+            if(levels.Length==1 && NecroCaveNetwork.HasNetwork(level))
+            {
+                GUI.Label(rect,NearSeal() ?
+                    (current.claimed?"CORAÇÃO DA CAVERNA DESCOBERTO":
+                        "O SELO AGUARDA") :
+                    "EXPLORE OS TÚNEIS E BIOMAS • USE O MINIMAPA",
+                    smallStyle);
+                return;
+            }
             if(NearSeal())
             {
                 if(RegionTravelAvailable() && stage+1<levels.Length)

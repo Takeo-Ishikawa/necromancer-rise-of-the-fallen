@@ -29,6 +29,7 @@ namespace Necromancer.EditorTools
             NecroDownedEditorCheck.Verify();
             NecroCharacterSwitchEditorCheck.Verify();
             NecroVisualEditorCheck.Verify();
+            NecroEntranceEditorCheck.Verify();
             NecroIllustratedAssetEditorCheck.Verify();
             NecroFrameEditorCheck.Verify();
             NecroSceneBootstrap.Setup();

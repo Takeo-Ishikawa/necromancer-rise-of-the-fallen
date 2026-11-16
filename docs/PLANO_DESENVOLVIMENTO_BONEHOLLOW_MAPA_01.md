@@ -1,3 +1,5 @@
+> **ATUALIZAÇÃO DE ESCOPO — 13/11/2026:** a pedido do usuário, Bonehollow deixa de ser somente o primeiro entre quatro mapas. As três outras fases (`lower_tunnels`, `necropolis` e `marsh`) foram retiradas de `levels.json` em favor de **um único mundo subterrâneo contínuo, de 160 × 104 unidades e nove grandes biomas interligados**. A câmara segura permanece. Os marcos e coordenadas de 56 × 34 apresentados neste documento são históricos e foram **substituídos** pela implantação descrita em [BONEHOLLOW_CAVERNA_UNIFICADA.md](BONEHOLLOW_CAVERNA_UNIFICADA.md) e [planta atual](BONEHOLLOW_CAVERNA_UNIFICADA_PLANTA.svg). Antes de expandir arte, testar a nova malha e as passagens com servos no Android. O plano anterior permanece como referência histórica, não como especificação vigente. 
+
 # PLANO DE PRODUÇÃO — BONEHOLLOW / MAPA 01
 ## Necromancer: Rise of the Fallen — cenário 2D de fantasia sombria
 
@@ -393,15 +395,16 @@ A tabela é uma sequência lógica, **não uma estimativa de horas ou promessa d
 
 ## 7. Registro de tarefas em andamento — atualizar sempre
 
-**ETAPA ATIVA:** 00 — Auditoria, baseline e proteção da fase atual.  
-**PRIMEIRA AÇÃO CONCRETA NA PRÓXIMA SESSÃO:** comparar a árvore atual e o arquivo levels.json com este plano; extrair a planta navegável de Bonehollow, inventariar os obstáculos, identificar o recorte adequado da entrada para a vertical slice e registrar o commit-base. **Não começar ilustrando o mapa inteiro.**
+**ETAPA ATIVA (16/11/2026):** 01–03 — estudos visuais, planta atualizada e **primeira construção modular da entrada**. O escopo original de 56 × 34 foi substituído por um mapa unificado de **160 × 104**. A planta e a máscara de colisão continuam sendo a fonte de verdade.
+
+**PRIMEIRA AÇÃO CONCRETA NA PRÓXIMA SESSÃO:** confirmar a compilação Android da vertical slice, recolher capturas reais da entrada e dos primeiros encontros, conferir legibilidade, transições, FPS e comportamento dos servos no aparelho. Ajustar o kit de 22 peças sem mexer em colisões, monstros ou refúgio. **O GATE 1 ainda não foi aprovado.**
 
 | Etapa | Status inicial | Evidência necessária |
 | --- | --- | --- |
-| 00 — Auditoria | [ ] Pendente | Commit-base + baseline |
-| 01 — Bíblia visual | [ ] Pendente | Guia + amostras |
-| 02 — Planta | [ ] Pendente | Mapa técnico navegável |
-| 03 — Vertical slice | [ ] Pendente | Captura jogável + validação |
+| 00 — Auditoria | [~] Arquivos/CI conferidos; medições no celular pendentes | Base #122 + estudos existentes |
+| 01 — Bíblia visual | [~] Guia, paleta, módulos e comparativo criados; aprovação pendente | BONEHOLLOW_ENTRADA_ESTUDOS_E_KIT.md |
+| 02 — Planta | [x] Geometria + módulos anotados e compatíveis com colisão | BONEHOLLOW_ENTRADA_KIT_PLANTA.svg |
+| 03 — Vertical slice | [~] Kit modular integrado; QA em APK pendente | 22 objetos/9 tipos, Gate 1 em aberto |
 | 04 — Piso | [ ] Pendente | Kit modular aprovado |
 | 05 — Paredes | [ ] Pendente | Kit e colisões validados |
 | 06 — Setores | [ ] Pendente | Sete setores revisados |
@@ -411,7 +414,7 @@ A tabela é uma sequência lógica, **não uma estimativa de horas ou promessa d
 | 10 — Minimapa | [ ] Código inicial; QA pendente | Teste em APK + save |
 | 11 — Áudio | [ ] Pendente | Mix e teste |
 | 12 — Otimização | [ ] Pendente | Métricas antes/depois |
-| 13 — QA e preview | [ ] Pendente | Execução CI + teste real |
+| 13 — QA e preview | [~] APK #122 aprovado antes do kit; teste real pendente | Nova build + captura no celular |
 
 **Convenção:** [ ] Pendente; [~] Em andamento; [x] Concluído e verificado; [!] Bloqueado. Em Markdown, usar texto de status na tabela; checklists podem ser marcados ao concluir.
 
@@ -422,6 +425,16 @@ A tabela é uma sequência lógica, **não uma estimativa de horas ou promessa d
 - Nenhuma mudança de terreno, colisões, posicionamento, iluminação ou inimigos foi efetuada por este documento.
 - Não foi executada compilação Android ou Windows para criar o plano.
 - Próxima tarefa: ETAPA 00, seguida de ETAPA 01 e da planta da ETAPA 02.
+
+**16/11/2026 — Estudos visuais + primeira construção modular da entrada (ETAPAS 01–03)**
+- Confirmada a build Android #122 de 29.631.788 bytes, **aprovada antes** do kit visual; teste físico de FPS e qualidade ainda não executado.
+- Estudados os recursos existentes: o piso violeta legado tem pouco relevo; o arco detalhado é específico do santuário; o rock_cluster serve como referência de silhueta e não como arte final de toda a caverna.
+- Criados `docs/BONEHOLLOW_ENTRADA_ESTUDOS_E_KIT.md` (guia e critérios de aceite) e `docs/BONEHOLLOW_ENTRADA_KIT_PLANTA.svg` (planta técnica fiel ao JSON).
+- Criados `NecroEntranceKit.cs` e `Data/bonehollow_entrance_modules.json` com **22 posições independentes e nove tipos visuais** em uma área contígua de entrada.
+- `NecroPrototype.LoadStage` integra a camada visual reversível; colisão segue exclusivamente em `NecroCaveNetwork.Blocked`.
+- `NecroEntranceEditorCheck` verifica carregamento, posições e tipos no Unity Editor antes de exportar Android/Windows. Os testes estruturais também verificam as 22 posições e a preservação das colisões.
+- Os elementos são protótipos procedurais editáveis, **não arte final aprovada**. Nenhuma nova captura de jogo em celular, medição de memória ou teste de formação em movimento foi feita.
+- A próxima tarefa é verificar a compilação Unity desta revisão e analisar as capturas reais do aparelho. **Não expandir aos demais setores antes do GATE 1.**
 
 **Modelo de próxima anotação (copiar ao finalizar uma sessão):**
 

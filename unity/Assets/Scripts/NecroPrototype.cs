@@ -26,6 +26,9 @@ namespace Necromancer
             public Vector2 pupHeading;
             public bool pupHit,catchingUp;
             public float followStragglerSeconds;
+            // Disposable follower navigation cache. Never included in saves.
+            public NecroCaveRoute caveRoute;
+            public float caveRepathAt;
             public bool ally;
             // Transient hostile AI focus: never serialized into the v1 save.
             public Actor hostileFocus;
@@ -160,7 +163,12 @@ namespace Necromancer
 
         static void FitGround(SpriteRenderer renderer,LevelDefinition area)
         {
-            if(area.background=="entrada_da_caverna_bonehollow")
+            if(NecroCaveNetwork.HasNetwork(area))
+            {
+                renderer.drawMode=SpriteDrawMode.Simple;
+                Fit(renderer,area.width,area.height);
+            }
+            else if(area.background=="entrada_da_caverna_bonehollow")
             {
                 // Tile the imported floor at its native pixel density.
                 // FullRect sprites allow SpriteRenderer tiled draw mode.
@@ -237,7 +245,9 @@ namespace Necromancer
                 next.root=new GameObject("Region "+(stage+1)+": "+level.title);
                 stages[stage]=next;
                 current=next;
-                Sprite background=NecroArt.Environment(level.background);
+                Sprite background=NecroCaveNetwork.HasNetwork(level) ?
+                    NecroCaveNetwork.Ground(level) :
+                    NecroArt.Environment(level.background);
                 next.backdrop=Visual("Ground",new Vector2(level.width*.5f,level.height*.5f),
                     background,-50,next.root.transform);
                 FitGround(next.backdrop,level);
@@ -252,7 +262,12 @@ namespace Necromancer
                 if(level.background!="forgotten_cave")
                 {
                     if(level.id=="bonehollow")
+                    {
                         NecroCaveZones.Populate(level,next.root.transform);
+                        // The entrance is an independent, reversible visual
+                        // layer; caveRows still controls all collisions.
+                        NecroEntranceKit.Populate(level,next.root.transform);
+                    }
                     NecroScenery.Populate(level,next.root.transform);
                     foreach(Obstacle rock in level.obstacles) {
                         SpriteRenderer stone=Visual("Rock",NecroLevels.At(level,rock.x,rock.y),

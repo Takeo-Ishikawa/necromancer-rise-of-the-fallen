@@ -15,6 +15,10 @@ required = [
     "Assets/Editor/NecromancerAndroidBuild.cs",
     "Assets/Editor/NecromancerWindowsBuild.cs",
     "Assets/Scripts/NecroLevels.cs",
+    "Assets/Scripts/NecroCaveNetwork.cs",
+    "Assets/Scripts/NecroEntranceKit.cs",
+    "Assets/Editor/NecroEntranceEditorCheck.cs",
+    "Assets/Resources/Data/bonehollow_entrance_modules.json",
     "Assets/Scripts/NecroArt.cs",
     "Assets/Scripts/NecroPrototype.cs",
     "Assets/Scripts/NecroGameplay.cs",
@@ -74,72 +78,234 @@ manifest = json.loads((unity / "Packages/manifest.json").read_text())
 assert "com.unity.2d.sprite" in manifest["dependencies"]
 
 levels = json.loads((unity / "Assets/Resources/Data/levels.json").read_text())["levels"]
-assert [area["id"] for area in levels] == [
-    "bonehollow", "lower_tunnels", "necropolis", "marsh"
-]
-kinds = set()
-for area in levels:
-    assert area["width"] > 20 and area["height"] > 15
-    assert area["objective"] and len(area["enemies"]) >= (3 if area["id"]=="bonehollow" else 6)
-    assert len(area["resources"]) >= 3
-    kinds.update(entity["kind"] for entity in area["enemies"])
-    assert area["startX"] > 0 and area["startY"] > 0
-    for entity in [
-        *area["enemies"], *area["resources"],
-        {"kind": "player", "x": area["startX"], "y": area["startY"]},
-    ]:
-        x, y = entity["x"], entity["y"]
-        assert 0 < x < area["width"] and 0 < y < area["height"]
-        assert all(
-            (x - obstacle["x"]) ** 2 + (y - obstacle["y"]) ** 2
-            > (obstacle["r"] + .2) ** 2
-            for obstacle in area["obstacles"]
-        ), f"Blocked start/spawn in {area['id']}: {entity}"
-assert {"rat", "bat", "slime", "spider", "snake", "skeleton",
-        "wisp", "grave_pup", "grave_lord", "marsh_lord"} <= kinds
-assert len(levels[0]["enemies"])>=10
-assert {"grave_pup","rat","bat","slime","spider"} <= {e["kind"] for e in levels[0]["enemies"]}
-assert levels[0]["width"]>=54 and levels[0]["height"]>=32
-assert levels[0]["background"]=="entrada_da_caverna_bonehollow"
-
-# Cave-scale regression: all encounter and pickup sites must be reachable
-# with 0.6 units of clearance. Tests geometry, not visual decoration.
-from collections import deque
+assert [area["id"] for area in levels] == ["bonehollow"], "Three former zones must be removed"
+assert len(levels)==1, "Only the one connected Bonehollow map is playable"
 first=levels[0]
-assert len(first["obstacles"])>=60
-def cave_blocked(x,y,r=.6):
-    return (x<r or y<r or x>first["width"]-r or
-            y>first["height"]-r or any(
-                (x-o["x"])**2+(y-o["y"])**2<(r+o["r"])**2
-                for o in first["obstacles"]))
+assert first["width"]==160 and first["height"]==104
+assert first["layoutRevision"]==2
+assert first["background"]=="entrada_da_caverna_bonehollow"
+assert first["objective"] and len(first["enemies"])>=35
+assert len(first["resources"])>=25
+assert {"rat","bat","slime","spider","snake","skeleton","wisp","grave_pup"} <= {
+    monster["kind"] for monster in first["enemies"]
+}
+assert {"cristal","ossos","fungo"} <= {r["type"] for r in first["resources"]}
+assert len(first["biomes"])>=9, "Need biomes connected inside a single cave"
+assert len({b["id"] for b in first["biomes"]})==len(first["biomes"])
+rows=first["caveRows"]
+W=int(first["width"])
+H=int(first["height"])
+assert len(rows)==H and all(len(row)==W for row in rows)
+assert set("".join(rows))=={"#","."}
+assert first["rotboarX"]>0 and first["rotboarY"]>0
+assert (unity/"Assets/Scripts/NecroCaveNetwork.cs").is_file()
+
+# Authoritative grid collision in the new one-map world. Use the same
+# circle-vs-cell AABB rule as NecroCaveNetwork.Blocked (JSON Y down).
+def cave_blocked(x,y,r=.60):
+    if x<=r or y<=r or x>=W-r or y>=H-r:
+        return True
+    from math import floor
+    for cy in range(floor(y-r),floor(y+r)+1):
+        for cx in range(floor(x-r),floor(x+r)+1):
+            if not (0<=cx<W and 0<=cy<H) or rows[cy][cx]=="#":
+                near_x=max(cx,min(x,cx+1))
+                near_y=max(cy,min(y,cy+1))
+                if (x-near_x)**2+(y-near_y)**2<=r*r:
+                    return True
+    for rock in first["obstacles"]:
+        if (x-rock["x"])**2+(y-rock["y"])**2<(r+rock["r"])**2:
+            return True
+    return False
+
+sites=[
+    ("entrance",first["startX"],first["startY"]),
+    ("seal",first["sealX"],first["sealY"]),
+    ("rotboar",first["rotboarX"],first["rotboarY"]),
+]
+sites.extend((e["kind"],e["x"],e["y"]) for e in first["enemies"])
+sites.extend((e["type"],e["x"],e["y"]) for e in first["resources"])
+for kind,x,y in sites:
+    assert 0<x<W and 0<y<H, f"Out of cave bounds: {kind}"
+    assert not cave_blocked(x,y), f"Spawn in solid rock: {kind} at {(x,y)}"
+# A creature is larger than a map pixel. Reserve clearance for animation,
+# knockback and followers before publishing edits to the underground network.
+for enemy in first["enemies"]:
+    assert not cave_blocked(enemy["x"],enemy["y"],1.0), (
+        f"Enemy too close to a cave wall: {enemy}"
+    )
+assert not cave_blocked(first["rotboarX"],first["rotboarY"],1.6), (
+    "Rotboar arena requires extra collision space"
+)
+for biome in first["biomes"]:
+    assert not cave_blocked(biome["x"],biome["y"]), (
+        f"Biome hub buried in rock: {biome['id']}"
+    )
+
+from collections import deque
 step=.5
-width=int(first["width"]/step)+1
-height=int(first["height"]/step)+1
-start=(round(first["startX"]/step),round(first["startY"]/step))
-assert not cave_blocked(start[0]*step,start[1]*step), "Cave entry obstructed"
-seen={start}
-pending=deque([start])
-while pending:
-    x,y=pending.popleft()
-    for dx,dy in ((0,1),(0,-1),(1,0),(-1,0)):
+cols=int(W/step)
+lines=int(H/step)
+def grid_point(i,j):
+    return ((i+.5)*step,(j+.5)*step)
+def is_open(i,j):
+    return 0<=i<cols and 0<=j<lines and not cave_blocked(*grid_point(i,j))
+start=(int(first["startX"]/step),int(first["startY"]/step))
+assert is_open(*start),"Cave entrance obstructed"
+visited={start}
+queue=deque([start])
+while queue:
+    x,y=queue.popleft()
+    for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
         nx,ny=x+dx,y+dy
-        if not (0<=nx<width and 0<=ny<height):
+        if (nx,ny) in visited or not is_open(nx,ny):
             continue
-        if (nx,ny) in seen or cave_blocked(nx*step,ny*step):
-            continue
-        seen.add((nx,ny)); pending.append((nx,ny))
-targets=[("selo",first["sealX"],first["sealY"]),
-         ("rotboar",first["rotboarX"],first["rotboarY"])]
-targets += [(p.get("kind","cristal"),p["x"],p["y"])
-            for p in first["enemies"]+first["resources"]]
-for kind,x,y in targets:
-    assert not cave_blocked(x,y), f"Spawn inside rock: {kind} {(x,y)}"
-    cx,cy=round(x/step),round(y/step)
-    assert any((cx+dx,cy+dy) in seen for dx in (-1,0,1)
-               for dy in (-1,0,1)), f"Isolated cave location: {kind} {(x,y)}"
+        visited.add((nx,ny))
+        queue.append((nx,ny))
+for kind,x,y in sites:
+    cx,cy=int(x/step),int(y/step)
+    assert (cx,cy) in visited or any(
+        (cx+dx,cy+dy) in visited for dx in (-1,0,1)
+        for dy in (-1,0,1)
+    ), f"Unreachable cavern objective: {kind} {(x,y)}"
+assert "NecroCaveNetwork.Blocked(level,point,radius)" in (
+    unity/"Assets/Scripts/NecroGameplay.cs").read_text()
+assert "NecroCaveNetwork.Ground(level)" in (
+    unity/"Assets/Scripts/NecroPrototype.cs").read_text()
+assert "NecroCaveNetwork.IsWall(zone,x,map.rows-1-y)" in (
+    unity/"Assets/Scripts/NecroMiniMap.cs").read_text()
 assert "NecroCaveZones.Populate(level,next.root.transform);" in (
     unity/"Assets/Scripts/NecroPrototype.cs").read_text()
 assert (unity/"Assets/Scripts/NecroCaveZones.cs").is_file()
+
+# Bonehollow entrance: editable, collision-free vertical slice. These are
+# separate visual modules, not a replacement for caveRows or its wall tests.
+entrance=json.loads((unity/"Assets/Resources/Data/bonehollow_entrance_modules.json").read_text())
+assert entrance["revision"]==1 and entrance["area"]=="bonehollow"
+modules=entrance["modules"]
+assert len(modules)>=18
+ids=[module["id"] for module in modules]
+assert len(set(ids))==len(ids)
+kinds={module["kind"] for module in modules}
+assert kinds=={
+    "floor_silt","floor_fracture","floor_grit",
+    "wall_facet","wall_rim","rock_chip","rock_slate",
+    "bone_shards","bone_rib"
+}
+assert sum(m["surface"]=="wall" for m in modules)>=5
+assert sum(m["surface"]=="floor" for m in modules)>=10
+for module in modules:
+    x,y=module["x"],module["y"]
+    assert module["width"]>0 and module["height"]>0
+    assert 0<module["alpha"]<=1
+    if module["surface"]=="wall":
+        assert module["width"]<=1 and module["height"]<=1
+        assert rows[int(y)][int(x)]=="#",f"Wall art on floor: {module['id']}"
+    else:
+        assert module["surface"]=="floor"
+        assert not cave_blocked(x,y,.85),f"Floor art in rock: {module['id']}"
+        assert (x-first["startX"])**2+(y-first["startY"])**2>=2.5**2
+        assert all((x-e["x"])**2+(y-e["y"])**2>=1.5**2
+                   for e in first["enemies"]),module["id"]
+        assert all((x-r["x"])**2+(y-r["y"])**2>=1.2**2
+                   for r in first["resources"]),module["id"]
+kit_source=(unity/"Assets/Scripts/NecroEntranceKit.cs").read_text()
+prototype=(unity/"Assets/Scripts/NecroPrototype.cs").read_text()
+entrance_editor=(unity/"Assets/Editor/NecroEntranceEditorCheck.cs").read_text()
+for token in ("BonehollowEntrancePiece[] modules", "bool Valid(",
+              "static void Paint(", "TextureSize=96", "public static int Populate(",
+              "new GameObject(\"Bonehollow / Entrance modular kit v1\")"):
+    assert token in kit_source, f"Missing entrance art primitive: {token}"
+assert "AddComponent<Collider" not in kit_source
+assert "AddComponent<Rigidbody" not in kit_source
+assert "NecroEntranceKit.Populate(level,next.root.transform);" in prototype
+assert "NecroEntranceKit.ReadLayout()" in entrance_editor
+for editor_path in ("NecromancerAndroidBuild.cs","NecromancerWindowsBuild.cs"):
+    build_source=(unity/"Assets/Editor"/editor_path).read_text()
+    assert "NecroEntranceEditorCheck.Verify();" in build_source
+
+# Bonehollow: companion routes use a cached solid-cell grid in Unity Y-up
+# coordinates. Mirror the clearance requirement on JSON Y-down cells and
+# confirm even larger followers can reach all nine biome hubs.
+navigator=(unity/"Assets/Scripts/NecroCaveNavigator.cs").read_text()
+formation=(unity/"Assets/Scripts/NecroServantFormation.cs").read_text()
+core_nav=(unity/"Assets/Scripts/NecroPrototype.cs").read_text()
+editor_nav=(unity/"Assets/Editor/NecroRegionEditorCheck.cs").read_text()
+for token in ("class NecroCaveNavigator", "class NecroCaveRoute",
+              "static bool[] FloorMask(", "int ClosestNode(",
+              "public static NecroCaveRoute Build(", "public static Vector2 Next(",
+              "if(!floor[adjacent] || seen[adjacent]==search)continue;",
+              "points[0]=CellCenter(origin);",
+              "Direct(level,from,route.waypoints[i],radius)"):
+    assert token in navigator, f"Missing cached cave navigation: {token}"
+for token in ("bool behindRock=cave && !NecroCaveNavigator.Direct(",
+              "route=NecroCaveNavigator.Build(level,",
+              "NecroCaveNavigator.Next(level,", "if(free && (!cave) &&",
+              "ally.caveRepathAt=Time.time+1.15f+", 
+              "RecordCaveHeroTrail();",
+              "TryCaveTrailSpot(ally,slot,out Vector2 trailSpot)",
+              "TryCaveRallySpot(ally,slot,out target)",
+              "bool destinationMoved=route!=null &&",
+              "bool exhausted=route!=null &&",
+              "if(needsRoute && Time.time>=ally.caveRepathAt)"):
+    assert token in formation, f"Missing cave follower integration: {token}"
+assert "public NecroCaveRoute caveRoute;" in core_nav
+assert "public float caveRepathAt;" in core_nav
+trail=(unity/"Assets/Scripts/NecroCaveFollowerTrail.cs").read_text()
+for token in ("const int CaveTrailCapacity=160;",
+              "void RecordCaveHeroTrail()", "bool NarrowCaveAroundHero()",
+              "bool TryCaveTrailSpot(Actor ally,int slot,out Vector2 spot)",
+              "CaveTrailSampleStep=.32f", "if(distance>6f)",
+              "player.radius+ally.radius+.55f",
+              "if(!FormationSpotOpen(ally,chosen))return false;"):
+    assert token in trail, f"Missing safe single-file cave feature: {token}"
+assert "bool TryCaveRallySpot(Actor ally,int slot,out Vector2 target)" in formation
+assert "target=ally.body.position;" in formation
+assert "float[] bodySizes={.28f,.52f};" in editor_nav
+assert "NecroCaveNavigator.Build(cave," in editor_nav
+
+from collections import deque
+for clearance in (.49,.72):
+    nav_open=[
+        not cave_blocked(x+.5,y+.5,clearance)
+        for y in range(H) for x in range(W)
+    ]
+    start_node=int(first["startY"])*W+int(first["startX"])
+    assert nav_open[start_node], "Follower cannot spawn on cave navigation grid"
+    seen_nav={start_node}
+    q=deque([start_node])
+    while q:
+        node=q.popleft()
+        x,y=node%W,node//W
+        for dx,dy in ((0,-1),(0,1),(-1,0),(1,0)):
+            xx,yy=x+dx,y+dy
+            if not (0<=xx<W and 0<=yy<H):
+                continue
+            neighbor=yy*W+xx
+            if neighbor in seen_nav or not nav_open[neighbor]:
+                continue
+            seen_nav.add(neighbor)
+            q.append(neighbor)
+    for biome in first["biomes"]:
+        node=int(biome["y"])*W+int(biome["x"])
+        assert node in seen_nav, (
+            f"Follower clearance {clearance} cannot reach {biome['id']}"
+        )
+    for landmark in [("Rotboar",first["rotboarX"],first["rotboarY"]),
+                     ("Selo",first["sealX"],first["sealY"])]:
+        name,x,y=landmark
+        assert int(y)*W+int(x) in seen_nav, (
+            f"Follower clearance {clearance} cannot reach {name}"
+        )
+
+cave_art=(unity/"Assets/Scripts/NecroCaveNetwork.cs").read_text()
+cave_zones=(unity/"Assets/Scripts/NecroCaveZones.cs").read_text()
+for token in ("static Color32 CellColor(", "daylight", "openNorth",
+              "texture.Apply(false,true)", "new Texture2D(width,height,TextureFormat.RGB24,false)"):
+    assert token in cave_art, f"Missing cave material feature: {token}"
+for token in ("MaskedHaze(", "NecroCaveNetwork.IsWall(level,cellX,cellY)",
+              "Fenda de luz solar"):
+    assert token in cave_zones, f"Missing cave lighting mask feature: {token}"
 
 pup_art=(unity/"Assets/Resources/Creatures/grave_pup.png").read_bytes()
 assert struct.unpack(">II",pup_art[16:24])==(1024,256) and pup_art[24:26]==bytes([8,6])
@@ -1244,7 +1410,7 @@ assert "if(collected)SaveProgress();" in pickup
 assert "current.resources.RemoveAt(i);" in pickup
 assert pickup.count("SaveProgress();")==1, "Batch saves once for collected items"
 assert len(levels[0]["resources"])>=10, "First cave must reward exploration"
-assert all(r["type"]=="cristal" for r in levels[0]["resources"])
+assert {"cristal","ossos","fungo"} <= {r["type"] for r in levels[0]["resources"]}
 assert sum(2 for _ in levels[0]["resources"])>=10, "Starter resources fund one mantle rank"
 progress_source=(unity/"Assets/Scripts/NecroProgressHud.cs").read_text()
 assert '"FRAGMENTOS "+shards+" | RECURSOS "+' in progress_source
@@ -1644,7 +1810,7 @@ assert "public string exploration;" in save_source
 assert 'public const int Version=1;' in save_source, "Do not invalidate old saves"
 # Cave coordinates are in a top-origin source system, converted once to Unity.
 first=levels[0]
-assert first["width"]==56 and first["height"]==34
+assert first["width"]==160 and first["height"]==104
 for enemy in first["enemies"]:
     assert 0<=enemy["x"]<=first["width"]
     assert 0<=first["height"]-enemy["y"]<=first["height"]

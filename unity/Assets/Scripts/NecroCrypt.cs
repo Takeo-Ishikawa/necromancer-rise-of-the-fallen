@@ -19,6 +19,9 @@ namespace Necromancer
         // preview. Attribute/wardrobe purchases must not erase old cave data.
         NecroStageRecord[] previousStageSnapshots;
         int previousCheckpointStage;
+        // Old four-region saves keep all hero/army/gear progression, but
+        // old map snapshots and coordinates are invalid in the new cave.
+        const int ActiveMapLayoutRevision=2;
 
         int VaultCapacity() {return 8+vaultRitual*4;}
 
@@ -204,6 +207,8 @@ namespace Necromancer
             NecroSaveData saved;
             if(!NecroSaveStore.TryLoad(out saved))return false;
             previousStageSnapshots=saved.stages;
+            if(saved.worldLayoutRevision!=ActiveMapLayoutRevision)
+                previousStageSnapshots=null;
             previousCheckpointStage=Mathf.Clamp(saved.stage,0,levels.Length-1);
             playerLevel=Mathf.Clamp(saved.level,1,100);
             experience=Mathf.Clamp(saved.experience,0,100000);
@@ -218,7 +223,8 @@ namespace Necromancer
             vaultRitual=Mathf.Clamp(saved.vaultRitual,0,2);
             spiritRitual=Mathf.Clamp(saved.spiritRitual,0,3);
             huntOrder=saved.huntOrder;
-            completed=saved.completed;
+            completed=saved.worldLayoutRevision==ActiveMapLayoutRevision &&
+                saved.completed;
             spellUnlocked=spellUnlocked || saved.spellUnlocked;
             vault.Clear();
             if(saved.vault!=null)foreach(NecroActorRecord item in saved.vault)
@@ -253,6 +259,7 @@ namespace Necromancer
                 : (Vector2)player.body.position;
             NecroSaveData save=new NecroSaveData {
                 version=NecroSaveStore.Version,
+                worldLayoutRevision=ActiveMapLayoutRevision,
                 stage=checkpointStage,level=playerLevel,experience=experience,
                 mana=mana,maxMana=maxMana,shards=shards,kills=kills,
                 gathered=gathered,staffTier=staffTier,mantleTier=mantleTier,
@@ -293,7 +300,9 @@ namespace Necromancer
             if(!NecroSaveStore.TryLoad(out NecroSaveData save))return false;
             if(save.stage<0 || save.stage>=levels.Length || save.stages.Length==0)return false;
             previousStageSnapshots=save.stages;
-            previousCheckpointStage=save.stage;
+            bool sameWorld=save.worldLayoutRevision==ActiveMapLayoutRevision;
+            if(!sameWorld)previousStageSnapshots=null;
+            previousCheckpointStage=Mathf.Clamp(save.stage,0,levels.Length-1);
             restoring=true;
             try
             {
@@ -313,7 +322,7 @@ namespace Necromancer
                 spiritRitual=Mathf.Clamp(save.spiritRitual,0,3);
                 spellUnlocked=save.spellUnlocked;
                 huntOrder=save.huntOrder;
-                completed=save.completed;
+                completed=sameWorld && save.completed;
                 player.maxHp=Mathf.Clamp(save.maxHp,115,10000);
                 player.hp=Mathf.Clamp(save.hp,1,player.maxHp);
                 speciesRanks.Clear();
@@ -330,16 +339,17 @@ namespace Necromancer
 
                 // Create only regions that were already visited. Unvisited areas
                 // remain fresh until the player discovers them.
-                for(int i=0;i<Mathf.Min(save.stages.Length,levels.Length);i++)
+                for(int i=0;i<(sameWorld ?
+                    Mathf.Min(save.stages.Length,levels.Length) : 0);i++)
                 {
                     NecroStageRecord savedStage=save.stages[i];
                     if(savedStage==null || !savedStage.visited)continue;
                     LoadStage(i);
                     RestoreStage(savedStage);
                 }
-                LoadStage(save.stage);
+                LoadStage(previousCheckpointStage);
                 Vector2 target=new Vector2(save.playerX,save.playerY);
-                if(!Blocked(target,player.radius))
+                if(sameWorld && !Blocked(target,player.radius))
                     player.body.position=target;
                 foreach(Actor servant in servants)Destroy(servant.body.gameObject);
                 servants.Clear();

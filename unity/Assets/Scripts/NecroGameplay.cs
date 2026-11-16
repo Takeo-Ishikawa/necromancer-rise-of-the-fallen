@@ -83,6 +83,9 @@ namespace Necromancer
             if(inSanctuary)return SanctuaryBlocked(point,radius);
             if(point.x<radius || point.y<radius ||
                 point.x>level.width-radius || point.y>level.height-radius)return true;
+            // The continuous cave uses a shared wall grid. It is not an open
+            // rectangular field with merely decorative walls.
+            if(NecroCaveNetwork.Blocked(level,point,radius))return true;
             if(level.obstacles!=null)foreach(Obstacle obstacle in level.obstacles)
             {
                 // Fast circle collision for complex maps and many following servants.
