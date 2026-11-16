@@ -262,7 +262,12 @@ namespace Necromancer
                 if(level.background!="forgotten_cave")
                 {
                     if(level.id=="bonehollow")
+                    {
                         NecroCaveZones.Populate(level,next.root.transform);
+                        // The entrance is an independent, reversible visual
+                        // layer; caveRows still controls all collisions.
+                        NecroEntranceKit.Populate(level,next.root.transform);
+                    }
                     NecroScenery.Populate(level,next.root.transform);
                     foreach(Obstacle rock in level.obstacles) {
                         SpriteRenderer stone=Visual("Rock",NecroLevels.At(level,rock.x,rock.y),
