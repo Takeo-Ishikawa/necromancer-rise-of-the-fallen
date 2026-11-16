@@ -52,6 +52,36 @@ namespace Necromancer.EditorTools
                 "both wall relief and floor decoration must be modular");
             Require(kinds.Count==9,
                 "expected floor variations, two rocks, two bones and wall variants");
+
+            // Run the *actual* builder, rather than only checking filenames
+            // or data fields. This test hierarchy is destroyed immediately;
+            // no scene or gameplay save is modified.
+            GameObject testRoot=new GameObject("Bonehollow visual verification");
+            try
+            {
+                int created=NecroEntranceKit.Populate(map,testRoot.transform);
+                Require(created==layout.modules.Length,
+                    "one or more modular pieces failed to instantiate");
+                Require(testRoot.transform.childCount==1,
+                    "entrance must have one removable parent group");
+                Transform group=testRoot.transform.GetChild(0);
+                Require(group.childCount==layout.modules.Length,
+                    "pieces must remain separate editable children");
+                foreach(Transform child in group)
+                {
+                    SpriteRenderer art=child.GetComponent<SpriteRenderer>();
+                    Require(art!=null && art.sprite!=null &&
+                        art.sortingOrder<0,
+                        "entrance module must render behind the actors");
+                    Require(child.GetComponent<Collider2D>()==null &&
+                        child.GetComponent<Rigidbody2D>()==null,
+                        "decorative modules cannot introduce new collisions");
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(testRoot);
+            }
         }
     }
 }
