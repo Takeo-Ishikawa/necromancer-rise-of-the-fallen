@@ -190,7 +190,7 @@ for token in ("class NecroCaveNavigator", "class NecroCaveRoute",
               "Direct(level,from,route.waypoints[i],radius)"):
     assert token in navigator, f"Missing cached cave navigation: {token}"
 for token in ("bool behindRock=cave && !NecroCaveNavigator.Direct(",
-              "ally.caveRoute=NecroCaveNavigator.Build(level,",
+              "route=NecroCaveNavigator.Build(level,",
               "NecroCaveNavigator.Next(level,", "if(free && (!cave) &&",
               "ally.caveRepathAt=Time.time+1.15f+", 
               "RecordCaveHeroTrail();",
