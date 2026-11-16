@@ -192,10 +192,26 @@ for token in ("class NecroCaveNavigator", "class NecroCaveRoute",
 for token in ("bool behindRock=cave && !NecroCaveNavigator.Direct(",
               "ally.caveRoute=NecroCaveNavigator.Build(level,",
               "NecroCaveNavigator.Next(level,", "if(free && (!cave) &&",
-              "ally.caveRepathAt=Time.time+1.4f+"):
+              "ally.caveRepathAt=Time.time+1.15f+", 
+              "RecordCaveHeroTrail();",
+              "TryCaveTrailSpot(ally,slot,out Vector2 trailSpot)",
+              "TryCaveRallySpot(ally,slot,out target)",
+              "bool destinationMoved=route!=null &&",
+              "bool exhausted=route!=null &&",
+              "if(needsRoute && Time.time>=ally.caveRepathAt)"):
     assert token in formation, f"Missing cave follower integration: {token}"
 assert "public NecroCaveRoute caveRoute;" in core_nav
 assert "public float caveRepathAt;" in core_nav
+trail=(unity/"Assets/Scripts/NecroCaveFollowerTrail.cs").read_text()
+for token in ("const int CaveTrailCapacity=160;",
+              "void RecordCaveHeroTrail()", "bool NarrowCaveAroundHero()",
+              "bool TryCaveTrailSpot(Actor ally,int slot,out Vector2 spot)",
+              "CaveTrailSampleStep=.32f", "if(distance>6f)",
+              "player.radius+ally.radius+.55f",
+              "if(!FormationSpotOpen(ally,chosen))return false;"):
+    assert token in trail, f"Missing safe single-file cave feature: {token}"
+assert "bool TryCaveRallySpot(Actor ally,int slot,out Vector2 target)" in formation
+assert "target=ally.body.position;" in formation
 assert "float[] bodySizes={.28f,.52f};" in editor_nav
 assert "NecroCaveNavigator.Build(cave," in editor_nav
 
