@@ -16,6 +16,9 @@ required = [
     "Assets/Editor/NecromancerWindowsBuild.cs",
     "Assets/Scripts/NecroLevels.cs",
     "Assets/Scripts/NecroCaveNetwork.cs",
+    "Assets/Scripts/NecroEntranceKit.cs",
+    "Assets/Editor/NecroEntranceEditorCheck.cs",
+    "Assets/Resources/Data/bonehollow_entrance_modules.json",
     "Assets/Scripts/NecroArt.cs",
     "Assets/Scripts/NecroPrototype.cs",
     "Assets/Scripts/NecroGameplay.cs",
@@ -174,6 +177,52 @@ assert "NecroCaveNetwork.IsWall(zone,x,map.rows-1-y)" in (
 assert "NecroCaveZones.Populate(level,next.root.transform);" in (
     unity/"Assets/Scripts/NecroPrototype.cs").read_text()
 assert (unity/"Assets/Scripts/NecroCaveZones.cs").is_file()
+
+# Bonehollow entrance: editable, collision-free vertical slice. These are
+# separate visual modules, not a replacement for caveRows or its wall tests.
+entrance=json.loads((unity/"Assets/Resources/Data/bonehollow_entrance_modules.json").read_text())
+assert entrance["revision"]==1 and entrance["area"]=="bonehollow"
+modules=entrance["modules"]
+assert len(modules)>=18
+ids=[module["id"] for module in modules]
+assert len(set(ids))==len(ids)
+kinds={module["kind"] for module in modules}
+assert kinds=={
+    "floor_silt","floor_fracture","floor_grit",
+    "wall_facet","wall_rim","rock_chip","rock_slate",
+    "bone_shards","bone_rib"
+}
+assert sum(m["surface"]=="wall" for m in modules)>=5
+assert sum(m["surface"]=="floor" for m in modules)>=10
+for module in modules:
+    x,y=module["x"],module["y"]
+    assert module["width"]>0 and module["height"]>0
+    assert 0<module["alpha"]<=1
+    if module["surface"]=="wall":
+        assert module["width"]<=1 and module["height"]<=1
+        assert rows[int(y)][int(x)]=="#",f"Wall art on floor: {module['id']}"
+    else:
+        assert module["surface"]=="floor"
+        assert not cave_blocked(x,y,.85),f"Floor art in rock: {module['id']}"
+        assert (x-first["startX"])**2+(y-first["startY"])**2>=2.5**2
+        assert all((x-e["x"])**2+(y-e["y"])**2>=1.5**2
+                   for e in first["enemies"]),module["id"]
+        assert all((x-r["x"])**2+(y-r["y"])**2>=1.2**2
+                   for r in first["resources"]),module["id"]
+kit_source=(unity/"Assets/Scripts/NecroEntranceKit.cs").read_text()
+prototype=(unity/"Assets/Scripts/NecroPrototype.cs").read_text()
+entrance_editor=(unity/"Assets/Editor/NecroEntranceEditorCheck.cs").read_text()
+for token in ("BonehollowEntrancePiece[] modules", "bool Valid(",
+              "static void Paint(", "TextureSize=96", "public static int Populate(",
+              "new GameObject(\"Bonehollow / Entrance modular kit v1\")"):
+    assert token in kit_source, f"Missing entrance art primitive: {token}"
+assert "AddComponent<Collider" not in kit_source
+assert "AddComponent<Rigidbody" not in kit_source
+assert "NecroEntranceKit.Populate(level,next.root.transform);" in prototype
+assert "NecroEntranceKit.ReadLayout()" in entrance_editor
+for editor_path in ("NecromancerAndroidBuild.cs","NecromancerWindowsBuild.cs"):
+    build_source=(unity/"Assets/Editor"/editor_path).read_text()
+    assert "NecroEntranceEditorCheck.Verify();" in build_source
 
 # Bonehollow: companion routes use a cached solid-cell grid in Unity Y-up
 # coordinates. Mirror the clearance requirement on JSON Y-down cells and
